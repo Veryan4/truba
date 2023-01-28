@@ -1,0 +1,9 @@
+{
+    "add-field" : {
+        "name":"Entities",
+        "type":"text_general",
+        "indexed":"true",
+        "stored":"true",
+        "multiValued":"true"
+    }
+}

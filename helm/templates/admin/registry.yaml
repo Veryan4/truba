@@ -1,0 +1,88 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: registry
+  name: registry
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: registry
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: registry
+    spec:
+      containers:
+        - name: registry
+          image: registry:2
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5000
+          volumeMounts:
+            - mountPath: /var/lib/registry
+              name: registrydata
+      restartPolicy: Always
+      volumes:
+        - name: registrydata
+          persistentVolumeClaim:
+            claimName: registrydata
+status: {}
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  labels:
+    app: registry
+  name: registrydata
+spec:
+  storageClassName: ""
+  claimRef:
+    namespace: default
+    name: registrydata
+  persistentVolumeReclaimPolicy: Retain
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+      storage: 50Gi
+  hostPath:
+    path: /data/registrydata/
+status: {}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: registrydata
+spec:
+  storageClassName: ""
+  volumeName: registrydata
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 50Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: registry
+spec:
+  ports:
+    - port: 5000
+      targetPort: 5000
+  selector:
+    app: registry
+status:
+  loadBalancer: {}
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: registry-auth
+spec:
+  basicAuth:
+    secret: registry

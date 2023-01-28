@@ -1,0 +1,23 @@
+### This file is to make sure k8s starts on reboot on linux
+
+### After installing minikube save file here: /lib/systemd/system/minikube.service 
+
+### then run the command: systemctl enable minikube.Service
+
+[Unit]
+Description=minikube
+After=network-online.target firewalld.service containerd.service docker.service
+Wants=network-online.target docker.service
+Requires=docker.socket containerd.service docker.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/bin/minikube start mount $HOME/tf_models:/tf_models
+ExecStop=/usr/bin/minikube stop
+User=root
+Group=root
+
+[Install]
+WantedBy=multi-user.target
+

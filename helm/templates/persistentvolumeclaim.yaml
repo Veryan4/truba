@@ -1,0 +1,46 @@
+{{ range $ind, $env := .Values.environments }}
+{{ range $index, $service := $.Values.services }}
+{{ if $service.volume }}
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  labels:
+    component: {{ $env }}{{ $service.volume.name }}
+  name: {{ $env }}{{ $service.volume.name }}
+  namespace: {{ $env }}
+spec:
+  storageClassName: ""
+  claimRef:
+    namespace: {{ $env }}
+    name: {{ $env }}{{ $service.volume.name }}
+  persistentVolumeReclaimPolicy: Retain
+  accessModes:
+    - ReadWriteMany
+  {{ if $service.volume.storage }}
+  capacity:
+      storage: {{ $service.volume.storage }}
+  {{ end }}
+  hostPath:
+    path: "/data/{{ $env }}/{{ $service.volume.name }}/"
+status: {}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ $env }}{{ $service.volume.name }}
+  namespace: {{ $env }}
+spec:
+  storageClassName: ""
+  volumeName: {{ $env }}{{ $service.volume.name }}
+  accessModes:
+    - ReadWriteMany
+  {{ if $service.volume.storage }}
+  resources:
+    requests:
+      storage: {{ $service.volume.storage }}
+  {{ end }}
+---
+{{ end }}
+{{ end }}
+{{ end }}

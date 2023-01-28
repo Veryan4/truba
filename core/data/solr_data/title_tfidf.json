@@ -1,0 +1,10 @@
+
+{   
+    "add-field" : {
+        "name":"Title_tfidf",
+        "type":"text_tfidf",
+        "indexed":"true",
+        "stored":"false",
+        "multiValued":"true"
+    }
+}

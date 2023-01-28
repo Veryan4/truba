@@ -1,0 +1,46 @@
+{{ range $ind, $env := .Values.environments }}
+{{ range $index, $service := $.Values.services }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: {{ $service.name }}
+  name: {{ $service.name }}
+  namespace: {{ $env }}
+spec:
+  ports:
+    - port: {{ $service.port }}
+      targetPort: {{ $service.port }}
+  selector:
+    app: {{ $service.name }}
+---
+{{ end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: "jaeger-agent"
+  name: "jaeger-agent"
+  namespace: {{ $env }}
+spec:
+  ports:
+    - port: 6831
+  type: ExternalName
+  externalName: "jaeger-agent.default.svc.cluster.local"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: "registry"
+  name: "registry"
+  namespace: {{ $env }}
+spec:
+  ports:
+    - port: 5000
+  type: ExternalName
+  externalName: "registry.default.svc.cluster.local"
+---
+{{ end }}

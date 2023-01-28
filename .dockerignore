@@ -1,0 +1,15 @@
+.git/
+dist/
+examples/
+web/node_modules/
+web/dist/
+web/.history/
+user/node_modules/
+core/__pycache__/
+core/.ipynb_checkpoints/
+ml/__pycache__/
+ml/.ipynb_checkpoints/
+scraper/__pycache__/
+scraper/.ipynb_checkpoints/
+.idea/
+Logs/

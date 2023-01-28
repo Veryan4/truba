@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: solr
+  name: solr
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: solr
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: solr
+    spec:
+      securityContext:
+        fsGroup: 8983
+      containers:
+      - name: solr
+        image: veryan4/solr
+        env:
+        - name: DB_NAME
+          valueFrom:
+            configMapKeyRef:
+              key: ENVIRONMENT
+              name: core-env
+        - name: SOLR_HOSTNAME
+          valueFrom:
+            configMapKeyRef:
+              key: SOLR_HOSTNAME
+              name: core-env
+        - name: SOLR_PORT
+          valueFrom:
+            configMapKeyRef:
+              key: SOLR_PORT
+              name: core-env
+        - name: JAEGER_AGENT_HOSTNAME
+          valueFrom:
+            configMapKeyRef:
+              key: JAEGER_AGENT_HOSTNAME
+              name: core-env
+        - name: JAEGER_AGENT_PORT
+          valueFrom:
+            configMapKeyRef:
+              key: JAEGER_AGENT_PORT
+              name: core-env
+        args:
+          - solr-precreate 
+          - $(ENVIRONMENT)
+          - /opt/docker-solr/conf
+        ports:
+          - containerPort: 8983
+      restartPolicy: Always
+      volumes:
+        - name: solr-data
+          persistentVolumeClaim:
+            claimName: solr-data
+status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: solr
+spec:
+  ports:
+  - port: 8983
+    targetPort: 8983
+  selector:
+    app: solr
+status:
+  loadBalancer: {}
+---

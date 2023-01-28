@@ -1,0 +1,6 @@
+{
+    "add-copy-field" : {
+        "source":"Title",
+        "dest":"Title_tfidf"
+    }
+}

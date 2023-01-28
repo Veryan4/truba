@@ -1,0 +1,8 @@
+{{ range .Values.environments }}
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ . }}
+---
+{{ end }}

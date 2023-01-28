@@ -1,0 +1,5 @@
+/redis
+/__pycache__
+/.idea
+test.py
+shared/

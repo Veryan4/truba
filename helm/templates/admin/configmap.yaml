@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: configs
+  namespace: default
+data:
+  CORE_HOSTNAME: "{{ .Values.services.core.name }}"
+  CORE_PORT: "{{ .Values.services.core.port }}"
+  CORE_DB_HOSTNAME: "mongo"
+  CORE_DB_PORT: "27017"
+  ML_HOSTNAME: "{{ .Values.services.ml.name }}"
+  ML_PORT: "{{ .Values.services.ml.port }}"
+  REDIS_HOSTNAME: "{{ .Values.services.coreRedis.name }}"
+  REDIS_PORT: "{{ .Values.services.coreRedis.port }}"
+  REDIS_QUEUE: "{{ .Values.configMap.redisQueue }}"
+  DEFAULT_USER_ID: "{{ .Values.configMap.defaultUserId }}"
+  PUBLIC_VAPID: "{{ .Values.configMap.publicVapid }}"
+  DOCKER_USERNAME: "{{ .Values.configMap.dockerUser}}"
+  JAEGER_AGENT_HOSTNAME: "jaeger-agent"
+  JAEGER_AGENT_PORT: "6831"
+  SOLR_HOSTNAME: "core-solr"
+  SOLR_PORT: "8983"

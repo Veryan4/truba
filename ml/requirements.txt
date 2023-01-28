@@ -1,0 +1,16 @@
+requests
+python-dotenv
+uvicorn
+gunicorn
+jaeger_client
+prometheus_client
+fastapi
+pydantic
+typing
+datetime
+pymongo
+numpy
+pandas
+pathlib
+contextvars
+fastparquet

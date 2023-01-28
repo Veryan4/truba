@@ -1,0 +1,90 @@
+{{ range $ind, $env := .Values.environments }}
+{{ range $index, $service := $.Values.services }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: {{ $service.name }}
+  name: {{ $service.name }}
+  namespace: {{ $env }}
+spec:
+  replicas: {{ $.Values.replicaCount }}
+  strategy: {}
+  selector:
+    matchLabels:
+      app: {{ $service.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ $service.name }}
+    spec:
+      {{ if $service.isCustomImage }}
+      serviceAccountName: docker-registry
+      {{ end }}
+      containers:
+        - name: {{ $service.name }}
+          {{ if $service.isCustomImage }}
+          image: "registry.truba.news/{{ $service.imageName }}:{{ $env }}"
+          {{ else }}
+          image: {{ $service.imageName }}
+          {{ end }}
+          imagePullPolicy: Always
+          env:
+            - name: SERVICE_NAME
+              value: {{ $service.name }}
+            - name: ENVIRONMENT
+              value: {{ $env }}
+            {{ range $index, $vars := $service.env }}
+            - name: {{ $vars.name }}
+              valueFrom:
+                {{ if $vars.isSecret }}
+                secretKeyRef:
+                  key: {{ $vars.name }}
+                  name: dark-secrets
+                {{ else }}
+                configMapKeyRef:
+                  name: configs
+                  key: {{ $vars.name }}
+                {{ end }}
+            {{ end }}
+          {{ if $service.command }}
+          command:
+          {{ range $service.command }}
+            - "{{ . }}"
+          {{ end }}
+          {{ end }}
+          {{ if $service.args }}
+          args:
+          {{ range $service.args }}
+            - "{{ . }}"
+          {{ end }}
+          {{ end }}
+          {{ if $service.isMondoDb }}
+          args:
+            - mongod
+            - --port
+            - "{{ $service.port }}"
+          {{ end }}
+          {{ if $service.port }}
+          ports:
+            - containerPort: {{ $service.port }}
+          {{ end }}
+          {{ if $service.volume }}
+          volumeMounts:
+            - mountPath: "/{{ $service.volume.path }}/"
+              name: {{ $env }}{{ $service.volume.name }}
+          {{ end }}
+          resources: {}
+      restartPolicy: Always
+      {{ if $service.volume }}
+      volumes:
+        - name: {{ $env }}{{ $service.volume.name }}
+          persistentVolumeClaim:
+            claimName: {{ $env }}{{ $service.volume.name }}
+            readOnly: true
+      {{ end }}
+status: {}
+---
+{{ end }}
+{{ end }}

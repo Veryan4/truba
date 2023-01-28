@@ -1,0 +1,119 @@
+{
+  "header": {
+    "home": "acceuil",
+    "login": "Se connecter",
+    "register": "S'inscrire",
+    "dark_mode": "changer la couleur",
+    "about": "aide",
+    "settings": "paramètres",
+    "language": "language",
+    "logout": "déconnexion",
+    "switch": "Personalization"
+  },
+  "about": {
+    "title": "Les nouvelles à votre manière",
+    "subtitle": "Truba est pour le lecture qui est conscient de l'impact des algorithmes de recommendation, mais qui continue d'aprécié du contenu personnalisé. Nous aidons ces lecteurs de 2 manières; avec un interrupteur de personnalisation, et l'abilité d'entraîner son algorithm.",
+    "switch": "Interrupteur de personnalisation",
+    "random": "Aléatoire",
+    "personalized": "Personnalisé",
+    "train": "Comment entraîner son algorithm",
+    "toggle": {
+      "1": "Vous trouverez cet interrupteur en haut de la page. Il se change entre les nouvelles ",
+      "2": " et les es nouvelles ",
+      "3": ".",
+      "4": "Nos nouvelles ",
+      "5": " proviennent de dizaines d'éditeurs, mais nous montrons seulment 1 article par éditeur, et nous essayons d'éviter des articles sur les mêmes thèmes. Pour consulter notre liste d'éditeurs visitez notre ",
+      "6": "document évolutif",
+      "7": "Si vous désirez que l'ont ajoute ou enlève un éditeur de cette liste, envoyez nous un courriel au ",
+      "8": "Nos nouvelles ",
+      "9": " sont entraîné pour vous donner des meilleurs résultats. Si vous n'entaînez pas votre algorithm, vos résultats resemblerons a ceux de la norme."
+    },
+    "fund": "Comment nous restons  à flot?",
+    "email": "info@truba.news",
+    "free_1": "Truba est gratuit. Nous apprécions n'importe quel donation ou relation publique qui peux nous etre envoyé. Veuillez nous envoyer un courriel au ",
+    "free_2": " pour toute autres question.",
+    "other": "Autres Information",
+    "emojis": "Chaque article aura des emojis pour que vous puissez indiquer votre réaction. Nous utiliserons cet indicateur pour vous trouver des meilleurs résultats dans le futur. Réagir a un article est la seule facon de la faire disparaitre, et un article de remplacement viendra en dessous de la pile.",
+    "features": {
+      "title": "Les traits d'article",
+      "fork": "ballon",
+      "york": "Paris",
+      "1": "Cahque article a un icône ",
+      "2": " . Quand vous cliquez sur cet icône, vous allez accèder aux traits de l'article qui sont utilisez dans les recommendations",
+      "3": "Un article de nouvelle peux avoir les traits suivants: une source, un auteur, des mots clés, des entités.",
+      "4": "Une entité et un mot qui représente une identié. Un mot clé est un nom commun qui n'est pas une entité. Par example, 'ballon' est un mot clé, mais 'Paris' est une entité.",
+      "5": "Quand vous sélectionnez un trait d'article, il sera considéré comme important pour vous et sera utilisé pour vos recommendations dans le futur.",
+      "6": "Vous pourrez changer votre sélections de traits en tout temps, à partir de la page de paramètres, mais veuillez prendre note que pour l'instant notre algorithm est seulement entrainer une fois par jour."
+    },
+    "open_source": "Code source ouvert"
+  },
+  "privacy": {
+    "title": "Privacy Policy"
+  },
+  "terms": {
+    "title": "Terms of service"
+  },
+  "home": {
+    "author": "Auteur",
+    "source": "Source",
+    "keyword": "Mots clés",
+    "entity": "Entités",
+    "angry": "Faché",
+    "sad": "Triste",
+    "ok": "Bof",
+    "smile": "Sourire",
+    "happy": "Content",
+    "article": "Article",
+    "favorites": "Personnalisation"
+  },
+  "auth": {
+    "login": {
+      "title": "Se connecter",
+      "email": "Courriel",
+      "password": "Mot de passe",
+      "login": "Se connecter",
+      "register": "S'inscrire",
+      "about_1": "C'est quoi truba? Regardez notre ",
+      "about_2": "page d'aide",
+      "forgot": "Mot de passe oublié?",
+      "google": "Connexion Google",
+      "or": "----- Sinon -----"
+    },
+    "register": {
+      "title": "S'inscrire",
+      "username": "Nom d'utilisateur",
+      "email": "Courriel",
+      "password": "Mot de passe",
+      "repeat": "Répétez le mot de passe",
+      "login": "Se connecter",
+      "register": "S'inscrire",
+      "about_1": "C'est quoi truba? Regardez notre ",
+      "about_2": "page d'aide",
+      "google": "Connexion Google",
+      "or": "----- Sinon -----"
+    },
+    "password": {
+      "submit": {
+        "title": "Mot de passe oublié?",
+        "button": "Soumettre"
+      },
+      "reset": {
+        "title": "Réinitialiser votre mot de passe",
+        "button": "Réinitialiser"
+      },
+      "email": "Courriel",
+      "password": "Mot de passe",
+      "repeat": "Répétez le mot de passe",
+      "mismatch": "Les mots de passes ne concordent pas",
+      "sent": "Nous vous avons envoyer un courriel, veuillez l'utilisez pour réinitialiser votre mot de passe."
+    },
+    "unsubscribe": {
+      "success": "Vous avez été désabonner de la liste de courriels.",
+      "error": "Il y a eu une erreur, nous avons pas réussit à vous désabonner."
+    },
+    "email": {
+      "success": "Merci d'avoir confirmer votre courriel!",
+      "error": "Il y a eu une erreur, nous avons pas réussit à confirmer votre courriel."
+    }
+  }
+}

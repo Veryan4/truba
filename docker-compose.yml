@@ -1,0 +1,54 @@
+version: "3.7"
+
+services:
+  web:
+    image: registry.truba.news/web:develop
+    build:
+      context: ./
+      dockerfile: ./web/Dockerfile
+      args:
+        - ENVIRONMENT=develop
+
+  core:
+    image: registry.truba.news/core:develop
+    build:
+      context: ./
+      dockerfile: ./core/Dockerfile
+
+  scraper:
+    image: registry.truba.news/scraper:develop
+    build:
+      context: ./
+      dockerfile: ./scraper/Dockerfile
+
+  ml:
+    image: registry.truba.news/ml:develop
+    build:
+      context: ./
+      dockerfile: ./ml/Dockerfile
+
+  solr:
+    image: registry.truba.news/solr:develop
+    build:
+      context: ./
+      dockerfile: ./solr/Dockerfile
+
+  jupyter:
+    image: registry.truba.news/jupyter
+    build:
+      context: ./
+      dockerfile: ./jupyter/Dockerfile
+    network_mode: "host"
+    ports:
+      - '8888:8888'
+    environment:
+      - ENVIRONMENT=develop
+      - CORE_HOSTNAME=localhost
+      - CORE_PORT=5057
+      - CORE_DB_HOSTNAME=localhost
+      - CORE_DB_PORT=27017
+      - MONGO_USERNAME=foo
+      - MONGO_PASSWORD=bar
+      - ML_HOSTNAME=localhost
+      - ML_PORT=5158
+

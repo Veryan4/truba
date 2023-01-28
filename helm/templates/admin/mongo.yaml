@@ -1,0 +1,92 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: mongo
+  name: mongo
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: mongo
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: mongo
+    spec:
+      containers:
+        - name: mongo
+          image: mongo:4.2.3-bionic
+          imagePullPolicy: IfNotPresent
+          resources: {}
+          env:
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: dark-secrets
+                  key: MONGO_INITDB_ROOT_PASSWORD
+            - name: MONGO_INITDB_ROOT_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: dark-secrets
+                  key: MONGO_INITDB_ROOT_USERNAME
+          ports:
+            - containerPort: 27017
+          volumeMounts:
+            - mountPath: /data/db
+              name: mongodata
+      restartPolicy: Always
+      volumes:
+        - name: mongodata
+          persistentVolumeClaim:
+            claimName: mongodata
+status: {}
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  labels:
+    app: mongo
+  name: mongodata
+spec:
+  storageClassName: "manual"
+  claimRef:
+    namespace: default
+    name: mongodata
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  capacity:
+      storage: 20Gi
+  hostPath:
+    path: /data/mongodata/
+status: {}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mongodata
+spec:
+  storageClassName: "manual"
+  volumeName: mongodata
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo
+spec:
+  ports:
+    - port: 27017
+      targetPort: 27017
+  selector:
+    app: mongo
+status:
+  loadBalancer: {}

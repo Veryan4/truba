@@ -1,0 +1,319 @@
+{{ range .Values.environments }}
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: ml-restart
+  namespace: {{ . }}
+spec:
+  successfulJobsHistoryLimit: 0
+  failedJobsHistoryLimit: 1
+  concurrencyPolicy: Forbid
+  schedule: {{ $.Values.schedules.mlRestart }} 
+  jobTemplate:
+    spec:
+      backoffLimit: 2 
+      activeDeadlineSeconds: 600 # timeout, makes most sense with
+        # "waiting for rollout" variant specified below
+      template:
+        spec:
+          serviceAccountName:
+            ml-restart # name of the service
+          restartPolicy: Never
+          containers:
+            - name: kubectl
+              imagePullPolicy: Always
+              image:
+                bitnami/kubectl # probably any kubectl image will do,
+                # optionaly specify version, but this
+                # should not be necessary, as long the
+                # version of kubectl is new enough to
+                # have `rollout restart`
+              command:
+                - "kubectl"
+                - "rollout"
+                - "restart"
+                - "deployment/ml"
+                - "-n"
+                - "{{ . }}"
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: training
+  namespace: {{ . }}
+spec:
+  schedule: {{ $.Values.schedules.training }}
+  successfulJobsHistoryLimit: 0
+  failedJobsHistoryLimit: 1
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      backoffLimit: 2 
+      template:
+        spec:
+          imagePullSecrets:
+            - name: docker-registry
+          containers:
+            - name: training
+              image: "registry.truba.news/ml:{{ . }}"
+              imagePullPolicy: Always
+              env:
+                - name: SERVICE_NAME
+                  value: training
+                - name: ENVIRONMENT
+                  value: {{ . }}
+                - name: CORE_DB_HOSTNAME
+                  valueFrom:
+                    configMapKeyRef:
+                      key: CORE_DB_HOSTNAME
+                      name: configs
+                - name: CORE_DB_PORT
+                  valueFrom:
+                    configMapKeyRef:
+                      key: CORE_DB_PORT
+                      name: configs
+                - name: MONGO_USERNAME
+                  valueFrom:
+                    secretKeyRef:
+                      name: dark-secrets
+                      key: MONGO_USERNAME
+                - name: MONGO_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: dark-secrets
+                      key: MONGO_PASSWORD
+                - name: ML_HOSTNAME
+                  valueFrom:
+                    configMapKeyRef:
+                      key: ML_HOSTNAME
+                      name: configs
+                - name: ML_PORT
+                  valueFrom:
+                    configMapKeyRef:
+                      key: ML_PORT
+                      name: configs
+                - name: CORE_HOSTNAME
+                  valueFrom:
+                    configMapKeyRef:
+                      key: CORE_HOSTNAME
+                      name: configs
+                - name: CORE_PORT
+                  valueFrom:
+                    configMapKeyRef:
+                      key: CORE_PORT
+                      name: configs
+                - name: JAEGER_AGENT_HOSTNAME
+                  valueFrom:
+                    configMapKeyRef:
+                      key: JAEGER_AGENT_HOSTNAME
+                      name: configs
+                - name: JAEGER_AGENT_PORT
+                  valueFrom:
+                    configMapKeyRef:
+                      key: JAEGER_AGENT_PORT
+                      name: configs
+              args:
+                - python
+                - training.py
+              ports:
+                - containerPort: 7077
+              volumeMounts:
+                - mountPath: "/{{ $.Values.services.ml.volume.name }}/"
+                  name: {{ . }}{{ $.Values.services.ml.volume.name }}
+              resources: {}
+          restartPolicy: Never
+          volumes:
+            - name: {{ . }}{{ $.Values.services.ml.volume.name }}
+              persistentVolumeClaim:
+                claimName: {{ . }}{{ $.Values.services.ml.volume.name }}
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: push
+  namespace: {{ . }}
+spec:
+  schedule: {{ $.Values.schedules.push }}
+  successfulJobsHistoryLimit: 0
+  failedJobsHistoryLimit: 1
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      backoffLimit: 2 
+      template:
+        spec:
+          imagePullSecrets:
+            - name: docker-registry
+          containers:
+            - name: push
+              image: "registry.truba.news/core:{{ . }}"
+              imagePullPolicy: Always
+              env:
+                - name: SERVICE_NAME
+                  value: push
+                - name: ENVIRONMENT
+                  value: {{ . }}
+                - name: CORE_DB_HOSTNAME
+                  valueFrom:
+                    configMapKeyRef:
+                      key: CORE_DB_HOSTNAME
+                      name: configs
+                - name: CORE_DB_PORT
+                  valueFrom:
+                    configMapKeyRef:
+                      key: CORE_DB_PORT
+                      name: configs
+                - name: MONGO_USERNAME
+                  valueFrom:
+                    secretKeyRef:
+                      name: dark-secrets
+                      key: MONGO_USERNAME
+                - name: MONGO_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: dark-secrets
+                      key: MONGO_PASSWORD
+                - name: PRIVATE_VAPID
+                  valueFrom:
+                    secretKeyRef:
+                      name: dark-secrets
+                      key: PRIVATE_VAPID
+                - name: PUBLIC_VAPID
+                  valueFrom:
+                    configMapKeyRef:
+                      key: PUBLIC_VAPID
+                      name: configs
+                - name: DOMAIN_NAME
+                  valueFrom:
+                    configMapKeyRef:
+                      key: DOMAIN_NAME
+                      name: configs
+                - name: GMAIL_ADDRESS
+                  valueFrom:
+                    configMapKeyRef:
+                      key: GMAIL_ADDRESS
+                      name: configs
+                - name: GMAIL_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: dark-secrets
+                      key: GMAIL_PASSWORD
+              args:
+                - python
+                - push.py
+              ports:
+                - containerPort: 7073
+          restartPolicy: Never
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: scraper
+  namespace: {{ . }}
+spec:
+  schedule: {{ $.Values.schedules.scraper.en }}
+  successfulJobsHistoryLimit: 0
+  failedJobsHistoryLimit: 1
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        spec:
+          imagePullSecrets:
+            - name: docker-registry
+          containers:
+            - name: scraper
+              image: "registry.truba.news/scraper:{{ . }}"
+              imagePullPolicy: Always
+              env:
+                - name: SERVICE_NAME
+                  value: scraper
+                - name: ENVIRONMENT
+                  value: {{ . }}
+                - name: CORE_HOSTNAME
+                  valueFrom:
+                    configMapKeyRef:
+                      key: CORE_HOSTNAME
+                      name: configs
+                - name: CORE_PORT
+                  valueFrom:
+                    configMapKeyRef:
+                      key: CORE_PORT
+                      name: configs
+                - name: JAEGER_AGENT_HOSTNAME
+                  valueFrom:
+                    configMapKeyRef:
+                      key: JAEGER_AGENT_HOSTNAME
+                      name: configs
+                - name: JAEGER_AGENT_PORT
+                  valueFrom:
+                    configMapKeyRef:
+                      key: JAEGER_AGENT_PORT
+                      name: configs
+                - name: SCRAPER_LANGUAGE
+                  value: en
+              args:
+                - python
+                - main.py
+              ports:
+                - containerPort: 5057
+          restartPolicy: Never
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: scraper-fr
+  namespace: {{ . }}
+spec:
+  schedule: {{ $.Values.schedules.scraper.fr }}
+  successfulJobsHistoryLimit: 0
+  failedJobsHistoryLimit: 1
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        spec:
+          imagePullSecrets:
+            - name: docker-registry
+          containers:
+            - name: scraper-fr
+              image: "registry.truba.news/scraper:{{ . }}"
+              imagePullPolicy: Always
+              env:
+                - name: SERVICE_NAME
+                  value: scraper_fr
+                - name: ENVIRONMENT
+                  value: {{ . }}
+                - name: CORE_HOSTNAME
+                  valueFrom:
+                    configMapKeyRef:
+                      key: CORE_HOSTNAME
+                      name: configs
+                - name: CORE_PORT
+                  valueFrom:
+                    configMapKeyRef:
+                      key: CORE_PORT
+                      name: configs
+                - name: JAEGER_AGENT_HOSTNAME
+                  valueFrom:
+                    configMapKeyRef:
+                      key: JAEGER_AGENT_HOSTNAME
+                      name: configs
+                - name: JAEGER_AGENT_PORT
+                  valueFrom:
+                    configMapKeyRef:
+                      key: JAEGER_AGENT_PORT
+                      name: configs
+                - name: SCRAPER_LANGUAGE
+                  value: fr
+              args:
+                - python
+                - main.py
+              ports:
+                - containerPort: 5057
+          restartPolicy: Never
+---
+{{ end }}

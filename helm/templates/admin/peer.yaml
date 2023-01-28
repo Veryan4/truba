@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: peer
+  name: peer
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: peer
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: peer
+    spec:
+      containers:
+        - name: peer
+          image: peerjs/peerjs-server
+          imagePullPolicy: IfNotPresent
+          resources: {}
+          ports:
+            - containerPort: 9000
+          args:
+            - --proxied=true
+            - --port=9000
+            - --path=/myapp
+      restartPolicy: Always
+status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: peer
+spec:
+  ports:
+    - port: 9000
+      targetPort: 9000
+  selector:
+    app: peer
+status:
+  loadBalancer: {}

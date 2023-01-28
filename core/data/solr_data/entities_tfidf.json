@@ -1,0 +1,9 @@
+{
+    "add-field" : {
+        "name":"Entities_tfidf",
+        "type":"text_tfidf",
+        "indexed":"true",
+        "stored":"false",
+        "multiValued":"true"
+    }
+}

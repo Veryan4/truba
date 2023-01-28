@@ -1,0 +1,13 @@
+requests
+python-dotenv
+fastapi
+bson
+jaeger_client
+prometheus_client
+pydantic
+bs4
+lxml
+more_itertools
+python-dateutil
+stop-words
+spacy[lookups]

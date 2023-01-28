@@ -1,0 +1,9 @@
+export { formService } from "./form.service";
+export { newsService } from "./news.service";
+export { personalizationService } from "./personalization.service";
+export { routerService } from "./router.service";
+export { themeService } from "./theme.service";
+export { toastService } from "./toast.service";
+export { tokenService } from "./token.service";
+export { translateService } from "./translate.service";
+export { userService } from "./user.service";
