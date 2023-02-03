@@ -1,13 +1,13 @@
 import { LitElement, html } from "lit";
 import { customElement } from "lit/decorators.js";
-import { TranslationController } from "../../controllers";
+import { TranslationController } from "@veryan/lit-spa";
 import { styles } from "./privacy.styles";
 
 @customElement("app-privacy")
 class Privacy extends LitElement {
   static styles = [styles];
 
-  private i18n = new TranslationController(this);
+  private i18n = new TranslationController(this, "auth");
 
   render() {
     return html`

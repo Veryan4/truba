@@ -5,16 +5,16 @@ import {
   personalizationService,
   userService,
 } from "../../services";
-import { TranslationController } from "../../controllers";
+import { TranslationController } from "@veryan/lit-spa";
 import { styles } from "./feedback-emojis.styles";
 
-import "../tooltip/tooltip";
+import "@veryan/lit-spa";
 
 @customElement("feedback-emojis")
 class FeedbackEmojiComponent extends LitElement {
   static styles = [styles];
 
-  private i18n = new TranslationController(this);
+  private i18n = new TranslationController(this, "home");
 
   @property({ type: String })
   story_id: string;
@@ -27,7 +27,7 @@ class FeedbackEmojiComponent extends LitElement {
     return html` <div class="feedback-container text-center">
         <fieldset class="stars">
           <ul class="feedback">
-            <tool-tip text="${this.i18n.t("home:angry")}" position="top">
+            <lit-spa-tooltip text="${this.i18n.t("home:angry")}" position="top">
               <li
                 class="angry"
                 id="${"angry-" + this.story_id}"
@@ -45,8 +45,8 @@ class FeedbackEmojiComponent extends LitElement {
                   </svg>
                 </div>
               </li>
-            </tool-tip>
-            <tool-tip text="${this.i18n.t("home:sad")}" position="top">
+            </lit-spa-tooltip>
+            <lit-spa-tooltip text="${this.i18n.t("home:sad")}" position="top">
               <li
                 class="sad"
                 id="${"sad-" + this.story_id}"
@@ -64,8 +64,8 @@ class FeedbackEmojiComponent extends LitElement {
                   </svg>
                 </div>
               </li>
-            </tool-tip>
-            <tool-tip text="${this.i18n.t("home:ok")}" position="top">
+            </lit-spa-tooltip>
+            <lit-spa-tooltip text="${this.i18n.t("home:ok")}" position="top">
               <li
                 class="ok"
                 id="${"ok-" + this.story_id}"
@@ -73,8 +73,8 @@ class FeedbackEmojiComponent extends LitElement {
               >
                 <div></div>
               </li>
-            </tool-tip>
-            <tool-tip text="${this.i18n.t("home:smile")}" position="top">
+            </lit-spa-tooltip>
+            <lit-spa-tooltip text="${this.i18n.t("home:smile")}" position="top">
               <li
                 class="good"
                 id="${"good-" + this.story_id}"
@@ -92,8 +92,8 @@ class FeedbackEmojiComponent extends LitElement {
                   </svg>
                 </div>
               </li>
-            </tool-tip>
-            <tool-tip text="${this.i18n.t("home:happy")}" position="top">
+            </lit-spa-tooltip>
+            <lit-spa-tooltip text="${this.i18n.t("home:happy")}" position="top">
               <li
                 class="happy"
                 id="${"happy-" + this.story_id}"
@@ -108,7 +108,7 @@ class FeedbackEmojiComponent extends LitElement {
                   </svg>
                 </div>
               </li>
-            </tool-tip>
+            </lit-spa-tooltip>
           </ul>
         </fieldset>
       </div>

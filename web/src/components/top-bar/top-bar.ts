@@ -1,18 +1,15 @@
 import { LitElement, html } from "lit";
 import { customElement, query } from "lit/decorators.js";
 import {
-  TranslationController,
-  DeviceController,
   UserController,
 } from "../../controllers";
 import { User } from "../../models";
 import {
   userService,
-  translateService,
   newsService,
-  routerService,
-  themeService,
+  
 } from "../../services";
+import { DeviceController,TranslationController,translateService,routerService, themeService, ThemeController } from "@veryan/lit-spa";
 import {
   buttonStyles,
   iconButtonStyles,
@@ -22,7 +19,7 @@ import {
 } from "../../styles";
 import { styles } from "./top-bar.styles";
 
-import "../tooltip/tooltip";
+import "@veryan/lit-spa";
 import "@material/mwc-menu";
 import "@material/mwc-list/mwc-list-item";
 import "@material/mwc-switch";
@@ -40,9 +37,10 @@ class TopBar extends LitElement {
     styles,
   ];
 
-  private i18n = new TranslationController(this);
+  private i18n = new TranslationController(this, "header");
   private user = new UserController(this);
   private device = new DeviceController(this);
+  private theme = new ThemeController(this);
 
   @query("#anchor")
   anchor: HTMLElement;
@@ -87,12 +85,12 @@ class TopBar extends LitElement {
 
   renderButtons() {
     return this.user.value
-      ? html` <tool-tip text=${this.i18n.t("header.switch")} position="bottom"
+      ? html` <lit-spa-tooltip text=${this.i18n.t("header.switch")} position="bottom"
           ><mwc-switch
             .selected=${this.user.value.is_personalized}
             @click=${this.onTabSwitch}
           ></mwc-switch
-        ></tool-tip>`
+        ></lit-spa-tooltip>`
       : html`
           <mwc-button
             dense
@@ -120,7 +118,7 @@ class TopBar extends LitElement {
           <i class="material-icons mdc-icon-button__icon">info</i>
           ${this.i18n.t("header.about")}
         </mwc-list-item>
-        <mwc-list-item @click=${themeService.changeTheme}>
+        <mwc-list-item @click=${this.changeTheme}>
           <i class="material-icons mdc-icon-button__icon">invert_colors</i>
           ${this.i18n.t("header.dark_mode")}
         </mwc-list-item>
@@ -172,5 +170,13 @@ class TopBar extends LitElement {
     userService.updateUser(user).then((updatedUser) => {
       newsService.getNews(updatedUser);
     });
+  }
+
+  changeTheme() {
+    if (this.theme.value == "light") {
+      themeService.changeTheme("dark");
+    } else {
+      themeService.changeTheme("light")
+    }
   }
 }

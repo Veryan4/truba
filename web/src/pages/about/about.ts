@@ -1,7 +1,7 @@
 import { LitElement, html } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import { classMap } from "lit-html/directives/class-map.js";
-import { TranslationController } from "../../controllers";
+import { TranslationController } from "@veryan/lit-spa";
 import { styles } from "./about.styles";
 
 import "@material/mwc-switch";
@@ -10,7 +10,7 @@ import "@material/mwc-switch";
 class About extends LitElement {
   static styles = [styles];
 
-  private i18n = new TranslationController(this);
+  private i18n = new TranslationController(this, "about");
 
   @state()
   emojis = [false, false, false, false, false];

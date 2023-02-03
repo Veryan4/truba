@@ -1,0 +1,13 @@
+{
+  "header": {
+    "home": "home",
+    "login": "Log in",
+    "register": "Sign Up",
+    "dark_mode": "toggle dark mode",
+    "about": "help",
+    "settings": "settings",
+    "language": "language",
+    "logout": "logout",
+    "switch": "Personalization Switch"
+  }
+}

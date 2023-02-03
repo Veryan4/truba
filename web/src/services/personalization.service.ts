@@ -2,7 +2,7 @@ import { userService } from "./user.service";
 import type { FavoriteItem, Recommendation } from "../models";
 import type { User } from "../models/user.model";
 import { appConfig } from "../app.config";
-import { httpService } from "./http.service";
+import { httpService } from "@veryan/lit-spa";
 
 let personalization: Recommendation | null;
 

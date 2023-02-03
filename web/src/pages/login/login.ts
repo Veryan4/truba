@@ -1,12 +1,11 @@
 import { LitElement, html } from "lit";
 import { customElement, query, state } from "lit/decorators.js";
-import { ThemeController, TranslationController } from "../../controllers";
+import { ThemeController, TranslationController, routerService } from "@veryan/lit-spa";
 import { appConfig } from "../../app.config";
 import {
   newsService,
   userService,
   formService,
-  routerService,
 } from "../../services";
 import { textFieldStyles, buttonStyles } from "../../styles";
 import { styles } from "./login.styles";
@@ -21,7 +20,7 @@ import "@google-web-components/google-signin/google-signin-aware";
 class Login extends LitElement {
   static styles = [styles, buttonStyles, textFieldStyles];
 
-  private i18n = new TranslationController(this);
+  private i18n = new TranslationController(this, "auth");
   private theme = new ThemeController(this);
 
   @query("#email")

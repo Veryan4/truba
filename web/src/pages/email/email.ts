@@ -1,14 +1,14 @@
 import { LitElement, html } from "lit";
 import { customElement, state } from "lit/decorators.js";
-import { TranslationController } from "../../controllers/translation.controller";
+import { TranslationController } from "@veryan/lit-spa";
 import { userService } from "../../services/user.service";
 import { styles } from "./email.styles";
-import "../../components/loader/loader";
+import "@veryan/lit-spa";
 @customElement("auth-email")
 class Email extends LitElement {
   static styles = [styles];
 
-  private i18n = new TranslationController(this);
+  private i18n = new TranslationController(this, "auth");
 
   @state()
   private _isLoading = true;
@@ -32,7 +32,7 @@ class Email extends LitElement {
 
   renderResult() {
     return this._isLoading
-      ? html`<app-loader></app-loader>`
+      ? html`<lit-spa-loader></lit-spa-loader>`
       : html` <div>${this.renderMessage()}</div>`;
   }
 

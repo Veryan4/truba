@@ -1,0 +1,15 @@
+{
+  "home": {
+    "author": "Auteur",
+    "source": "Source",
+    "keyword": "Mots clés",
+    "entity": "Entités",
+    "angry": "Faché",
+    "sad": "Triste",
+    "ok": "Bof",
+    "smile": "Sourire",
+    "happy": "Content",
+    "article": "Article",
+    "favorites": "Personnalisation"
+  }
+}

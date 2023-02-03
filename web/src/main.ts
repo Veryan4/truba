@@ -1,21 +1,19 @@
 import { LitElement, html } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import {
-  translateService,
-  routerService,
-  tokenService,
   userService,
   newsService,
 } from "./services";
-import { RouteController, ToastController } from "./controllers";
 import { appConfig } from "./app.config";
+import { RouteController, ToastController, TranslationController, httpService, themeService, translateService } from "@veryan/lit-spa";
 import "./components/top-bar/top-bar";
+import { routes } from "./app.routes";
 
 @customElement("my-app")
 class Truba extends LitElement {
   static styles = [];
 
-  private router = new RouteController(this);
+  private router = new RouteController(this, routes);
   private toaster = new ToastController(this);
 
   @state()
@@ -30,6 +28,7 @@ class Truba extends LitElement {
   constructor() {
     super();
     this.registerServiceWorker();
+    this.registerThemes();
     if (!this._isLoaded) {
       userService
         .me()
@@ -67,19 +66,8 @@ class Truba extends LitElement {
     }
   }
 
-  shouldUpdate(
-    changedProperties: Map<string | number | symbol, unknown>
-  ): boolean {
-    return this.hasLoadedTranslations && super.shouldUpdate(changedProperties);
-  }
-
   async connectedCallback() {
     super.connectedCallback();
-
-    window.dispatchEvent(new CustomEvent(routerService.ROUTE_EVENT));
-    window.onpopstate = () => {
-      window.dispatchEvent(new CustomEvent(routerService.ROUTE_EVENT));
-    };
 
     const user = userService.getUser();
     if (user) {
@@ -87,10 +75,6 @@ class Truba extends LitElement {
     } else if (this.socket) {
       this.socket.close();
     }
-
-    !this.hasLoadedTranslations &&
-      (await translateService.initTranslateLanguage());
-    this.hasLoadedTranslations = true;
   }
 
   disconnectedCallback() {
@@ -99,7 +83,7 @@ class Truba extends LitElement {
   }
 
   public async initWebsocket() {
-    const token = tokenService.getToken();
+    const token = httpService.getAuthToken();
     if (!token) return;
     this.socket = await new WebSocket(appConfig.backendSocket, token);
     this.socket.onmessage = (event) => {
@@ -113,5 +97,43 @@ class Truba extends LitElement {
         }
       }
     };
+  }
+
+  registerThemes() {
+    const root = document.querySelector(":root") as HTMLElement;
+    const primaryWhite = "#fafafa";
+    const secondaryWhite = "white";
+    const primaryBlack = "#2c2c2c";
+    const secondaryBlack = "black";
+    const imageColor = "unset";
+    const invertedImageColor = "invert(100%)";
+    const inputBackgroundColor = "#E8E8E8";
+    const invertedInputBackgroundColor = "#696969";
+    const outlineColor = "#b0bec5";
+    const invertedOutlineColor = "#2c2c2c";
+    const toastBackground = "#313131";
+    const chipBackground = "#696969";
+    themeService.registerThemes(root, {
+      'light': {
+        '--primary-color': primaryBlack,
+        '--primary-background-color': primaryWhite,
+        '--secondary-background-color': secondaryWhite,
+        '--image-color': imageColor,
+        '--input-fill': inputBackgroundColor,
+        '--outline-color': outlineColor,
+        '--toast-background': toastBackground,
+        '--chip-background': inputBackgroundColor
+      },
+      'dark': {
+        '--primary-color': primaryWhite,
+        '--primary-background-color': primaryBlack,
+        '--secondary-background-color': secondaryBlack,
+        '--image-color': invertedImageColor,
+        '--input-fill': invertedInputBackgroundColor,
+        '--outline-color': invertedOutlineColor,
+        '--toast-background': secondaryBlack,
+        '--chip-background': chipBackground
+      }
+    } as any);
   }
 }

@@ -5,9 +5,8 @@ import {
   newsService,
   userService,
   formService,
-  routerService,
 } from "../../services";
-import { ThemeController, TranslationController } from "../../controllers";
+import { ThemeController, TranslationController, routerService } from "@veryan/lit-spa";
 import { checkBoxStyles, textFieldStyles, buttonStyles } from "../../styles";
 import { styles } from "./register.styles";
 
@@ -22,7 +21,7 @@ import "@google-web-components/google-signin/google-signin-aware";
 class Register extends LitElement {
   static styles = [styles, buttonStyles, textFieldStyles, checkBoxStyles];
 
-  private i18n = new TranslationController(this);
+  private i18n = new TranslationController(this, "auth");
   private theme = new ThemeController(this);
 
   @query("#password")

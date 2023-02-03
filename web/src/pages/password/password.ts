@@ -1,7 +1,7 @@
 import { LitElement, html } from "lit";
 import { customElement, query, state } from "lit/decorators.js";
-import { TranslationController } from "../../controllers";
-import { userService, routerService } from "../../services";
+import { TranslationController, routerService } from "@veryan/lit-spa";
+import { userService } from "../../services";
 import { User } from "../../models";
 import { textFieldStyles, buttonStyles } from "../../styles";
 import { styles } from "./password.styles";
@@ -14,7 +14,7 @@ import "@material/mwc-textfield";
 class Password extends LitElement {
   static styles = [styles, buttonStyles, textFieldStyles];
 
-  private i18n = new TranslationController(this);
+  private i18n = new TranslationController(this, "auth");
 
   @state()
   private _hasToken = false;

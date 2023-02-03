@@ -4,14 +4,14 @@ import { classMap } from "lit-html/directives/class-map.js";
 import { personalizationService } from "../../services";
 import { chipStyles } from "../../styles";
 import { FavoriteItem } from "../../models";
-import { TranslationController } from "../../controllers";
+import { TranslationController } from "@veryan/lit-spa";
 import { styles } from "./favorite-chips.styles";
 
 @customElement("favorite-chips")
 class FavoriteChipsComponent extends LitElement {
   static styles = [styles, chipStyles];
 
-  private i18n = new TranslationController(this);
+  private i18n = new TranslationController(this, "home");
 
   @property({ type: Array })
   favorite_items?: FavoriteItem[];

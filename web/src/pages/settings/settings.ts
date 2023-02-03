@@ -1,7 +1,7 @@
 import { LitElement, html } from "lit";
 import { customElement, state, query } from "lit/decorators.js";
 import { classMap } from "lit-html/directives/class-map.js";
-import { TranslationController } from "../../controllers";
+import { TranslationController } from "@veryan/lit-spa";
 import { userService, personalizationService } from "../../services";
 import { Recommendation, FavoriteItem, IdValuePair } from "../../models";
 import { textFieldStyles, iconButtonStyles, chipStyles } from "../../styles";
@@ -14,7 +14,7 @@ import "@material/mwc-textfield";
 class Settings extends LitElement {
   static styles = [styles, textFieldStyles, chipStyles, iconButtonStyles];
 
-  private i18n = new TranslationController(this);
+  private i18n = new TranslationController(this, "home");
 
   @state()
   availableKeywords: FavoriteItem[];

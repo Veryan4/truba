@@ -13,7 +13,7 @@ Requires=docker.socket containerd.service docker.service
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-ExecStart=/usr/local/bin/minikube start mount $HOME/tf_models:/tf_models
+ExecStart=/usr/local/bin/minikube start mount
 ExecStop=/usr/bin/minikube stop
 User=root
 Group=root

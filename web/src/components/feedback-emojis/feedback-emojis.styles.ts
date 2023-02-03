@@ -11,7 +11,7 @@ export const styles = css`
     padding: 0;
     border: none;
   }
-  tool-tip:not(:last-child) {
+  lit-spa-tooltip:not(:last-child) {
     margin-right: 10px;
   }
   /*

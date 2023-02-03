@@ -1,0 +1,15 @@
+{
+  "home": {
+    "author": "Author",
+    "source": "Source",
+    "keyword": "Keywords",
+    "entity": "Entities",
+    "angry": "Angry",
+    "sad": "Sad",
+    "ok": "Meh",
+    "smile": "Smile",
+    "happy": "Happy",
+    "article": "News article",
+    "favorites": "Recommendation items"
+  }
+}

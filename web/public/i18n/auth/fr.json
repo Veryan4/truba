@@ -1,0 +1,52 @@
+{
+  "auth": {
+    "login": {
+      "title": "Se connecter",
+      "email": "Courriel",
+      "password": "Mot de passe",
+      "login": "Se connecter",
+      "register": "S'inscrire",
+      "about_1": "C'est quoi truba? Regardez notre ",
+      "about_2": "page d'aide",
+      "forgot": "Mot de passe oublié?",
+      "google": "Connexion Google",
+      "or": "----- Sinon -----"
+    },
+    "register": {
+      "title": "S'inscrire",
+      "username": "Nom d'utilisateur",
+      "email": "Courriel",
+      "password": "Mot de passe",
+      "repeat": "Répétez le mot de passe",
+      "login": "Se connecter",
+      "register": "S'inscrire",
+      "about_1": "C'est quoi truba? Regardez notre ",
+      "about_2": "page d'aide",
+      "google": "Connexion Google",
+      "or": "----- Sinon -----"
+    },
+    "password": {
+      "submit": {
+        "title": "Mot de passe oublié?",
+        "button": "Soumettre"
+      },
+      "reset": {
+        "title": "Réinitialiser votre mot de passe",
+        "button": "Réinitialiser"
+      },
+      "email": "Courriel",
+      "password": "Mot de passe",
+      "repeat": "Répétez le mot de passe",
+      "mismatch": "Les mots de passes ne concordent pas",
+      "sent": "Nous vous avons envoyer un courriel, veuillez l'utilisez pour réinitialiser votre mot de passe."
+    },
+    "unsubscribe": {
+      "success": "Vous avez été désabonner de la liste de courriels.",
+      "error": "Il y a eu une erreur, nous avons pas réussit à vous désabonner."
+    },
+    "email": {
+      "success": "Merci d'avoir confirmer votre courriel!",
+      "error": "Il y a eu une erreur, nous avons pas réussit à confirmer votre courriel."
+    }
+  }
+}

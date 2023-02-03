@@ -1,12 +1,13 @@
 import { User } from "../models/user.model";
-import { userStore } from "./user.store";
 import { appConfig } from "../app.config";
-import { httpService } from "./http.service";
-import { tokenService } from "./token.service";
-import { translateService } from "./translate.service";
+import { httpService, translateService } from "@veryan/lit-spa";
+
+const USER_EVENT = "user-update";
+
+let user: User | null = null;
 
 export const userService = {
-  getUser: () => userStore.getUser(),
+  getUser: () => user,
   login,
   register,
   forgotPassword,
@@ -16,16 +17,19 @@ export const userService = {
   socialLogin,
   signOut,
   unsubscribeEmail,
-  confirmEmail
+  confirmEmail,
+  USER_EVENT
 };
+
 
 function setUser(newUser: User | null): User | null {
   if (!newUser) {
-    userStore.setUser(null);
+    user = null;
+    window.dispatchEvent(new CustomEvent(USER_EVENT));
     return null;
   }
-  const user = new User(newUser);
-  userStore.setUser(user);
+  user = new User(newUser);
+  window.dispatchEvent(new CustomEvent(USER_EVENT));
   return user;
 }
 
@@ -36,7 +40,7 @@ function login(email: string, password: string): Promise<User | null> {
   return httpService
     .post(appConfig.backendApi + "token", formData)
     .then((data: any) => {
-      tokenService.setToken(data.token);
+      httpService.setAuthToken(data.token);
       subscribeUser(data.user);
       return setUser(data.user);
     });
@@ -55,7 +59,7 @@ function register(
       terms_consent: new Date().toISOString(),
     })
     .then((data: any) => {
-      tokenService.setToken(data.token);
+      httpService.setAuthToken(data.token);
       return setUser(data.user);
     });
 }
@@ -76,7 +80,7 @@ function resetPassword(
       new_password: newPassword,
     })
     .then((data: any) => {
-      tokenService.setToken(data.token);
+      httpService.setAuthToken(data.token);
       return setUser(data.user);
     });
 }
@@ -84,7 +88,7 @@ function resetPassword(
 function updateUser(user: any): Promise<User | null> {
   const lang = user.language
     ? user.language
-    : translateService.getStoredLanguage();
+    : translateService.getLanguage();
   return httpService
     .put(appConfig.backendApi + "users", {
       id: user.id,
@@ -103,7 +107,7 @@ function updateUser(user: any): Promise<User | null> {
 }
 
 function me(): Promise<any> {
-  const tokenVal = tokenService.getToken();
+  const tokenVal = httpService.getAuthToken();
   if (!tokenVal) {
     setUser(null);
     return Promise.reject(Error("No token found."));
@@ -120,7 +124,7 @@ function me(): Promise<any> {
 }
 
 function confirmEmail(): Promise<any> {
-  const tokenVal = tokenService.getToken();
+  const tokenVal = httpService.getAuthToken();
   if (!tokenVal) {
     setUser(null);
     return Promise.reject(Error("No token found."));
@@ -140,14 +144,14 @@ function socialLogin(idToken: string): Promise<User | null> {
   return httpService
     .get(appConfig.backendApi + "google/" + idToken)
     .then((data: any) => {
-      tokenService.setToken(data.token);
+      httpService.setAuthToken(data.token);
       subscribeUser(data.user);
       return setUser(data.user);
     });
 }
 
 async function signOut(): Promise<void> {
-  tokenService.removeToken();
+  httpService.removeAuthToken();
   await setUser(null);
   if ((window as any).gapi) {
     const auth2 = (window as any).gapi.auth2.getAuthInstance();

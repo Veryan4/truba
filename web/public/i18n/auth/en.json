@@ -1,0 +1,52 @@
+{
+  "auth": {
+    "login": {
+      "title": "Login",
+      "email": "Email",
+      "password": "Password",
+      "login": "Log In",
+      "register": "Sign Up",
+      "about_1": "What is truba? See our ",
+      "about_2": "about page",
+      "forgot": "Forgot your password?",
+      "google": "Sign in with Google",
+      "or": "----- OR -----"
+    },
+    "register": {
+      "title": "Register",
+      "username": "Username",
+      "email": "Email",
+      "password": "Password",
+      "repeat": "Repeat Password",
+      "login": "Log In",
+      "register": "Sign Up",
+      "about_1": "What is truba? See our ",
+      "about_2": "about page",
+      "google": "Sign up with Google",
+      "or": "----- OR -----"
+    },
+    "password": {
+      "submit": {
+        "title": "Forgot your Password?",
+        "button": "Submit"
+      },
+      "reset": {
+        "title": "Reset your Password",
+        "button": "Reset"
+      },
+      "email": "Email",
+      "password": "Password",
+      "repeat": "Repeat Password",
+      "mismatch": "Password mismatch",
+      "sent": "We sent you an email, please read & reset."
+    },
+    "unsubscribe": {
+      "success": "You've be unsubscribed from the email list.",
+      "error": "There was an error unsubscribing you from the email list."
+    },
+    "email": {
+      "success": "Thank you for confirming your email!",
+      "error": "There was an error confirming your email."
+    }
+  }
+}

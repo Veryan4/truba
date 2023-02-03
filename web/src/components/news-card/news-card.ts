@@ -1,7 +1,8 @@
 import { LitElement, html } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { classMap } from "lit-html/directives/class-map.js";
-import { TranslationController, UserController } from "../../controllers";
+import { UserController } from "../../controllers";
+import { TranslationController } from "@veryan/lit-spa";
 import { Article } from "../../models";
 import {
   buttonStyles,
@@ -13,7 +14,7 @@ import { styles } from "./news-card.styles";
 
 import "../feedback-emojis/feedback-emojis";
 import "../favorite-chips/favorite-chips";
-import "../tooltip/tooltip";
+import "@veryan/lit-spa";
 import "@material/mwc-button";
 
 @customElement("news-card")
@@ -27,7 +28,7 @@ class NewsCard extends LitElement {
   ];
 
   private user = new UserController(this);
-  private i18n = new TranslationController(this);
+  private i18n = new TranslationController(this, "home");
 
   @state()
   private _isFlipped = false;
@@ -124,7 +125,7 @@ class NewsCard extends LitElement {
 
   private createUserButtons() {
     if (!this.user.value) return "";
-    return html`<tool-tip
+    return html`<lit-spa-tooltip
       text="${this._isFlipped
         ? this.i18n.t("home:article")
         : this.i18n.t("home:favorites")}"
@@ -136,7 +137,7 @@ class NewsCard extends LitElement {
         @click="${(e: Event) => (this._isFlipped = !this._isFlipped)}"
       >
         more_vert
-      </button></tool-tip
+      </button></lit-spa-tooltip
     >`;
   }
 

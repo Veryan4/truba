@@ -5,8 +5,7 @@ import type { Recommendation } from "../models/personalization.model";
 import { FavoriteItem, IdValuePair } from "../models/favorite-item.model";
 
 import { appConfig } from "../app.config";
-import { httpService } from "./http.service";
-import { translateService } from "./translate.service";
+import { httpService, translateService } from "@veryan/lit-spa";
 
 let newsStories: Article[] = [];
 const seenStoryIds = new Set<string>();
@@ -100,7 +99,7 @@ function getRecommendedArticles(user: User): Promise<Article[]> {
 }
 
 function getPublicArticles(): Promise<Article[]> {
-  const language = translateService.getStoredLanguage();
+  const language = translateService.getLanguage();
   return httpService.get<Article[]>(appConfig.backendApi + "news/" + language);
 }
 

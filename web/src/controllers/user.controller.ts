@@ -1,6 +1,5 @@
 import { ReactiveControllerHost } from "lit";
 import { userService } from "../services/user.service";
-import { userStore } from "../services/user.store";
 
 export class UserController {
   private host: ReactiveControllerHost;
@@ -20,14 +19,14 @@ export class UserController {
 
   hostConnected() {
     window.addEventListener(
-      userStore.USER_EVENT,
+      userService.USER_EVENT,
       this._changeUser as EventListener
     );
   }
 
   hostDisconnected() {
     window.removeEventListener(
-      userStore.USER_EVENT,
+      userService.USER_EVENT,
       this._changeUser as EventListener
     );
   }

@@ -1,0 +1,13 @@
+{
+  "header": {
+    "home": "acceuil",
+    "login": "Se connecter",
+    "register": "S'inscrire",
+    "dark_mode": "changer la couleur",
+    "about": "aide",
+    "settings": "paramètres",
+    "language": "language",
+    "logout": "déconnexion",
+    "switch": "Personalization"
+  }
+}
