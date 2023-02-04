@@ -3,44 +3,38 @@ from services.source_story_parser import SourceStoryParser, log_error
 from shared.types import source_types
 
 
-class NPR(SourceScraper):
+class France24_EN(SourceScraper):
 
   def __init__(self, source: source_types.Source):
-    self.source_story_parser = NPRParser
+    self.source_story_parser = France24_ENParser
     self.rss_feed = self.get_rss_feed(source.rss_feed)
     if self.rss_feed:
       self.stories = self.scrape_stories(source)
 
 
-class NPRParser(SourceStoryParser):
-
-  @log_error
-  def get_story_image_url(self):
-    return self.article_content.find(attrs={
-        'id': 'storytext'
-    }).find('img')['src']
+class France24_ENParser(SourceStoryParser):
 
   @log_error
   def get_story_title(self):
-    return self.article_content.find(class_="storytitle").find('h1').text
-
-  @log_error
-  def get_story_description(self):
-    return None
+    return self.article_content.find('title').get_text()
 
   @log_error
   def get_story_author(self):
-    return self.article_content.find(attrs={'rel': 'author'}).text
+    return None
 
   @log_error
   def get_story_publication_date(self):
-    return self.article_content.find('time')['datetime']
+    return self.article_content.find('time', attrs={'pubdate':
+                                                    'pubdate'})['datetime']
 
   @log_error
   def get_story_body(self):
     story_body = []
-    for body in self.article_content.find_all(attrs={'id': 'storytext'}):
-      for paragraph_or_element in body.find_all('p', recursive=False):
+    story_description = self.article_content.find(
+        attrs={'property': 'og:description'})['content']
+    story_body.append(story_description)
+    for body in self.article_content.find_all(class_="t-content__body"):
+      for paragraph_or_element in body.find_all('p'):
         story_body.append(paragraph_or_element.get_text())
     story_body = " ".join(story_body)
     return story_body

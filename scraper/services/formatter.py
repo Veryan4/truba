@@ -1,9 +1,5 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
-from bs4 import BeautifulSoup
 import requests
 import traceback
-import importlib
 import os
 from typing import Optional, Tuple, List
 from urllib.parse import quote
@@ -12,33 +8,20 @@ from collections import Counter
 from dateutil import parser
 import spacy
 
+from services.source_story_parser import SourceStoryParser
+from services import rss_item
 from shared import setup, tracing
 from shared.types import story_types, source_types, entity_types, author_types, keyword_types
 
-current_module = 'Parser'
+current_module = 'Formatter'
 
 # SpaCy can only load one language at a time
 # That is why there is an image per language
 nlp = None
-if str(os.getenv("SCRAPER_LANGUAGE")) == 'fr':
-  nlp = spacy.load("fr_core_news_sm")
+if str(os.getenv('SCRAPER_LANGUAGE')) == 'fr':
+  nlp = spacy.load('fr_core_news_sm')
 else:
-  nlp = spacy.load("en_core_web_sm")
-
-
-def get_article_content(url: str):
-  """Retrives the BeautifulSoup html for a given website.
-
-    Args:
-        url: the internet address of the website.
-
-    Returns:
-        BeautifulSoup type object which contains the HTML.
-
-    """
-
-  page = requests.get(url, headers={'User-Agent': 'My User Agent 1.0'})
-  return BeautifulSoup(page.content, 'html.parser')
+  nlp = spacy.load('en_core_web_sm')
 
 
 def get_author_by_name(author_name: str) -> Optional[author_types.Author]:
@@ -114,54 +97,21 @@ def get_entities_and_keywords(
   return entities, keywords
 
 
-def get_source_class(source: source_types.Source, article_url: str):
-  """Loads the appropriate Source module for extracting the information.
-
-    Args:
-        source: The news source.
-        article_url: The page the news is hosted on.
-
-    Returns:
-        The class of the loaded module.
-
-    """
-
-  source_dir = "sources." + source.language + "."
-  class_name = source.name.replace(' ', '_')
-  module = importlib.import_module(source_dir + str(class_name))
-  source_class = getattr(module, class_name)
-  article_content = get_article_content(article_url)
-  return source_class(article_content)
-
-
-def get_story(source: source_types.Source, article_url: str,
-              rss_item) -> Optional[story_types.Story]:
-  """Extracts and parses the news story of a given url.
-
-    Args:
-        source: The news source.
-        article_url: The page the news is hosted on.
-        rss_item: The BeautifulSoup object of the RSS feed the
-          story was located in.
-
-    Returns:
-        The news Story if successful, None if not.
-
-    """
-
+def format_story(
+    source: source_types.Source, article_url: str,
+    parsed_story: SourceStoryParser,
+    article_item: rss_item.RssItem) -> Optional[story_types.Story]:
   try:
-    source_class = get_source_class(source, article_url)
-
-    image_url = source_class.get_story_image_url()
-    title = source_class.get_story_title()
+    image_url = parsed_story.story_image_url
+    title = parsed_story.story_title
     if not title:
-      title = rss_item.find('title').text
-    description = source_class.get_story_description()
+      title = article_item.title
+    description = parsed_story.story_description
     if not description:
-      description = rss_item.find('description').text
-    author_name = source_class.get_story_author()
-    publication_date = source_class.get_story_publication_date()
-    body = source_class.get_story_body()
+      description = article_item.description
+    author_name = parsed_story.story_author
+    publication_date = parsed_story.story_publication_date
+    body = parsed_story.story_body
 
     author = None
     if author_name:
@@ -214,7 +164,7 @@ def get_story(source: source_types.Source, article_url: str,
       publication_date = time.replace(tzinfo=None)
     except Exception:
       try:
-        time = parser.parse(rss_item.find('pubdate').text)
+        time = parser.parse(article_item.pubdate)
         publication_date = time.replace(tzinfo=None)
       except Exception:
         publication_date = datetime.now()

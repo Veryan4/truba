@@ -46,7 +46,7 @@
     "@material/mwc-menu": "^0.25.3",
     "@material/mwc-switch": "^0.25.3",
     "@material/mwc-textfield": "^0.25.3",
-    "@veryan/lit-spa": "0.1.0",
+    "@veryan/lit-spa": "0.1.1",
     "lit": "^2.6.1",
     "workbox-core": "^6.5.4"
   }

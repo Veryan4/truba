@@ -1,94 +1,54 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
-import traceback
-
-import sys
-
-sys.path.append('../')
-
-from shared import tracing
-
-current_module = 'source_parsers'
+from services.source_scraper import SourceScraper
+from services.source_story_parser import SourceStoryParser, log_error
+from shared.types import source_types
 
 
-# This class is for the format of an article after being parsed
-class RFI_FR:
+class RFI_FR(SourceScraper):
 
-  def __init__(self, article_content):
+  def __init__(self, source: source_types.Source):
+    self.source_story_parser = RFI_FRParser
+    self.rss_feed = self.get_rss_feed(source.rss_feed)
+    if self.rss_feed:
+      self.stories = self.scrape_stories(source)
 
-    self.article_content = article_content
 
+class RFI_FRParser(SourceStoryParser):
+
+  @log_error
   def get_story_image_url(self):
-    story_image_url = None
-    try:
-      story_image_url = self.article_content.find(
-          attrs={'itemprop': 'image'})['src']
-    except Exception:
-      message_to_log = traceback.format_exc()
-      tracing.log(current_module, 'exception', message_to_log)
-    return story_image_url
+    return self.article_content.find(attrs={'itemprop': 'image'})['src']
 
-  def get_story_title(self):
-    story_title = None
-    try:
-      story_title = self.article_content.find(
-          attrs={'property': 'og:title'})['content']
-    except Exception:
-      message_to_log = traceback.format_exc()
-      tracing.log(current_module, 'exception', message_to_log)
-    return story_title
-
+  @log_error
   def get_story_description(self):
     story_description = None
     try:
       story_description = self.article_content.find(class_="intro").get_text()
     except AttributeError:
-      try:
-        story_description = self.article_content.find(
-            attrs={'property': 'og:description'})['content']
-      except Exception:
-        message_to_log = traceback.format_exc()
-        tracing.log(current_module, 'exception', message_to_log)
-    except Exception:
-      message_to_log = traceback.format_exc()
-      tracing.log(current_module, 'exception', message_to_log)
+      return self.article_content.find(
+          attrs={'property': 'og:description'})['content']
     return story_description
 
+  @log_error
   def get_story_author(self):
-    story_author = None
-    try:
-      story_author = self.article_content.find(
-          attrs={'property': 'og:site_name'})['content']
-    except Exception:
-      message_to_log = traceback.format_exc()
-      tracing.log(current_module, 'exception', message_to_log)
-    return story_author
+    return self.article_content.find(
+        attrs={'property': 'og:site_name'})['content']
 
+  @log_error
   def get_story_publication_date(self):
-    story_publication_date = None
-    try:
-      story_publication_date = self.article_content.find(
-          attrs={'property': 'article:published_time'})['content']
-    except Exception:
-      message_to_log = traceback.format_exc()
-      tracing.log(current_module, 'exception', message_to_log)
-    return story_publication_date
+    return self.article_content.find(
+        attrs={'property': 'article:published_time'})['content']
 
+  @log_error
   def get_story_body(self):
-    story_body = None
-    try:
-      story_body = []
-      for body in self.article_content.find_all(
-          attrs={'itemprop': 'articleBody'}):
-        for paragraph_or_element in body.find_all('p', recursive=False):
-          paragraph_count = 0
-          for paragraph in paragraph_or_element.find_all('p', recursive=True):
-            story_body.append(paragraph.get_text())
-            paragraph_count = paragraph_count + 1
-          if (paragraph_count == 0):
-            story_body.append(paragraph_or_element.get_text())
-      story_body = " ".join(story_body)
-    except Exception:
-      message_to_log = traceback.format_exc()
-      tracing.log(current_module, 'exception', message_to_log)
+    story_body = []
+    for body in self.article_content.find_all(
+        attrs={'itemprop': 'articleBody'}):
+      for paragraph_or_element in body.find_all('p', recursive=False):
+        paragraph_count = 0
+        for paragraph in paragraph_or_element.find_all('p', recursive=True):
+          story_body.append(paragraph.get_text())
+          paragraph_count = paragraph_count + 1
+        if (paragraph_count == 0):
+          story_body.append(paragraph_or_element.get_text())
+    story_body = " ".join(story_body)
     return story_body

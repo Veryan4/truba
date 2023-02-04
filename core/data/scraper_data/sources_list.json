@@ -3,7 +3,7 @@
     {
       "source_id": "FR-1",
       "name": "Les Affaires Montreal",
-      "rss_feed": "https://news.google.com/rss/search?q=when:24h+allinurl:lesaffaires.com&hl=fr-CA&gl=CA&ceid=CA:fr",
+      "rss_feed": "https://www.lesaffaires.com/rss/monde",
       "home_page_url": "http://www.lesaffaires.com/",
       "language": "fr",
       "rank_in_alexa": 68266
@@ -11,7 +11,7 @@
     {
       "source_id": "FR-2",
       "name": "RFI FR",
-      "rss_feed": "https://news.google.com/rss/search?q=when:24h+allinurl:rfi.fr&hl=fr-CA&gl=CA&ceid=CA:fr",
+      "rss_feed": "https://www.rfi.fr/fr/rss",
       "home_page_url": "http://www.rfi.fr",
       "language": "fr",
       "rank_in_alexa": 3859
@@ -19,63 +19,63 @@
     {
       "source_id": "FR-3",
       "name": "France24 FR",
-      "rss_feed": "https://news.google.com/rss/search?q=when:24h+allinurl:.com&hl=fr-CA&gl=CA&ceid=CA:fr",
+      "rss_feed": "https://www.france24.com/fr/rss",
       "home_page_url": "https://www.france24.com/fr/",
       "language": "fr",
       "rank_in_alexa": 2667
     },
     {
       "source_id": "FR-4",
-      "name": "TVA Nouvelles Montreal",
-      "rss_feed": "https://news.google.com/rss/search?q=when:24h+allinurl:tvanouvelles.ca&hl=fr-CA&gl=CA&ceid=CA:fr",
-      "home_page_url": "https://www.tvanouvelles.ca/",
-      "language": "fr",
-      "rank_in_alexa": 18841
-    },
-    {
-      "source_id": "FR-5",
       "name": "Ici Radio Canada Montreal",
-      "rss_feed": "https://news.google.com/rss/search?q=when:24h+allinurl:ici.radio-canada.ca&hl=fr-CA&gl=CA&ceid=CA:fr",
+      "rss_feed": "https://ici.radio-canada.ca/rss/96",
       "home_page_url": "https://ici.radio-canada.ca/",
       "language": "fr",
       "rank_in_alexa": 8277
     },
     {
-      "source_id": "FR-6",
+      "source_id": "FR-5",
       "name": "Le Devoir Montreal",
-      "rss_feed": "https://news.google.com/rss/search?q=when:24h+allinurl:ledevoir.com&hl=fr-CA&gl=CA&ceid=CA:fr",
+      "rss_feed": "https://www.ledevoir.com/rss/section/monde.xml?id=76",
       "home_page_url": "https://www.ledevoir.com/",
       "language": "fr",
       "rank_in_alexa": 44556
     },
     {
-      "source_id": "FR-7",
+      "source_id": "FR-6",
       "name": "Le Monde",
-      "rss_feed": "https://news.google.com/rss/search?q=when:24h+allinurl:lemonde.fr&hl=fr-CA&gl=CA&ceid=CA:fr",
+      "rss_feed": "https://www.lemonde.fr/international/rss_full.xml",
       "home_page_url": "https://www.lemonde.fr",
       "language": "fr",
       "rank_in_alexa": 1077
     },
     {
-      "source_id": "FR-8",
+      "source_id": "FR-7",
       "name": "Le Journal De Montreal",
-      "rss_feed": "https://news.google.com/rss/search?q=when:24h+allinurl:journaldemontreal.com&hl=fr-CA&gl=CA&ceid=CA:fr",
+      "rss_feed": "https://www.journaldemontreal.com/monde/rss.xml",
       "home_page_url": "https://www.journaldemontreal.com",
       "language": "fr",
       "rank_in_alexa": 15595
     },
     {
-      "source_id": "FR-9",
+      "source_id": "FR-8",
       "name": "Lapresse",
-      "rss_feed": "https://news.google.com/rss/search?q=when:24h+allinurl:lapresse.ca&hl=fr-CA&gl=CA&ceid=CA:fr",
+      "rss_feed": "https://www.lapresse.ca/international/rss",
       "home_page_url": "https://www.lapresse.ca",
+      "language": "fr",
+      "rank_in_alexa": 8401
+    },
+    {
+      "source_id": "FR-9",
+      "name": "Le Point",
+      "rss_feed": "https://www.lepoint.fr/rss.xml",
+      "home_page_url": "https://www.lepoint.fr/",
       "language": "fr",
       "rank_in_alexa": 8401
     },
     {
       "source_id": "EN-1",
       "name": "Reuters",
-      "rss_feed": "https://news.google.com/rss/search?q=when:24h+allinurl:reuters.com&hl=en-CA&gl=CA&ceid=CA:en",
+      "rss_feed": "https://www.reutersagency.com/feed/?taxonomy=best-topics&post_type=best",
       "home_page_url": "https://www.reuters.com/",
       "language": "en",
       "rank_in_alexa": 450
@@ -83,7 +83,7 @@
     {
       "source_id": "EN-2",
       "name": "BBC",
-      "rss_feed": "https://news.google.com/rss/search?q=when:24h+allinurl:bbc.com&hl=en-CA&gl=CA&ceid=CA:en",
+      "rss_feed": "http://feeds.bbci.co.uk/news/world/rss.xml",
       "home_page_url": "https://www.bbc.com/",
       "language": "en",
       "rank_in_alexa": 88
@@ -91,7 +91,7 @@
     {
       "source_id": "EN-3",
       "name": "The Guardian",
-      "rss_feed": "https://news.google.com/rss/search?q=when:24h+allinurl:theguardian.com&hl=en-CA&gl=CA&ceid=CA:en",
+      "rss_feed": "https://www.theguardian.com/world/rss",
       "home_page_url": "https://www.theguardian.com/",
       "language": "en",
       "rank_in_alexa": 136
@@ -99,7 +99,7 @@
     {
       "source_id": "EN-4",
       "name": "CBC",
-      "rss_feed": "https://news.google.com/rss/search?q=when:24h+allinurl:cbc.ca&hl=en-CA&gl=CA&ceid=CA:en",
+      "rss_feed": "https://www.cbc.ca/cmlink/rss-world",
       "home_page_url": "https://www.cbc.ca/",
       "language": "en",
       "rank_in_alexa": 1152
@@ -107,7 +107,7 @@
     {
       "source_id": "EN-5",
       "name": "CNN",
-      "rss_feed": "https://news.google.com/rss/search?q=when:24h+allinurl:cnn.com&hl=en-CA&gl=CA&ceid=CA:en",
+      "rss_feed": "http://rss.cnn.com/rss/edition_world.rss",
       "home_page_url": "https://www.cnn.com/",
       "language": "en",
       "rank_in_alexa": 66
@@ -115,7 +115,7 @@
     {
       "source_id": "EN-6",
       "name": "NPR",
-      "rss_feed": "https://news.google.com/rss/search?q=when:24h+allinurl:npr.org&hl=en-CA&gl=CA&ceid=CA:en",
+      "rss_feed": "https://feeds.npr.org/1004/rss.xml",
       "home_page_url": "https://www.npr.org/",
       "language": "en",
       "rank_in_alexa": 481
@@ -123,7 +123,7 @@
     {
       "source_id": "EN-7",
       "name": "NBC",
-      "rss_feed": "https://news.google.com/rss/search?q=when:24h+allinurl:nbcnews.com&hl=en-CA&gl=CA&ceid=CA:en",
+      "rss_feed": "https://rss2.feedspot.com/https://www.nbcnews.com/world",
       "home_page_url": "https://www.nbcnews.com/",
       "language": "en",
       "rank_in_alexa": 535
@@ -131,7 +131,7 @@
     {
       "source_id": "EN-8",
       "name": "Science",
-      "rss_feed": "https://news.google.com/rss/search?q=when:24h+allinurl:sciencemag.org&hl=en-CA&gl=CA&ceid=CA:en",
+      "rss_feed": "https://www.science.org/rss/news_current.xml",
       "home_page_url": "https://www.sciencemag.org/",
       "language": "en",
       "rank_in_alexa": 3401
@@ -139,7 +139,7 @@
     {
       "source_id": "EN-9",
       "name": "Nature",
-      "rss_feed": "https://news.google.com/rss/search?q=when:24h+allinurl:nature.com&hl=en-CA&gl=CA&ceid=CA:en",
+      "rss_feed": "https://www.nature.com/nmat.rss",
       "home_page_url": "https://www.nature.com/",
       "language": "en",
       "rank_in_alexa": 1090
@@ -147,7 +147,7 @@
     {
       "source_id": "EN-10",
       "name": "New York Times",
-      "rss_feed": "https://news.google.com/rss/search?q=when:24h+allinurl:nytimes.com&hl=en-CA&gl=CA&ceid=CA:en",
+      "rss_feed": "https://www.nytimes.com/svc/collections/v1/publish/https://www.nytimes.com/section/world/rss.xml",
       "home_page_url": "https://www.nytimes.com/",
       "language": "en",
       "rank_in_alexa": 76
@@ -155,7 +155,7 @@
     {
       "source_id": "EN-11",
       "name": "The Economist",
-      "rss_feed": "https://news.google.com/rss/search?q=when:24h+allinurl:economist.com&hl=en-CA&gl=CA&ceid=CA:en",
+      "rss_feed": "https://www.economist.com/international/rss.xml",
       "home_page_url": "https://www.economist.com/",
       "language": "en",
       "rank_in_alexa": 2650
@@ -163,7 +163,7 @@
     {
       "source_id": "EN-12",
       "name": "The Atlantic",
-      "rss_feed": "https://news.google.com/rss/search?q=when:24h+allinurl:theatlantic.com&hl=en-CA&gl=CA&ceid=CA:en",
+      "rss_feed": "https://www.theatlantic.com/feed/all/",
       "home_page_url": "https://www.theatlantic.com/",
       "language": "en",
       "rank_in_alexa": 1500
@@ -171,7 +171,7 @@
     {
       "source_id": "EN-13",
       "name": "Al Jazeera",
-      "rss_feed": "https://news.google.com/rss/search?q=when:24h+allinurl:aljazeera.com&hl=en-CA&gl=CA&ceid=CA:en",
+      "rss_feed": "https://www.aljazeera.com/xml/rss/all.xml",
       "home_page_url": "https://www.aljazeera.com/",
       "language": "en",
       "rank_in_alexa": 1338
@@ -187,7 +187,7 @@
     {
       "source_id": "EN-15",
       "name": "TIME",
-      "rss_feed": "https://news.google.com/rss/search?q=when:24h+allinurl:time.com&hl=en-CA&gl=CA&ceid=CA:en",
+      "rss_feed": "http://feeds.feedburner.com/time/world",
       "home_page_url": "https://time.com/",
       "language": "en",
       "rank_in_alexa": 1354
@@ -195,7 +195,7 @@
     {
       "source_id": "EN-16",
       "name": "Washington Post",
-      "rss_feed": "https://news.google.com/rss/search?q=when:24h+allinurl:washingtonpost.com&hl=en-CA&gl=CA&ceid=CA:en",
+      "rss_feed": "https://feeds.washingtonpost.com/rss/world",
       "home_page_url": "https://www.washingtonpost.com/",
       "language": "en",
       "rank_in_alexa": 172
@@ -203,7 +203,7 @@
     {
       "source_id": "EN-17",
       "name": "South China Morning Post",
-      "rss_feed": "https://news.google.com/rss/search?q=when:24h+allinurl:scmp.com&hl=en-CA&gl=CA&ceid=CA:en",
+      "rss_feed": "https://www.scmp.com/rss/5/feed",
       "home_page_url": "https://www.scmp.com/",
       "language": "en",
       "rank_in_alexa": 2820
@@ -211,7 +211,7 @@
     {
       "source_id": "EN-18",
       "name": "VOX",
-      "rss_feed": "https://news.google.com/rss/search?q=when:24h+allinurl:vox.com&hl=en-CA&gl=CA&ceid=CA:en",
+      "rss_feed": "https://www.vox.com/rss/world/index.xml",
       "home_page_url": "https://www.vox.com/",
       "language": "en",
       "rank_in_alexa": 1908
@@ -219,7 +219,7 @@
     {
       "source_id": "EN-19",
       "name": "Der Spiegel",
-      "rss_feed": "https://news.google.com/rss/search?q=when:24h+allinurl:spiegel.de&hl=en-CA&gl=CA&ceid=CA:en",
+      "rss_feed": "https://www.spiegel.de/international/index.rss",
       "home_page_url": "https://www.spiegel.de/",
       "language": "en",
       "rank_in_alexa": 819
@@ -227,7 +227,7 @@
     {
       "source_id": "EN-20",
       "name": "Phys Org",
-      "rss_feed": "https://news.google.com/rss/search?q=when:24h+allinurl:phys.org&hl=en-CA&gl=CA&ceid=CA:en",
+      "rss_feed": "https://phys.org/rss-feed/",
       "home_page_url": "https://phys.org/",
       "language": "en",
       "rank_in_alexa": 7766
@@ -235,8 +235,16 @@
     {
       "source_id": "EN-21",
       "name": "Channel News Asia",
-      "rss_feed": "https://news.google.com/rss/search?q=when:24h+allinurl:channelnewsasia.com&hl=en-CA&gl=CA&ceid=CA:en",
+      "rss_feed": "https://www.channelnewsasia.com/api/v1/rss-outbound-feed?_format=xml&category=6311",
       "home_page_url": "https://www.channelnewsasia.com/",
+      "language": "en",
+      "rank_in_alexa": 3120
+    },
+    {
+      "source_id": "EN-22",
+      "name": "France24 EN",
+      "rss_feed": "https://www.france24.com/en/rss",
+      "home_page_url": "https://www.france24.com/en",
       "language": "en",
       "rank_in_alexa": 3120
     }
