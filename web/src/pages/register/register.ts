@@ -7,19 +7,17 @@ import {
   formService,
 } from "../../services";
 import { ThemeController, TranslationController, routerService } from "@veryan/lit-spa";
-import { checkBoxStyles, textFieldStyles, buttonStyles } from "../../styles";
+import { checkBoxStyles, textFieldStyles, buttonStyles, googleButtonStyles } from "../../styles";
 import { styles } from "./register.styles";
 
 import "@material/mwc-button";
 import "@material/mwc-checkbox";
 import "@material/mwc-formfield";
 import "@material/mwc-textfield";
-import "@google-web-components/google-signin";
-import "@google-web-components/google-signin/google-signin-aware";
 
 @customElement("auth-register")
 class Register extends LitElement {
-  static styles = [styles, buttonStyles, textFieldStyles, checkBoxStyles];
+  static styles = [styles, buttonStyles, textFieldStyles, checkBoxStyles, googleButtonStyles];
 
   private i18n = new TranslationController(this, "auth");
   private theme = new ThemeController(this);
@@ -27,38 +25,17 @@ class Register extends LitElement {
   @query("#password")
   passwordInput: HTMLInputElement;
 
+  @query("#googleBtn")
+  googleBtn: HTMLElement;
+
   @state()
   isFormValid = false;
-
-  constructor() {
-    super();
-    window.addEventListener("google-signin-aware-success", (e: Event) => {
-      const idToken = (window as any).gapi.auth2
-        .getAuthInstance()
-        .currentUser.get()
-        .getAuthResponse().id_token;
-      userService
-        .socialLogin(idToken)
-        .then((user) => {
-          return newsService.getNews(user);
-        })
-        .then(() => routerService.navigate("/"));
-    });
-  }
 
   render() {
     return html`
     <div class="card register">
       <div class="card-title">${this.i18n.t("auth.register.title")}</div>
-      <google-signin
-        id="google"
-        brand="google"
-        client-id="${appConfig.googleAuthClientId}"
-        label-signin="${this.i18n.t("auth.register.google")}"
-        theme=${this.theme.value}
-        width="wide"
-        height="tall"
-      ></google-signin>
+      <div id="googleBtn"></div>
       <br />
       <span class="centered-text">${this.i18n.t("auth.register.or")}</span>
       <br />
@@ -151,6 +128,34 @@ class Register extends LitElement {
     </div>`;
   }
 
+  connectedCallback(): void {
+    super.connectedCallback();
+    setTimeout(() => {
+      const renderButton = userService.googleProvider.useRenderButton({
+        itp_support: true,
+        element: this.googleBtn,
+        type: 'standard',
+        theme: 'outline',
+        text: 'signup_with',
+        size: 'large',
+        shape: 'rectangular',
+        logo_alignment: 'left',
+        ux_mode: 'popup',
+        locale: navigator.language,
+        onError: () => console.error('Failed to render button'),
+        onSuccess: (res) => {
+          if (res.credential) {
+            userService
+              .socialLogin(res.credential)
+              .then((user) => newsService.getNews(user))
+              .then(() => routerService.navigate("/"));
+          }
+        }
+      })
+      renderButton();
+    });
+  }
+
   register(): void {
     if (!this.isFormValid) {
       return;
@@ -160,6 +165,15 @@ class Register extends LitElement {
 
     userService
       .register(formData.username, formData.email, formData.password)
+      .then((user) => {
+        return newsService.getNews(user);
+      })
+      .then(() => routerService.navigate("/"));
+  }
+
+  handleGoogleRegister(idToken: string) {
+    userService
+      .socialLogin(idToken)
       .then((user) => {
         return newsService.getNews(user);
       })

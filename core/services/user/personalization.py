@@ -1,5 +1,4 @@
 from pydantic import BaseModel
-from multiprocessing import Pool
 from typing import Tuple, Optional, List
 from uuid import UUID
 import requests
@@ -34,17 +33,10 @@ def get_personalization(user_id: str, language: str) -> Personalization:
         The user's Personalization object.
 
     """
-  
-  pool = Pool(processes=3)
-  arg = [user_id, FAVORITE_ITEM_COUNT, language]
-  future_1 = pool.map_async(favorite.get_recommended_favorite_items, arg)
-  future_2 = pool.map_async(favorite.get_favorite_items, arg)
-  future_3 = pool.map_async(favorite.get_hated_items, arg)
-  recommended_items = future_1.get()
-  favorite_items = future_2.get()
-  hated_items = future_3.get()
-  pool.close()
-  pool.join()
+
+  recommended_items = favorite.get_recommended_favorite_items(user_id, FAVORITE_ITEM_COUNT, language)
+  favorite_items = favorite.get_favorite_items(user_id, FAVORITE_ITEM_COUNT, language)
+  hated_items = favorite.get_hated_items(user_id, FAVORITE_ITEM_COUNT, language)
 
   return Personalization(recommended_items=recommended_items,
                          favorite_items=favorite_items,

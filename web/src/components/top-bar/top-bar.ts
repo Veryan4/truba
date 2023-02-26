@@ -57,7 +57,7 @@ class TopBar extends LitElement {
           <section
             class="mdc-top-app-bar__section mdc-top-app-bar__section--align-start"
           >
-            <a href="/" class="logo"></a>
+            <a @click=${()=>routerService.navigate("/")} class="logo"></a>
           </section>
           <section
             class="mdc-top-app-bar__section mdc-top-app-bar__section--align-end"

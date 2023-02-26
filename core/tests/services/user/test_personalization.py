@@ -5,24 +5,24 @@ from services.user import personalization
 from tests.services.user.test_favorite import mock_favorite_items
 from tests.services.user.test_user import mock_user
 
-# TODO: Look into testing pool.map_async
-#def test_get_personalization(mocker: MockerFixture):
-#  spy_recommended = mocker.patch(
-#      'services.user.personalization.favorite.get_recommended_favorite_items',
-#      return_value=mock_favorite_items())
-#  spy_favorite = mocker.patch(
-#      'services.user.personalization.favorite.get_favorite_items',
-#      return_value=mock_favorite_items())
-#  spy_hated = mocker.patch(
-#      'services.user.personalization.favorite.get_hated_items',
-#      return_value=mock_favorite_items())
-#
-#  assert personalization.get_personalization(mock_user().user_id,
-#                                             "en") == mock_Personalization()
-#
-#  spy_recommended.assert_called_once_with(mock_user().user_id, 10, "en")
-#  spy_favorite.assert_called_once_with(mock_user().user_id, 10, "en")
-#  spy_hated.assert_called_once_with(mock_user().user_id, 10, "en")
+
+def test_get_personalization(mocker: MockerFixture):
+  spy_recommended = mocker.patch(
+      'services.user.personalization.favorite.get_recommended_favorite_items',
+      return_value=mock_favorite_items())
+  spy_favorite = mocker.patch(
+      'services.user.personalization.favorite.get_favorite_items',
+      return_value=mock_favorite_items())
+  spy_hated = mocker.patch(
+      'services.user.personalization.favorite.get_hated_items',
+      return_value=mock_favorite_items())
+
+  assert personalization.get_personalization(mock_user().user_id,
+                                             "en") == mock_Personalization()
+
+  spy_recommended.assert_called_once_with(mock_user().user_id, 10, "en")
+  spy_favorite.assert_called_once_with(mock_user().user_id, 10, "en")
+  spy_hated.assert_called_once_with(mock_user().user_id, 10, "en")
 
 
 def test_add_solr_model(requests_mock, mocker: MockerFixture):
@@ -71,4 +71,5 @@ def test_find_most_similar_profile(mocker: MockerFixture):
 def mock_Personalization() -> personalization.Personalization:
   return personalization.Personalization(
       recommended_items=mock_favorite_items(),
-      favorite_items=mock_favorite_items())
+      favorite_items=mock_favorite_items(),
+      hated_items=mock_favorite_items())

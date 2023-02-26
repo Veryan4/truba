@@ -8,3 +8,4 @@ export { checkBoxStyles } from "./check-box.styles";
 export { cardStyles } from "./card.styles";
 export { scrollBarStyles } from "./scroll-bar.styles";
 export { switchStyles } from "./switch.styles";
+export { googleButtonStyles } from "./google-signin.styles"

@@ -1,8 +1,10 @@
 import { User } from "../models/user.model";
 import { appConfig } from "../app.config";
 import { httpService, translateService } from "@veryan/lit-spa";
+import { GoogleOAuthProvider, googleLogout } from 'google-oauth-gsi';
 
 const USER_EVENT = "user-update";
+const googleProvider = new GoogleOAuthProvider({clientId: appConfig.googleAuthClientId});
 
 let user: User | null = null;
 
@@ -18,9 +20,9 @@ export const userService = {
   signOut,
   unsubscribeEmail,
   confirmEmail,
+  googleProvider,
   USER_EVENT
 };
-
 
 function setUser(newUser: User | null): User | null {
   if (!newUser) {
@@ -153,15 +155,7 @@ function socialLogin(idToken: string): Promise<User | null> {
 async function signOut(): Promise<void> {
   httpService.removeAuthToken();
   await setUser(null);
-  if ((window as any).gapi) {
-    const auth2 = (window as any).gapi.auth2.getAuthInstance();
-    const currentUser = auth2.currentUser.get();
-    if (currentUser) {
-      await currentUser.disconnect();
-    }
-    await auth2.signOut();
-    await auth2.disconnect();
-  }
+  googleLogout();
 }
 
 function unsubscribeEmail(userEmail: string): Promise<boolean> {
