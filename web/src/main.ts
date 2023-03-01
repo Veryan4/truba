@@ -22,7 +22,6 @@ class Truba extends LitElement {
     this.registerServiceWorker();
     this.registerThemes();
     this.initNews();
-    this.googleOneTap();
   }
 
   render() {
@@ -45,6 +44,9 @@ class Truba extends LitElement {
   initNews() {
     userService.me().then(
       (user) => {
+        if (!user) {
+          this.googleOneTap();
+        }
         if (user.language) {
           translateService.useLanguage(user.language);
         }

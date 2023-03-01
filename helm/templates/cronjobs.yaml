@@ -12,7 +12,7 @@ spec:
   schedule: {{ $.Values.schedules.mlRestart }} 
   jobTemplate:
     spec:
-      backoffLimit: 2 
+      backoffLimit: 1 
       activeDeadlineSeconds: 600 # timeout, makes most sense with
         # "waiting for rollout" variant specified below
       template:
@@ -49,7 +49,7 @@ spec:
   concurrencyPolicy: Forbid
   jobTemplate:
     spec:
-      backoffLimit: 2 
+      backoffLimit: 1 
       template:
         spec:
           imagePullSecrets:
@@ -140,7 +140,7 @@ spec:
   concurrencyPolicy: Forbid
   jobTemplate:
     spec:
-      backoffLimit: 2 
+      backoffLimit: 1 
       template:
         spec:
           imagePullSecrets:
@@ -218,7 +218,7 @@ spec:
   concurrencyPolicy: Forbid
   jobTemplate:
     spec:
-      backoffLimit: 2
+      backoffLimit: 1
       template:
         spec:
           imagePullSecrets:
@@ -273,7 +273,7 @@ spec:
   concurrencyPolicy: Forbid
   jobTemplate:
     spec:
-      backoffLimit: 2
+      backoffLimit: 1
       template:
         spec:
           imagePullSecrets:
