@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from datetime import datetime, timedelta
 from typing import Optional, Union
 from jose import JWTError, jwt
-from fastapi import HTTPException, Depends, status, Header, WebSocket
+from fastapi import HTTPException, Depends, status, Query, WebSocket
 from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
 from google.oauth2 import id_token
@@ -274,7 +274,7 @@ def reset_password(token: str, new_password: str):
 
 async def get_websocket_token(
     websocket: WebSocket,
-    sec_websocket_protocol: Optional[str] = Header(None)):
+    token: Union[str, None] = Query(default=None)):
   """Validates the access token found in the websocket connection,
   to make sure user should have access to the socket. The websocket connection
   is closed if the validation fails.
@@ -289,14 +289,14 @@ async def get_websocket_token(
     """
 
   try:
-    payload = jwt.decode(sec_websocket_protocol,
+    payload = jwt.decode(token,
                          os.getenv("JWT_SECRET"),
                          algorithms=[ENCRYPTION_ALGORITHM])
     user_id: str = payload.get("sub")
-    if sec_websocket_protocol is None or user_id is None:
-      await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+    if token is None or user_id is None:
+      await websocket.close(code=status.WS_1008_POLICY_VIOLATION, reason=status.WS_1008_POLICY_VIOLATION)
       return None
   except JWTError:
-    await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+    await websocket.close(code=status.WS_1008_POLICY_VIOLATION, reason=status.WS_1008_POLICY_VIOLATION)
     return None
   return user_id

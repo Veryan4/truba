@@ -12,7 +12,7 @@ export const webSocketService = {
 async function openSocket() {
     const token = httpService.getAuthToken();
     if (!token) return;
-    socket = await new WebSocket(appConfig.backendSocket, token);
+    socket = await new WebSocket(appConfig.backendSocket + "?token=" + token);
     socket.onmessage = (event) => {
         const data = JSON.parse(event.data);
         if (Array.isArray(data)) {
