@@ -73,6 +73,9 @@ def build_stories_from_db(
 
     """
 
+  if not stories_in_db:
+    return tuple()
+
   author_ids = set()
   source_ids = set()
   entity_links = set()

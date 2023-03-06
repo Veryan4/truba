@@ -13,7 +13,7 @@ ARG ENVIRONMENT=develop
 
 RUN npm run "build-"$ENVIRONMENT
 
-FROM fholzer/nginx-brotli:v1.18.0
+FROM fholzer/nginx-brotli:v1.21.6
 
 ## Remove default nginx website
 RUN rm -rf /usr/share/nginx/html/*
@@ -25,4 +25,5 @@ EXPOSE 80
 COPY ./web/nginx/frontend.conf /etc/nginx/conf.d/frontend.conf
 COPY ./web/nginx/nginx.conf /etc/nginx/nginx.conf
 
-CMD ["nginx"]
+ENTRYPOINT ["nginx"]
+CMD ["-g", "daemon off;"]

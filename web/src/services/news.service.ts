@@ -7,7 +7,7 @@ import { FavoriteItem, IdValuePair } from "../models/favorite-item.model";
 import { appConfig } from "../app.config";
 import { httpService, translateService } from "@veryan/lit-spa";
 
-let newsStories: Article[] = [];
+let newsStories: Article[];
 const seenStoryIds = new Set<string>();
 const NEWS_EVENT = "news-update";
 

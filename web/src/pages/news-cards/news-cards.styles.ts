@@ -22,7 +22,13 @@ export const styles = css`
     margin-left: 15px;
     margin-right: 15px;
   }
-
+  .no-stories {
+    height: 80vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    font-size: 32px;
+  }
   @media only screen and (max-width: 840px) {
     .flex-row {
       justify-content: center;

@@ -10,6 +10,7 @@
     "smile": "Smile",
     "happy": "Happy",
     "article": "News article",
-    "favorites": "Recommendation items"
+    "favorites": "Recommendation items",
+    "noNews": "No news today!"
   }
 }
