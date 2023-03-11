@@ -87,7 +87,7 @@ def get_by_ids(author_ids: Tuple[UUID, ...]) -> Tuple[author_types.Author]:
   return tuple(author_types.Author(**author) for author in authors)
 
 
-def update_reputation(author_id: str, reward: float):
+def update_reputation(author_id: UUID, reward: float):
   """Updates the Author's reputation score.
 
     Args:
@@ -99,7 +99,7 @@ def update_reputation(author_id: str, reward: float):
 
     """
 
-  mongo_filter = {"author_id": UUID(author_id)}
+  mongo_filter = {"author_id": author_id}
   authors = mongo.get(DB_COLLECTION_NAME, mongo_filter, limit=1)
   if authors:
     author = authors[0]

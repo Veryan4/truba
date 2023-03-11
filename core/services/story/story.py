@@ -168,12 +168,12 @@ def get_by_id(story_id: str) -> Optional[story_types.Story]:
   return None
 
 
-def update_feedback_counts(story_id: str, feedback_type: int):
+def update_feedback_counts(story_id: str, feedback_type: str):
   """Updates the feedback count by 1 for any given story and type of feedback.
 
     Args:
         story_id: The id of the story.
-        feedback_type: the int which represent which feedback count to
+        feedback_type: the property which represent which feedback count to
           increment.
 
     Returns:
@@ -186,20 +186,7 @@ def update_feedback_counts(story_id: str, feedback_type: int):
   stories = mongo.get(DB_COLLECTION_NAME, mongo_filter, limit=1)
   if stories:
     story = stories[0]
-    if feedback_type == 0:
-      story["read_count"] += 1
-    if feedback_type == 1:
-      story["shared_count"] += 1
-    if feedback_type == 31:
-      story["angry_count"] += 1
-    if feedback_type == 32:
-      story["cry_count"] += 1
-    if feedback_type == 33:
-      story["neutral_count"] += 1
-    if feedback_type == 34:
-      story["smile_count"] += 1
-    if feedback_type == 35:
-      story["happy_count"] += 1
+    story[feedback_type + "_count"] += 1
     return mongo.add_or_update(story, DB_COLLECTION_NAME)
   return None
 
@@ -262,7 +249,7 @@ def get_recommended_stories(user_id: str,
   response = requests.get(setup.get_base_ml_service_url() +
                           "/recommendations/" + user_id + "/" + language)
   if response:
-    story_ids = list(response.json())
+    story_ids = tuple(response.json())
     is_id_list = tuple(UUID(i) for i in story_ids if i not in not_id_list)
     mongo_filter["story_id"].update({"$in": is_id_list})
     stories = mongo.get(DB_COLLECTION_NAME, mongo_filter, limit=12)

@@ -1,5 +1,5 @@
 import { userService } from "./user.service";
-import type { FavoriteItem, Recommendation } from "../models";
+import type { FavoriteItem, FeedbackType, Recommendation } from "../models";
 import type { User } from "../models/user.model";
 import { appConfig } from "../app.config";
 import { httpService } from "@veryan/lit-spa";
@@ -35,7 +35,7 @@ function postUpdatePersonalization(
 function postFeedback(
   searchTerm: string,
   storyId: string,
-  feedBackType: number
+  feedBackType: FeedbackType
 ): void {
   const currentUser = userService.getUser();
   if (!currentUser) return;

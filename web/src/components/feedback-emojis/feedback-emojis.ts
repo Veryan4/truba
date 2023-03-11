@@ -6,6 +6,7 @@ import {
   userService,
 } from "../../services";
 import { TranslationController } from "@veryan/lit-spa";
+import { FeedbackType } from "../../models";
 import { styles } from "./feedback-emojis.styles";
 
 import "@veryan/lit-spa";
@@ -31,7 +32,7 @@ class FeedbackEmojiComponent extends LitElement {
               <li
                 class="angry"
                 id="${"angry-" + this.story_id}"
-                @click="${(e: Event) => this.onFeedbackClick(31, true)}"
+                @click="${(e: Event) => this.onFeedbackClick(FeedbackType.angry, true)}"
               >
                 <div>
                   <svg class="eye left">
@@ -49,8 +50,8 @@ class FeedbackEmojiComponent extends LitElement {
             <lit-spa-tooltip text="${this.i18n.t("home:sad")}" position="top">
               <li
                 class="sad"
-                id="${"sad-" + this.story_id}"
-                @click="${(e: Event) => this.onFeedbackClick(32, true)}"
+                id="${"cry-" + this.story_id}"
+                @click="${(e: Event) => this.onFeedbackClick(FeedbackType.cry, true)}"
               >
                 <div>
                   <svg class="eye left">
@@ -68,8 +69,8 @@ class FeedbackEmojiComponent extends LitElement {
             <lit-spa-tooltip text="${this.i18n.t("home:ok")}" position="top">
               <li
                 class="ok"
-                id="${"ok-" + this.story_id}"
-                @click="${(e: Event) => this.onFeedbackClick(33, true)}"
+                id="${"neutral-" + this.story_id}"
+                @click="${(e: Event) => this.onFeedbackClick(FeedbackType.neutral, true)}"
               >
                 <div></div>
               </li>
@@ -77,8 +78,8 @@ class FeedbackEmojiComponent extends LitElement {
             <lit-spa-tooltip text="${this.i18n.t("home:smile")}" position="top">
               <li
                 class="good"
-                id="${"good-" + this.story_id}"
-                @click="${(e: Event) => this.onFeedbackClick(34, true)}"
+                id="${"smile-" + this.story_id}"
+                @click="${(e: Event) => this.onFeedbackClick(FeedbackType.smile, true)}"
               >
                 <div>
                   <svg class="eye left">
@@ -97,7 +98,7 @@ class FeedbackEmojiComponent extends LitElement {
               <li
                 class="happy"
                 id="${"happy-" + this.story_id}"
-                @click="${(e: Event) => this.onFeedbackClick(35, true)}"
+                @click="${(e: Event) => this.onFeedbackClick(FeedbackType.happy, true)}"
               >
                 <div>
                   <svg class="eye left">
@@ -130,12 +131,11 @@ class FeedbackEmojiComponent extends LitElement {
       </svg>`;
   }
 
-  onFeedbackClick(feedbackType: number, isEmoji = false) {
+  onFeedbackClick(feedbackType: FeedbackType, isEmoji = false) {
     personalizationService.postFeedback("*", this.story_id, feedbackType);
     if (isEmoji) {
-      const emotions = ["angry", "sad", "ok", "good", "happy"];
       const articleEl = this.renderRoot.querySelector(
-        `#${emotions[feedbackType - 31] + "-" + this.story_id}`
+        `#${feedbackType + "-" + this.story_id}`
       )!;
       articleEl.classList.add("active");
       newsService.getSingleArticle(userService.getUser(), this.story_id).then(() => articleEl.classList.remove("active"));

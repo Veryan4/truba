@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
 from datetime import datetime
+from enum import Enum
 from typing import List, Tuple
 
 from services.search import features
@@ -22,13 +23,22 @@ SMILE_SCORE = 2.0
 HAPPY_SCORE = 5.0
 
 
+class FeedbackType(str, Enum):
+  read = "read"
+  shared = "shared"
+  angry = "angry"
+  cry = "cry"
+  neutral = "neutral"
+  smile = "smile"
+  happy = "happy"
+
 class UserFeedback(BaseModel):
-  id: bson_id.ObjectIdStr = Field(None, alias='_id')
+  id: bson_id.ObjectIdStr = Field(None, alias="_id")
   user_id: str
   story_id: str
   search_term: str = "*"
   feedback_datetime: datetime = Field(default_factory=datetime.utcnow)
-  feedback_type: int
+  feedback_type: FeedbackType
 
 
 def add(user_feedback: UserFeedback):
@@ -83,20 +93,20 @@ def get_list(user_id: str) -> Tuple[UserFeedback, ...]:
   return tuple(UserFeedback(**feedback) for feedback in feedbacks)
 
 
-def convert_feedback_type_to_relevancy_rate(feedback_type: int) -> float:
-  if feedback_type == 0:
+def convert_feedback_type_to_relevancy_rate(feedback_type: FeedbackType) -> float:
+  if feedback_type == FeedbackType.read:
     return URL_CLICKED_SCORE
-  elif feedback_type == 1:
+  elif feedback_type == FeedbackType.shared:
     return SHARED_SCORE
-  elif feedback_type == 31:
+  elif feedback_type == FeedbackType.angry:
     return ANGRY_SCORE
-  elif feedback_type == 32:
+  elif feedback_type == FeedbackType.cry:
     return CRY_SCORE
-  elif feedback_type == 33:
+  elif feedback_type == FeedbackType.neutral:
     return NEUTRAL_SCORE
-  elif feedback_type == 34:
+  elif feedback_type == FeedbackType.smile:
     return SMILE_SCORE
-  elif feedback_type == 35:
+  elif feedback_type == FeedbackType.happy:
     return HAPPY_SCORE
 
 
@@ -163,11 +173,9 @@ def received(feedback: UserFeedback):
   read_story.add(current_read_story)
   result = add(feedback)
   reward = None
-  #Angry
-  if feedback.feedback_type == 31:
+  if feedback.feedback_type == FeedbackType.angry:
     reward = -FEEDBACK_RECEIVED_REWARD
-  #Happy or Shared
-  elif feedback.feedback_type == 35 or feedback.feedback_type == 1:
+  elif feedback.feedback_type == FeedbackType.happy or FeedbackType.shared:
     reward = FEEDBACK_RECEIVED_REWARD
   current_story = story.get_by_id(feedback.story_id)
   if current_story:

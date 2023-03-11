@@ -46,7 +46,7 @@ def test_update_reputation(mocker: MockerFixture):
   spy_set = mocker.patch('services.story.author.mongo.add_or_update',
                          return_value=True)
 
-  assert author.update_reputation(str(author_types.mock_author().author_id),
+  assert author.update_reputation(author_types.mock_author().author_id,
                                   0.1) == True
 
   spy_get.assert_called_once_with(

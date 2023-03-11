@@ -41,20 +41,20 @@ def test_get_list(mocker: MockerFixture):
 
 
 def test_convert_feedback_type_to_relevancy_rate(mocker: MockerFixture):
-  assert feedback.convert_feedback_type_to_relevancy_rate(0) == 1.0
-  assert feedback.convert_feedback_type_to_relevancy_rate(1) == 5.0
-  assert feedback.convert_feedback_type_to_relevancy_rate(31) == -5.0
-  assert feedback.convert_feedback_type_to_relevancy_rate(32) == -2.0
-  assert feedback.convert_feedback_type_to_relevancy_rate(33) == 0.0
-  assert feedback.convert_feedback_type_to_relevancy_rate(34) == 2.0
-  assert feedback.convert_feedback_type_to_relevancy_rate(35) == 5.0
+  assert feedback.convert_feedback_type_to_relevancy_rate(feedback.FeedbackType.read) == 1.0
+  assert feedback.convert_feedback_type_to_relevancy_rate(feedback.FeedbackType.shared) == 5.0
+  assert feedback.convert_feedback_type_to_relevancy_rate(feedback.FeedbackType.angry) == -5.0
+  assert feedback.convert_feedback_type_to_relevancy_rate(feedback.FeedbackType.cry) == -2.0
+  assert feedback.convert_feedback_type_to_relevancy_rate(feedback.FeedbackType.neutral) == 0.0
+  assert feedback.convert_feedback_type_to_relevancy_rate(feedback.FeedbackType.smile) == 2.0
+  assert feedback.convert_feedback_type_to_relevancy_rate(feedback.FeedbackType.happy) == 5.0
 
 
 @freeze_time("2021-01-04")
 def test_get_tf_training_data(mocker: MockerFixture):
   spy_get = mocker.patch('services.user.feedback.get_list',
                          return_value=[mock_user_feedback()])
-  spy_covert = mocker.patch(
+  spy_convert = mocker.patch(
       'services.user.feedback.convert_feedback_type_to_relevancy_rate',
       return_value=5.0)
   spy_story = mocker.patch('services.user.feedback.story.get_by_id',
@@ -69,7 +69,7 @@ def test_get_tf_training_data(mocker: MockerFixture):
       mock_user_feedback().user_id) == [ranking_data]
 
   spy_get.assert_called_once_with(mock_user_feedback().user_id)
-  spy_covert.assert_called_once_with(1)
+  spy_convert.assert_called_once_with(feedback.FeedbackType.shared)
   spy_story.assert_called_once_with(str(story_types.mock_story().story_id))
   spy_feature.assert_called_once_with(story_types.mock_story())
 
@@ -132,7 +132,7 @@ def mock_user_feedback() -> feedback.UserFeedback:
                                search_term="*",
                                feedback_datetime=datetime(
                                    2021, 1, 4, 0, 0, 0, 0),
-                               feedback_type=1)
+                               feedback_type=feedback.FeedbackType.shared)
 
 
 def mock_ranking_data() -> data_set_types.RankingData:

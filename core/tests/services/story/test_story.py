@@ -71,7 +71,7 @@ def test_update_feedback_counts(mocker: MockerFixture):
                          return_value=True)
 
   assert story.update_feedback_counts(str(story_types.mock_story().story_id),
-                                      1) == True
+                                      'shared') == True
 
   spy_get.assert_called_once_with(
       "Story", {"story_id": story_types.mock_story().story_id}, limit=1)
