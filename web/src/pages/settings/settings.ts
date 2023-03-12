@@ -4,15 +4,14 @@ import { classMap } from "lit-html/directives/class-map.js";
 import { TranslationController } from "@veryan/lit-spa";
 import { userService, personalizationService } from "../../services";
 import { Recommendation, FavoriteItem, IdValuePair } from "../../models";
-import { textFieldStyles, iconButtonStyles, chipStyles } from "../../styles";
+import { iconButtonStyles, chipStyles } from "../../styles";
 import { styles } from "./settings.styles";
 
-import "@material/mwc-formfield";
-import "@material/mwc-textfield";
+import "../../material-web"
 
 @customElement("app-settings")
 class Settings extends LitElement {
-  static styles = [styles, textFieldStyles, chipStyles, iconButtonStyles];
+  static styles = [styles, chipStyles, iconButtonStyles];
 
   private i18n = new TranslationController(this, "home");
 
@@ -92,12 +91,12 @@ class Settings extends LitElement {
             </div>`;
           })}
         </div>
-        <mwc-textfield
+        <md-filled-text-field
           id="keywords"
           type="text"
           name="keywords"
           @submit=${this.addKeyword}
-        ></mwc-textfield>
+        ></md-filled-text-field>
       </div>`;
   }
 

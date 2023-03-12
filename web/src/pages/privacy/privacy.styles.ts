@@ -4,7 +4,7 @@ export const styles = css`
   .privacy-container {
     display: flex;
     justify-content: center;
-    width: 100vw;
+    width: 100dvw;
   }
   .privacy-wrap {
     display: flex;

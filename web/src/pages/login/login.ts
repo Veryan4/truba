@@ -7,19 +7,15 @@ import {
 } from "@veryan/lit-spa";
 import { newsService, userService, formService } from "../../services";
 import {
-  textFieldStyles,
-  buttonStyles,
   googleButtonStyles,
 } from "../../styles";
 import { styles } from "./login.styles";
 
-import "@material/mwc-button";
-import "@material/mwc-formfield";
-import "@material/mwc-textfield";
+import "../../material-web"
 
 @customElement("auth-login")
 class Login extends LitElement {
-  static styles = [styles, buttonStyles, textFieldStyles, googleButtonStyles];
+  static styles = [styles, googleButtonStyles];
 
   private i18n = new TranslationController(this, "auth");
   private theme = new ThemeController(this);
@@ -45,39 +41,34 @@ class Login extends LitElement {
         <span class="centered-text">${this.i18n.t("auth.login.or")}</span>
         <br />
         <form class="card-form">
-          <mwc-textfield
+          <md-filled-text-field
             class="form-field"
             label="${this.i18n.t("auth.login.email")}"
             id="email"
             type="email"
             name="email"
             required
-            @input=${this.checkFormValidity}
-          ></mwc-textfield>
-          <mwc-textfield
+            @input=${this.checkInputValidity}
+          ></md-filled-text-field>
+          <md-filled-text-field
             class="form-field"
             label="${this.i18n.t("auth.login.password")}"
             id="password"
             type="password"
             name="password"
             required
-            @input=${this.checkFormValidity}
-          ></mwc-textfield>
+            @input=${this.checkInputValidity}
+          ></md-filled-text-field>
         </form>
         <div class="form-buttons">
-          <mwc-button
-            dense
-            unelevated
+          <md-filled-button
             ?disabled=${!this.isFormValid}
             @click=${this.login}
-            label=${this.i18n.t("auth.login.login")}
-          ></mwc-button>
-          <mwc-button
+          >${this.i18n.t("auth.login.login")}</md-filled-button>
+          <md-outlined-button
             class="sign-btn"
-            dense
-            label=${this.i18n.t("auth.login.register")}
             @click=${() => routerService.navigate("/register")}
-          ></mwc-button>
+          >${this.i18n.t("auth.login.register")}</md-outlined-button>
         </div>
         <br />
         ${this.i18n.t("auth.login.about_1")}<a href="/about"
@@ -150,5 +141,10 @@ class Login extends LitElement {
       return formService.collectFormData(this.shadowRoot!);
     }
     return {};
+  }
+
+  checkInputValidity(e: Event) {
+    formService.checkInputValidity(e);
+    this.checkFormValidity();
   }
 }

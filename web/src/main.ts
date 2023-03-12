@@ -2,12 +2,15 @@ import { LitElement, html } from "lit";
 import { customElement } from "lit/decorators.js";
 import { userService, newsService, webSocketService } from "./services";
 import {
+  httpService,
   RouteController,
-  ToastController,
+  routerService,
   themeService,
   translateService,
 } from "@veryan/lit-spa";
 import { routes } from "./app.routes";
+
+import "@veryan/lit-spa";
 import "./components/top-bar/top-bar";
 
 @customElement("my-app")
@@ -15,12 +18,12 @@ class Truba extends LitElement {
   static styles = [];
 
   private router = new RouteController(this, routes);
-  private toaster = new ToastController(this);
 
   constructor() {
     super();
     this.registerServiceWorker();
     this.registerThemes();
+    httpService.baseHttp = this.customBaseHttp;
     this.initNews();
   }
 
@@ -28,7 +31,7 @@ class Truba extends LitElement {
     return html`
       <top-bar>
         <div class="main">${this.router.navigation()}</div>
-        ${this.toaster.wait()}
+        <lit-spa-toast></lit-spa-toast>
       </top-bar>
     `;
   }
@@ -72,7 +75,6 @@ class Truba extends LitElement {
   }
 
   registerThemes() {
-    const root = document.querySelector(":root") as HTMLElement;
     const primaryWhite = "#fafafa";
     const secondaryWhite = "white";
     const primaryBlack = "#2c2c2c";
@@ -85,7 +87,7 @@ class Truba extends LitElement {
     const invertedOutlineColor = "#2c2c2c";
     const toastBackground = "#313131";
     const chipBackground = "#696969";
-    themeService.registerThemes(root, {
+    themeService.registerThemes({
       light: {
         "--primary-color": primaryBlack,
         "--primary-background-color": primaryWhite,
@@ -107,6 +109,20 @@ class Truba extends LitElement {
         "--chip-background": chipBackground,
       },
     } as any);
+  }
+
+  customBaseHttp<T>(url: string, options?: RequestInit, bustCache = false): Promise<T>{
+    return httpService.cachedHttp(url, options, bustCache).then((response) => {
+      if (response.status == 401 || response.status == 403) {
+        httpService.removeAuthToken();
+        routerService.navigate("/login");
+        throw new Error("Unauthorized");
+      }
+      if (!response.ok) {
+        throw new Error(response.statusText);
+      }
+      return response.json();
+    });
   }
 
   disconnectedCallback() {

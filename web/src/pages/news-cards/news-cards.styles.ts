@@ -6,6 +6,13 @@ export const styles = css`
     justify-content: center;
     width: 100%;
   }
+  .loader-wrap{
+    display: flex;
+    justify-content:center;
+    align-items: center;
+    width: 100%;
+    height: 88dvh;
+  }
   .flex-row {
     display: flex;
     flex-wrap: wrap;
@@ -23,7 +30,7 @@ export const styles = css`
     margin-right: 15px;
   }
   .no-stories {
-    height: 80vh;
+    height: 80dvh;
     display: flex;
     flex-direction: column;
     justify-content: center;

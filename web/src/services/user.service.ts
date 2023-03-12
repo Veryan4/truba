@@ -40,7 +40,7 @@ function login(email: string, password: string): Promise<User | null> {
   formData.append("username", email);
   formData.append("password", password);
   return httpService
-    .post(appConfig.backendApi + "token", formData)
+    .post(appConfig.backendApi + "token", formData, true)
     .then((data: any) => {
       httpService.setAuthToken(data.token);
       subscribeUser(data.user);
@@ -59,7 +59,7 @@ function register(
       email,
       password,
       terms_consent: new Date().toISOString(),
-    })
+    }, true)
     .then((data: any) => {
       httpService.setAuthToken(data.token);
       return setUser(data.user);
@@ -80,7 +80,7 @@ function resetPassword(
     .post(appConfig.backendApi + "reset_password", {
       token,
       new_password: newPassword,
-    })
+    }, true)
     .then((data: any) => {
       httpService.setAuthToken(data.token);
       return setUser(data.user);
@@ -102,7 +102,7 @@ function updateUser(user: any): Promise<User | null> {
       has_personalization: user.has_personalization,
       rated_count: user.rated_count,
       subscription: user.subscription,
-    })
+    }, true)
     .then((data: any) => {
       return setUser(data.user);
     });
@@ -115,13 +115,13 @@ function me(): Promise<any> {
     return Promise.reject(Error("No token found."));
   }
   return httpService
-    .get(appConfig.backendApi + "users/me")
+    .get(appConfig.backendApi + "users/me", true)
     .then((data: any) => {
       return setUser(data.user);
     })
     .catch((_) => {
       setUser(null);
-      return Error("Failed to get user with token");
+      return Promise.reject(Error("Failed to get user with token"));
     });
 }
 
@@ -160,7 +160,7 @@ async function signOut(): Promise<void> {
 
 function unsubscribeEmail(userEmail: string): Promise<boolean> {
   return httpService
-    .get(appConfig.backendApi + `unsubscribe/${encodeURI(userEmail)}`)
+    .get(appConfig.backendApi + `unsubscribe/${encodeURI(userEmail)}`, true)
     .then((data: any) => {
       return data.result;
     });

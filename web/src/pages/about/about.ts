@@ -4,7 +4,7 @@ import { classMap } from "lit-html/directives/class-map.js";
 import { TranslationController } from "@veryan/lit-spa";
 import { styles } from "./about.styles";
 
-import "@material/mwc-switch";
+import "../../material-web"
 
 @customElement("app-about")
 class About extends LitElement {
@@ -33,13 +33,13 @@ class About extends LitElement {
             <div class="example-col">
               <h5>${this.i18n.t("about.random")}</h5>
               <div class="example-wrap">
-                <mwc-switch .selected=${false} .disabled=${true}></mwc-switch>
+                <md-switch .selected=${false} .disabled=${true}></md-switch>
               </div>
             </div>
             <div class="example-col">
               <h5>${this.i18n.t("about.personalized")}</h5>
               <div class="example-wrap">
-                <mwc-switch .selected=${true} .disabled=${true}></mwc-switch>
+                <md-switch .selected=${true} .disabled=${true}></md-switch>
               </div>
             </div>
           </div>
@@ -176,42 +176,6 @@ class About extends LitElement {
               </li>
             </ul>
           </span>
-          <div class="about-title">${this.i18n.t("about.fund")}</div>
-          <span class="about-item">
-            ${this.i18n.t("about.free_1")}<strong
-              >${this.i18n.t("about.email")}</strong
-            >
-            ${this.i18n.t("about.free_2")}
-            <br />
-            <br />
-            <form
-              action="https://www.paypal.com/donate"
-              method="POST"
-              target="_top"
-            >
-              <input
-                type="hidden"
-                name="hosted_button_id"
-                value="KY23TS7UL2VA6"
-              />
-              <input
-                type="image"
-                src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif"
-                border="0"
-                name="submit"
-                title="PayPal - The safer, easier way to pay online!"
-                alt="Donate with PayPal button"
-              />
-              <img
-                alt=""
-                border="0"
-                src="https://www.paypal.com/en_CA/i/scr/pixel.gif"
-                width="1"
-                height="1"
-              />
-            </form>
-          </span>
-
           <div class="about-title">${this.i18n.t("about.other")}</div>
           <span class="about-item">
             <ul>
@@ -247,5 +211,44 @@ class About extends LitElement {
   onFeedbackClick(index: number) {
     this.emojis = [false, false, false, false, false];
     this.emojis[index] = true;
+  }
+
+
+  renderFundMe() {
+    return html`<div class="about-title">${this.i18n.t("about.fund")}</div>
+    <span class="about-item">
+      ${this.i18n.t("about.free_1")}<strong
+        >${this.i18n.t("about.email")}</strong
+      >
+      ${this.i18n.t("about.free_2")}
+      <br />
+      <br />
+      <form
+        action="https://www.paypal.com/donate"
+        method="POST"
+        target="_top"
+      >
+        <input
+          type="hidden"
+          name="hosted_button_id"
+          value="KY23TS7UL2VA6"
+        />
+        <input
+          type="image"
+          src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif"
+          border="0"
+          name="submit"
+          title="PayPal - The safer, easier way to pay online!"
+          alt="Donate with PayPal button"
+        />
+        <img
+          alt=""
+          border="0"
+          src="https://www.paypal.com/en_CA/i/scr/pixel.gif"
+          width="1"
+          height="1"
+        />
+      </form>
+    </span>`
   }
 }

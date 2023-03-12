@@ -5,7 +5,6 @@ import { UserController } from "../../controllers";
 import { TranslationController } from "@veryan/lit-spa";
 import { Article } from "../../models";
 import {
-  buttonStyles,
   scrollBarStyles,
   iconButtonStyles,
   cardStyles,
@@ -15,7 +14,7 @@ import { styles } from "./news-card.styles";
 import "../feedback-emojis/feedback-emojis";
 import "../favorite-chips/favorite-chips";
 import "@veryan/lit-spa";
-import "@material/mwc-button";
+import "../../material-web"
 
 @customElement("news-card")
 class NewsCard extends LitElement {
@@ -24,7 +23,6 @@ class NewsCard extends LitElement {
     cardStyles,
     iconButtonStyles,
     scrollBarStyles,
-    buttonStyles,
   ];
 
   private user = new UserController(this);
@@ -99,11 +97,10 @@ class NewsCard extends LitElement {
   private createBottomRow() {
     return html` <div class="mdc-card__actions">
       <div class="mdc-card__action-buttons">
-        <mwc-button
+        <md-filled-button
           dense
-          label=${"Read"}
           @click="${this.openInNewTab}"
-        ></mwc-button>
+        >Read</md-filled-button>
       </div>
       <div class="mdc-card__action-icons">
         ${this.createShareButton()} ${this.createUserButtons()}
@@ -125,20 +122,14 @@ class NewsCard extends LitElement {
 
   private createUserButtons() {
     if (!this.user.value) return "";
-    return html`<lit-spa-tooltip
-      text="${this._isFlipped
-        ? this.i18n.t("home:article")
-        : this.i18n.t("home:favorites")}"
-      position="top"
-      ><button
+    return html`<button
         class="mdc-icon-button material-icons mdc-card__action mdc-card__action--icon--unbounded"
-        title="More options"
+        title=${this.i18n.t("home:favorites")}
         data-mdc-ripple-is-unbounded="true"
         @click="${(e: Event) => (this._isFlipped = !this._isFlipped)}"
       >
         more_vert
-      </button></lit-spa-tooltip
-    >`;
+      </button>`;
   }
 
   private createFeedbackEmojis() {

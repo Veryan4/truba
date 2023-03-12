@@ -15,7 +15,10 @@ class NewsCards extends LitElement {
 
   render() {
     if (!this.news.value) {
-      return html`<lit-spa-loader></lit-spa-loader>`;
+      return html`
+        <div class="loader-wrap">
+          <lit-spa-loader .styleInfo=${{width: '10rem' }}></lit-spa-loader>
+        </div>`;
     }
     return this.news.value.length > 0
       ? html` <div id="news-container" class="news-container">

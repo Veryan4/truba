@@ -1,63 +1,41 @@
 import { LitElement, html } from "lit";
 import { customElement, query } from "lit/decorators.js";
-import {
-  UserController,
-} from "../../controllers";
+import { UserController } from "../../controllers";
 import { User } from "../../models";
+import { userService, newsService } from "../../services";
 import {
-  userService,
-  newsService,
-  
-} from "../../services";
-import { DeviceController,TranslationController,translateService,routerService, themeService, ThemeController } from "@veryan/lit-spa";
-import {
-  buttonStyles,
-  iconButtonStyles,
-  topAppBarStyles,
-  switchStyles,
-  menuStyles,
-} from "../../styles";
-import { styles } from "./top-bar.styles";
+  DeviceController,
+  TranslationController,
+  translateService,
+  routerService,
+  themeService,
+  ThemeController,
+} from "@veryan/lit-spa";
+import { iconButtonStyles } from "../../styles";
+import { styles, mdcTopAppBarStyles } from "./top-bar.styles";
 
 import "@veryan/lit-spa";
-import "@material/mwc-menu";
-import "@material/mwc-list/mwc-list-item";
-import "@material/mwc-switch";
-import "@material/mwc-formfield";
-import "@material/mwc-button";
+import "../../material-web";
 
 @customElement("top-bar")
 class TopBar extends LitElement {
-  static styles = [
-    topAppBarStyles,
-    iconButtonStyles,
-    buttonStyles,
-    switchStyles,
-    menuStyles,
-    styles,
-  ];
+  static styles = [mdcTopAppBarStyles, iconButtonStyles, styles];
 
   private i18n = new TranslationController(this, "header");
   private user = new UserController(this);
   private device = new DeviceController(this);
   private theme = new ThemeController(this);
 
-  @query("#anchor")
-  anchor: HTMLElement;
-
-  @query("#lang-anchor")
-  langAnchor: HTMLElement;
-
   @query("#menu")
   menu: any;
 
   render() {
-    return html` <header class="mdc-top-app-bar top-bar">
+    return html`<header class="mdc-top-app-bar top-bar">
         <div class="mdc-top-app-bar__row">
           <section
             class="mdc-top-app-bar__section mdc-top-app-bar__section--align-start"
           >
-            <a @click=${()=>routerService.navigate("/")} class="logo"></a>
+            <a @click=${() => routerService.navigate("/")} class="logo"></a>
           </section>
           <section
             class="mdc-top-app-bar__section mdc-top-app-bar__section--align-end"
@@ -85,65 +63,76 @@ class TopBar extends LitElement {
 
   renderButtons() {
     return this.user.value
-      ? html` <lit-spa-tooltip text=${this.i18n.t("header.switch")} position="bottom"
-          ><mwc-switch
+      ? html` <lit-spa-tooltip
+          text=${this.i18n.t("header.switch")}
+          position="bottom"
+          ><md-switch
             .selected=${this.user.value.is_personalized}
+            show-only-selected-icon
             @click=${this.onTabSwitch}
-          ></mwc-switch
+          ></md-switch
         ></lit-spa-tooltip>`
-      : html`
-          <mwc-button
-            dense
-            unelevated
-            label=${this.i18n.t("header.login")}
-            @click=${() => routerService.navigate("/login")}
-          ></mwc-button>
-          <mwc-button
-            dense
-            label=${this.i18n.t("header.register")}
+      : html` <div class="button-wrap">
+          <md-filled-button @click=${() => routerService.navigate("/login")}
+            >${this.i18n.t("header.login")}</md-filled-button
+          >
+          <md-outlined-button
             @click=${() => routerService.navigate("/register")}
-          ></mwc-button>
-        `;
+            >${this.i18n.t("header.register")}</md-outlined-button
+          >
+        </div>`;
   }
 
   renderMenu() {
     return html`
-      <mwc-menu
+      <md-menu
         id="menu"
-        .anchor=${this.anchor}
-        .corner=${this.device.isMobile ? "TOP_RIGHT" : "TOP_LEFT"}
-        .menuCorner=${this.device.isMobile ? "END" : "START"}
+        anchor="anchor"
+        .anchor-corner=${this.device.isMobile ? "TOP_RIGHT" : "TOP_LEFT"}
+        .menu-corner=${this.device.isMobile ? "END" : "START"}
       >
-        <mwc-list-item @click=${() => routerService.navigate("/about")}>
-          <i class="material-icons mdc-icon-button__icon">info</i>
-          ${this.i18n.t("header.about")}
-        </mwc-list-item>
-        <mwc-list-item @click=${this.changeTheme}>
-          <i class="material-icons mdc-icon-button__icon">invert_colors</i>
-          ${this.i18n.t("header.dark_mode")}
-        </mwc-list-item>
+        <md-menu-item @click=${() => routerService.navigate("/about")}>
+          <div class="menu-item" slot="headline">
+            <i class="material-icons mdc-icon-button__icon">info</i>
+            ${this.i18n.t("header.about")}
+          </div>
+        </md-menu-item>
+        <md-menu-item @click=${this.changeTheme}>
+          <div class="menu-item" slot="headline">
+            <i class="material-icons mdc-icon-button__icon">invert_colors</i>
+            ${this.i18n.t("header.dark_mode")}
+          </div>
+        </md-menu-item>
         ${this.user.value
-          ? html` <mwc-list-item
+          ? html` <md-menu-item
                 @click=${() => routerService.navigate("/settings")}
               >
-                <i class="material-icons mdc-icon-button__icon">settings</i>
-                ${this.i18n.t("header.settings")}
-              </mwc-list-item>
-              <mwc-list-item @click=${this.logout}
-                ><i class="material-icons mdc-icon-button__icon">clear</i
-                >${this.i18n.t("header.logout")}</mwc-list-item
-              >`
+                <div class="menu-item" slot="headline">
+                  <i class="material-icons mdc-icon-button__icon">settings</i>
+                  ${this.i18n.t("header.settings")}
+                </div>
+              </md-menu-item>
+              <md-menu-item @click=${this.logout}>
+                <div class="menu-item" slot="headline">
+                  <i class="material-icons mdc-icon-button__icon">clear</i
+                  >${this.i18n.t("header.logout")}
+                </div>
+              </md-menu-item>`
           : ""}
         <hr />
-        <mwc-list-item @click=${(e: Event) => this.language("en")}>
-          <i class="material-icons mdc-icon-button__icon flag uk-flag"></i>
-          English
-        </mwc-list-item>
-        <mwc-list-item @click=${(e: Event) => this.language("fr")}>
-          <i class="material-icons mdc-icon-button__icon flag fr-flag"></i>
-          Francais
-        </mwc-list-item>
-      </mwc-menu>
+        <md-menu-item @click=${(e: Event) => this.language("en")}>
+          <div class="menu-item" slot="headline">
+            <i class="material-icons mdc-icon-button__icon flag uk-flag"></i>
+            English
+          </div>
+        </md-menu-item>
+        <md-menu-item @click=${(e: Event) => this.language("fr")}>
+          <div class="menu-item" slot="headline">
+            <i class="material-icons mdc-icon-button__icon flag fr-flag"></i>
+            Francais
+          </div>
+        </md-menu-item>
+      </md-menu>
     `;
   }
 
@@ -176,7 +165,7 @@ class TopBar extends LitElement {
     if (this.theme.value == "light") {
       themeService.changeTheme("dark");
     } else {
-      themeService.changeTheme("light")
+      themeService.changeTheme("light");
     }
   }
 }
