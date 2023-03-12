@@ -34,7 +34,7 @@ class Unsubscribe extends LitElement {
 
   renderResult() {
     return this._isLoading
-      ? html`<lit-spa-loader></lit-spa-loader>`
+      ? html`<lit-spa-loader .styleInfo=${{width: '10rem' }}></lit-spa-loader>`
       : html` <div>${this.renderMessage()}</div>`;
   }
 

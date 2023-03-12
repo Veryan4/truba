@@ -4,7 +4,7 @@ export const styles = css`
   .terms-container {
     display: flex;
     justify-content: center;
-    width: 100vw;
+    width: 100dvw;
   }
   .terms-wrap {
     display: flex;

@@ -57,6 +57,11 @@ export const styles = css`
     color: unset;
   }
 
+  label {
+    display: flex;
+    align-items: center;
+  }
+
   @media only screen and (max-width: 752px) {
     .card {
       margin: 60px auto;

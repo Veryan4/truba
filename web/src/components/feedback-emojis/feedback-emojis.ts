@@ -94,7 +94,7 @@ class FeedbackEmojiComponent extends LitElement {
                 </div>
               </li>
             </lit-spa-tooltip>
-            <lit-spa-tooltip text="${this.i18n.t("home:happy")}" position="top">
+            <lit-spa-tooltip text="${this.i18n.t("home:happy")}" position="top-end">
               <li
                 class="happy"
                 id="${"happy-" + this.story_id}"

@@ -1,7 +1,7 @@
 import { css } from "lit";
 
 export const styles = css`
-  mwc-textfield {
+  md-filled-text-field {
     --mdc-theme-primary: #296954;
   }
 
@@ -28,7 +28,7 @@ export const styles = css`
   .settings-container {
     display: flex;
     justify-content: center;
-    width: 100vw;
+    width: 100dvw;
     font-family: var(--font-family);
   }
   .settings-wrap {
