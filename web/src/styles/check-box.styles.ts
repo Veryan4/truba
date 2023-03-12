@@ -1,14 +1,17 @@
 import { css } from "lit";
 
 export const checkBoxStyles = css`
-  mwc-checkbox {
-    --mdc-theme-secondary: #296954;
-    --mdc-checkbox-ink-color: var(--primary-color);
-    --mdc-theme-text-primary-on-background: var(--primary-color);
-    --mdc-checkbox-unchecked-color: var(--input-fill);
-    --mdc-checkbox-disabled-color: var(--input-fill);
+  md-checkbox {
+    /* System tokens */
+    --md-sys-color-primary: #296954;
+    --md-sys-color-on-primary: var(--input-fill);
+    --md-sys-color-on-surface-variant: var(--primary-color);
+
+    /* Component tokens */
+    --md-checkbox-container-shape: 0px;
   }
-  mwc-formfield {
+
+  label {
     --mdc-theme-text-primary-on-background: var(--primary-color);
   }
 `;

@@ -1,9 +1,10 @@
 import { css } from "lit";
 
 export const buttonStyles = css`
-  mwc-button {
-    --mdc-theme-primary: var(--theme-color);
-    --mdc-theme-on-primary: white;
-    --mdc-button-disabled-fill-color: lightgrey;
+  md-filled-button {
+    --md-sys-color-primary: var(--theme-color);
+    --md-sys-color-on-primary: white;
+    --_disabled-container-color: lightgrey;
+    --_disabled-container-opacity: 1;
   }
 `;

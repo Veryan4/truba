@@ -6,9 +6,7 @@ import { User } from "../../models";
 import { textFieldStyles, buttonStyles } from "../../styles";
 import { styles } from "./password.styles";
 
-import "@material/mwc-button";
-import "@material/mwc-formfield";
-import "@material/mwc-textfield";
+import "../../material-web"
 
 @customElement("auth-password")
 class Password extends LitElement {
@@ -68,15 +66,15 @@ class Password extends LitElement {
   renderForm() {
     return this._hasToken
       ? html` <form class="card-form">
-          <mwc-textfield
+          <md-filled-text-field
             class="form-field"
             label="${this.i18n.t("auth.password.password")}"
             id="password"
             type="password"
             name="password"
             required
-          ></mwc-textfield>
-          <mwc-textfield
+          ></md-filled-text-field>
+          <md-filled-text-field
             class="form-field"
             label="${this.i18n.t("auth.password.repeat")}"
             id="repeatPassword"
@@ -85,34 +83,32 @@ class Password extends LitElement {
             validationMessage="${this.i18n.t("auth.password.mismatch")}"
             @validityTransform=${this.passwordsMatchValidator}
             required
-          ></mwc-textfield>
+          ></md-filled-text-field>
         </form>`
       : html` <form class="card-form">
-          <mwc-textfield
+          <md-filled-text-field
             class="form-field"
             label="${this.i18n.t("auth.password.email")}"
             id="email"
             type="email"
             name="email"
             required
-          ></mwc-textfield>
+          ></md-filled-text-field>
         </form>`;
   }
 
   renderButton() {
     return this._hasToken
-      ? html`<mwc-button
+      ? html`<md-filled-button
           dense
           unelevated
           @click=${this.resetPassword}
-          label=${this.i18n.t("auth.password.reset.button")}
-        ></mwc-button>`
-      : html`<mwc-button
+        >${this.i18n.t("auth.password.reset.button")}</md-filled-button>`
+      : html`<md-filled-button
           dense
           unelevated
           @click=${this.forgotPassword}
-          label=${this.i18n.t("auth.password.submit.button")}
-        ></mwc-button>`;
+        >${this.i18n.t("auth.password.submit.button")}</md-filled-button>`;
   }
 
   renderMessage() {

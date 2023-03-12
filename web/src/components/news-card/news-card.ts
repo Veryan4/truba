@@ -15,7 +15,7 @@ import { styles } from "./news-card.styles";
 import "../feedback-emojis/feedback-emojis";
 import "../favorite-chips/favorite-chips";
 import "@veryan/lit-spa";
-import "@material/mwc-button";
+import "../../material-web"
 
 @customElement("news-card")
 class NewsCard extends LitElement {
@@ -99,11 +99,10 @@ class NewsCard extends LitElement {
   private createBottomRow() {
     return html` <div class="mdc-card__actions">
       <div class="mdc-card__action-buttons">
-        <mwc-button
+        <md-filled-button
           dense
-          label=${"Read"}
           @click="${this.openInNewTab}"
-        ></mwc-button>
+        >Read</md-filled-button>
       </div>
       <div class="mdc-card__action-icons">
         ${this.createShareButton()} ${this.createUserButtons()}

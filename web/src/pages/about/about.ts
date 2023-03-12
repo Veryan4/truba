@@ -4,7 +4,7 @@ import { classMap } from "lit-html/directives/class-map.js";
 import { TranslationController } from "@veryan/lit-spa";
 import { styles } from "./about.styles";
 
-import "@material/mwc-switch";
+import "../../material-web"
 
 @customElement("app-about")
 class About extends LitElement {
@@ -33,13 +33,13 @@ class About extends LitElement {
             <div class="example-col">
               <h5>${this.i18n.t("about.random")}</h5>
               <div class="example-wrap">
-                <mwc-switch .selected=${false} .disabled=${true}></mwc-switch>
+                <md-switch .selected=${false} .disabled=${true}></md-switch>
               </div>
             </div>
             <div class="example-col">
               <h5>${this.i18n.t("about.personalized")}</h5>
               <div class="example-wrap">
-                <mwc-switch .selected=${true} .disabled=${true}></mwc-switch>
+                <md-switch .selected=${true} .disabled=${true}></md-switch>
               </div>
             </div>
           </div>

@@ -1,8 +1,10 @@
 import { css } from "lit";
 
 export const menuStyles = css`
-  mwc-menu {
-    --mdc-theme-text-primary-on-background: var(--primary-color);
-    --mdc-theme-surface: var(--primary-background-color);
+  md-menu {
+    background-color: var(--primary-background-color);
+    --md-menu-container-color: var(--primary-background-color);
+    --md-sys-color-on-surface: var(--primary-color);
+    // --md-menu-container-shape: 0px;
   }
 `;

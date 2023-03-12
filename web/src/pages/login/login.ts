@@ -13,9 +13,7 @@ import {
 } from "../../styles";
 import { styles } from "./login.styles";
 
-import "@material/mwc-button";
-import "@material/mwc-formfield";
-import "@material/mwc-textfield";
+import "../../material-web"
 
 @customElement("auth-login")
 class Login extends LitElement {
@@ -45,7 +43,7 @@ class Login extends LitElement {
         <span class="centered-text">${this.i18n.t("auth.login.or")}</span>
         <br />
         <form class="card-form">
-          <mwc-textfield
+          <md-filled-text-field
             class="form-field"
             label="${this.i18n.t("auth.login.email")}"
             id="email"
@@ -53,8 +51,8 @@ class Login extends LitElement {
             name="email"
             required
             @input=${this.checkFormValidity}
-          ></mwc-textfield>
-          <mwc-textfield
+          ></md-filled-text-field>
+          <md-filled-text-field
             class="form-field"
             label="${this.i18n.t("auth.login.password")}"
             id="password"
@@ -62,22 +60,18 @@ class Login extends LitElement {
             name="password"
             required
             @input=${this.checkFormValidity}
-          ></mwc-textfield>
+          ></md-filled-text-field>
         </form>
         <div class="form-buttons">
-          <mwc-button
-            dense
+          <md-filled-button
             unelevated
             ?disabled=${!this.isFormValid}
             @click=${this.login}
-            label=${this.i18n.t("auth.login.login")}
-          ></mwc-button>
-          <mwc-button
+          >${this.i18n.t("auth.login.login")}</md-filled-button>
+          <md-filled-button
             class="sign-btn"
-            dense
-            label=${this.i18n.t("auth.login.register")}
             @click=${() => routerService.navigate("/register")}
-          ></mwc-button>
+          >${this.i18n.t("auth.login.register")}</md-filled-button>
         </div>
         <br />
         ${this.i18n.t("auth.login.about_1")}<a href="/about"

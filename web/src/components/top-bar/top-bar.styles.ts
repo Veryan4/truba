@@ -25,6 +25,11 @@ export const styles = css`
     color: var(--primary-color);
   }
 
+  .menu-item {
+    display: flex;
+    width: max-content;
+  }
+
   @media screen and (min-width: 780px) {
     .mdc-top-app-bar__section--align-end,
     .mdc-top-app-bar__section--align-start {

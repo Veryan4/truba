@@ -1,7 +1,7 @@
 import { css } from "lit";
 
 export const styles = css`
-  mwc-textfield {
+  md-filled-text-field {
     --mdc-theme-primary: #296954;
   }
 
