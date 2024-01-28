@@ -24,12 +24,11 @@ app.add_middleware(
 )
 
 app.add_middleware(BrotliMiddleware)
-
+app.add_middleware(tracing.OpentracingMiddleware)
 
 @app.on_event("startup")
 async def startup():
   tracing.init_tracer(app)
-  app.add_middleware(tracing.OpentracingMiddleware)
 
 
 app.include_router(secure.router)

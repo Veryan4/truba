@@ -6,6 +6,7 @@ from services import ranking
 from shared import tracing
 
 app = FastAPI()
+app.add_middleware(tracing.OpentracingMiddleware)
 
 indexes = ranking.get_indexes()
 if indexes:
@@ -18,7 +19,6 @@ if indexes:
 @app.on_event('startup')
 async def startup():
   tracing.init_tracer(app)
-  app.add_middleware(tracing.OpentracingMiddleware)
 
 
 @app.post('/model-store/reset')
