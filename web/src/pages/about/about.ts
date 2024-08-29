@@ -1,6 +1,6 @@
 import { LitElement, html } from "lit";
 import { customElement, state } from "lit/decorators.js";
-import { classMap } from "lit-html/directives/class-map.js";
+import { classMap } from "lit/directives/class-map.js";
 import { TranslationController } from "@veryan/lit-spa";
 import { styles } from "./about.styles";
 
@@ -10,7 +10,7 @@ import "../../material-web"
 class About extends LitElement {
   static styles = [styles];
 
-  private i18n = new TranslationController(this, "about");
+  private i18n = new TranslationController(this, {scope:"about"});
 
   @state()
   emojis = [false, false, false, false, false];

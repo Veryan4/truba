@@ -8,7 +8,7 @@ import "@veryan/lit-spa";
 class Unsubscribe extends LitElement {
   static styles = [styles];
 
-  private i18n = new TranslationController(this, "auth");
+  private i18n = new TranslationController(this, {scope:"auth"});
 
   @state()
   private _isLoading = true;

@@ -1,4 +1,4 @@
-import { LitElement, html } from "lit";
+import { LitElement, PropertyValueMap, html } from "lit";
 import { customElement } from "lit/decorators.js";
 import { userService, newsService, webSocketService } from "./services";
 import {
@@ -7,6 +7,7 @@ import {
   routerService,
   themeService,
   translateService,
+  TranslationController,
 } from "@veryan/lit-spa";
 import { routes } from "./app.routes";
 
@@ -18,6 +19,9 @@ class Truba extends LitElement {
   static styles = [];
 
   private router = new RouteController(this, routes);
+  private i18n = new TranslationController(this, {
+    supportedLanguages: ["en", "fr"],
+  });
 
   constructor() {
     super();
@@ -34,6 +38,12 @@ class Truba extends LitElement {
         <lit-spa-toast></lit-spa-toast>
       </top-bar>
     `;
+  }
+
+  protected shouldUpdate(
+    _changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>,
+  ): boolean {
+    return this.i18n.hasLoadedTranslations;
   }
 
   registerServiceWorker() {
@@ -55,7 +65,7 @@ class Truba extends LitElement {
         }
         newsService.getNews(user);
       },
-      (err) => newsService.getNews(null)
+      (err) => newsService.getNews(null),
     );
   }
 
@@ -111,7 +121,11 @@ class Truba extends LitElement {
     } as any);
   }
 
-  customBaseHttp<T>(url: string, options?: RequestInit, bustCache = false): Promise<T>{
+  customBaseHttp<T>(
+    url: string,
+    options?: RequestInit,
+    bustCache = false,
+  ): Promise<T> {
     return httpService.cachedHttp(url, options, bustCache).then((response) => {
       if (response.status == 401 || response.status == 403) {
         httpService.removeAuthToken();

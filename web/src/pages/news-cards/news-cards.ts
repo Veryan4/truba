@@ -11,7 +11,7 @@ class NewsCards extends LitElement {
   static styles = [styles];
 
   private news = new NewsController(this);
-  private i18n = new TranslationController(this, "home");
+  private i18n = new TranslationController(this, {scope:"home"});
 
   render() {
     if (!this.news.value) {

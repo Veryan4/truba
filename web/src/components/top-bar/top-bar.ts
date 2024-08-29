@@ -21,7 +21,7 @@ import "../../material-web";
 class TopBar extends LitElement {
   static styles = [mdcTopAppBarStyles, iconButtonStyles, styles];
 
-  private i18n = new TranslationController(this, "header");
+  private i18n = new TranslationController(this, {scope:"header"});
   private user = new UserController(this);
   private device = new DeviceController(this);
   private theme = new ThemeController(this);

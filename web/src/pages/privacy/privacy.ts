@@ -7,7 +7,7 @@ import { styles } from "./privacy.styles";
 class Privacy extends LitElement {
   static styles = [styles];
 
-  private i18n = new TranslationController(this, "auth");
+  private i18n = new TranslationController(this, {scope:"auth"});
 
   render() {
     return html`

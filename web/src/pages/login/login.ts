@@ -17,7 +17,7 @@ import "../../material-web"
 class Login extends LitElement {
   static styles = [styles, googleButtonStyles];
 
-  private i18n = new TranslationController(this, "auth");
+  private i18n = new TranslationController(this, {scope:"auth"});
   private theme = new ThemeController(this);
 
   @query("#email")

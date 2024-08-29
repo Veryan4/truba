@@ -12,7 +12,7 @@ import "../../material-web"
 class Password extends LitElement {
   static styles = [styles];
 
-  private i18n = new TranslationController(this, "auth");
+  private i18n = new TranslationController(this, {scope:"auth"});
 
   @state()
   private _hasToken = false;

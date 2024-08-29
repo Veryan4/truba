@@ -1,6 +1,6 @@
 import { LitElement, html } from "lit";
 import { customElement, property } from "lit/decorators.js";
-import { classMap } from "lit-html/directives/class-map.js";
+import { classMap } from "lit/directives/class-map.js";
 import { personalizationService } from "../../services";
 import { chipStyles } from "../../styles";
 import { FavoriteItem } from "../../models";
@@ -11,7 +11,7 @@ import { styles } from "./favorite-chips.styles";
 class FavoriteChipsComponent extends LitElement {
   static styles = [styles, chipStyles];
 
-  private i18n = new TranslationController(this, "home");
+  private i18n = new TranslationController(this, {scope:"home"});
 
   @property({ type: Array })
   favorite_items?: FavoriteItem[];

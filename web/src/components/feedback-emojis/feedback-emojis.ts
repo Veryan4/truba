@@ -15,7 +15,7 @@ import "@veryan/lit-spa";
 class FeedbackEmojiComponent extends LitElement {
   static styles = [styles];
 
-  private i18n = new TranslationController(this, "home");
+  private i18n = new TranslationController(this, {scope:"home"});
 
   @property({ type: String })
   story_id: string;

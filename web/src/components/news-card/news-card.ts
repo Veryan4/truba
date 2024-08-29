@@ -1,6 +1,6 @@
 import { LitElement, html } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
-import { classMap } from "lit-html/directives/class-map.js";
+import { classMap } from "lit/directives/class-map.js";
 import { UserController } from "../../controllers";
 import { TranslationController } from "@veryan/lit-spa";
 import { Article } from "../../models";
@@ -26,7 +26,7 @@ class NewsCard extends LitElement {
   ];
 
   private user = new UserController(this);
-  private i18n = new TranslationController(this, "home");
+  private i18n = new TranslationController(this, {scope:"home"});
 
   @state()
   private _isFlipped = false;
