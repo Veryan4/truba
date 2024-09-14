@@ -1,0 +1,19 @@
+components:
+  schemas:
+    Author:
+      required:
+        - author_id
+      properties:
+        _id:
+          type: any
+        author_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        affiliation:
+          items:
+            $ref: "./Source.yaml#/components/schemas/Source"
+        reputation:
+          type: number 
+          default: 0.0

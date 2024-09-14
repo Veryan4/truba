@@ -3,13 +3,13 @@ from typing import Tuple
 
 from services.story import story
 from services.user import user, auth
-from shared.types import story_types
+import project_types
 
 router = APIRouter()
 
 
 @router.get('/news/{language}',
-            response_model=Tuple[story_types.ShortStory, ...])
+            response_model=Tuple[project_types.ShortStory, ...])
 def get_public_stories(language: str):
   return story.get_public_stories(language)
 

@@ -1,0 +1,23 @@
+components:
+  schemas:
+    Source:
+      required:
+        - source_id
+      properties:
+        _id:
+          type: any
+        source_id:
+          type: string
+        name:
+          type: string
+        home_page_url:
+          type: string
+        rank_in_alexa:
+          type: number
+        language:
+          type: string
+        rss_feed:
+          type: string
+        reputation:
+          type: number 
+          default: 0.0

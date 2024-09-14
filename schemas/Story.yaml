@@ -1,0 +1,213 @@
+components:
+  schemas:
+    Story:
+      required:
+        - story_id
+      properties:
+        _id:
+          type: any
+        story_id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        body:
+          type: string
+        summary:
+          type: string
+        source:
+          $ref: './Source.yaml#/components/schemas/Source'
+        author:
+          $ref: './Author.yaml#/components/schemas/Author'
+        entities:
+          items:
+            $ref: './Entity.yaml#/components/schemas/EntityInStory'
+          default: []
+        keywords:
+          items:
+            $ref: './Keyword.yaml#/components/schemas/KeywordInStory'
+          default: []
+        images:
+          items:
+            type: string
+        language:
+          type: string
+        published_at:
+          type: string
+          format: date-time
+        url:
+          type: string
+        read_count:
+          type: integer
+          default: 0
+        shared_count:
+          type: integer
+          default: 0
+        angry_count:
+          type: integer
+          default: 0
+        cry_count:
+          type: integer
+          default: 0
+        neutral_count:
+          type: integer
+          default: 0
+        smile_count:
+          type: integer
+          default: 0
+        happy_count:
+          type: integer
+          default: 0
+    StoryInDb:
+      required:
+        - story_id
+      properties:
+        _id:
+          type: any
+        story_id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        body:
+          type: string
+        summary:
+          type: string
+        source_id:
+          type: string
+        author_id:
+          type: string
+          format: uuid
+        entities:
+          items:
+            $ref: './Entity.yaml#/components/schemas/EntityInStoryDB'
+          default: []
+        keywords:
+          items:
+            $ref: './Keyword.yaml#/components/schemas/KeywordInStoryDB'
+          default: []
+        images:
+          items:
+            type: string
+        language:
+          type: string
+        published_at:
+          type: string
+          format: date-time
+        url:
+          type: string
+        read_count:
+          type: integer
+          default: 0
+        shared_count:
+          type: integer
+          default: 0
+        angry_count:
+          type: integer
+          default: 0
+        cry_count:
+          type: integer
+          default: 0
+        neutral_count:
+          type: integer
+          default: 0
+        smile_count:
+          type: integer
+          default: 0
+        happy_count:
+          type: integer
+          default: 0
+    ShortStory:
+      required:
+        - story_id
+        - title
+        - url
+      properties:
+        story_id:
+          type: string
+        title:
+          type: string
+        summary:
+          type: string
+        source:
+          type: string
+        source_id:
+          type: string
+        author:
+          type: string
+        author_id:
+          type: string
+        entities:
+          items:
+            type: string
+          default: []
+        entity_links:
+          items:
+            type: string
+          default: []
+        keywords:
+          items:
+            type: string
+          default: []
+        image:
+          type: string
+        language:
+          type: string
+        published_at:
+          type: string
+          format: date-time
+        url:
+          type: string
+    StoryInSolr:
+      required:
+        - id
+        - StoryId
+        - Title
+        - Body
+        - StoryUrl
+      properties:
+        _id:
+          type: string
+        StoryId:
+          type: string
+          format: uuid
+        Title:
+          type: string
+        Body:
+          type: string
+        Summary:
+          type: string
+        PublishedAt:
+          type: string
+        Author:
+          type: string
+        AuthorId:
+          type: string
+        Source:
+          type: string
+        SourceId:
+          type: string
+        StoryUrl:
+          type: string
+        Language:
+          type: string
+        Entities:
+          items:
+            type: string
+          default: []
+        EntityLinks:
+          items:
+            type: string
+          default: []
+        Keywords:
+          items:
+            type: string
+          default: []
+        Images:
+          items:
+            type: string
+       
+ 
+
+
+

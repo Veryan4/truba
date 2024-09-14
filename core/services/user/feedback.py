@@ -8,7 +8,7 @@ from services.story import story, source, author
 from services.user import favorite, read_story
 from services import mongo
 from shared import bson_id
-from shared.types import data_set_types
+import project_types
 
 DB_COLLECTION_NAME = "UserFeedback"
 USER_FEEDBACK_COUNT = 200
@@ -110,7 +110,7 @@ def convert_feedback_type_to_relevancy_rate(feedback_type: FeedbackType) -> floa
     return HAPPY_SCORE
 
 
-def get_tf_training_data(user_id: str) -> List[data_set_types.RankingData]:
+def get_tf_training_data(user_id: str) -> List[project_types.RankingData]:
   """Retrieves a list of tensorflow training data generated from the user
   feedback.
 
@@ -150,7 +150,7 @@ def get_tf_training_data(user_id: str) -> List[data_set_types.RankingData]:
             "time_stamp": datetime.timestamp(time_dict[story_id])
         }
         data_entry.update(ranking_features.dict())
-        data_entry_list.append(data_set_types.RankingData(**data_entry))
+        data_entry_list.append(project_types.RankingData(**data_entry))
   return data_entry_list
 
 

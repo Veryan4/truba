@@ -1,0 +1,24 @@
+components:
+  schemas:
+    Entity:
+      properties:
+        _id:
+          type: any
+        text:
+          type: string
+        type:
+          type: string
+        links:
+          type: string
+    EntityInStory:
+      properties:
+        entity:
+          $ref: '#/components/schemas/Entity'
+        frequency:
+          type: integer
+    EntityInStoryDB:
+      properties:
+        links:
+          type: string
+        frequency:
+          type: integer

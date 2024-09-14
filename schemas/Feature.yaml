@@ -1,0 +1,67 @@
+components:
+  schemas:
+    SolrFeatures:
+      properties:
+        tfidf_sim_title:
+          type: number
+          default: 0.0
+        bm25_sim_title:
+          type: number
+          default: 0.0
+        tfidf_sim_body:
+          type: number
+          default: 0.0
+        bm25_sim_body:
+          type: number
+          default: 0.0
+        documentRecency:
+          type: number
+          default: 0.0
+        tfidf_sim_keywords:
+          type: number
+          default: 0.0
+        bm25_sim_keywords:
+          type: number
+          default: 0.0
+        tfidf_sim_entities:
+          type: number
+          default: 0.0
+        bm25_sim_entities:
+          type: number
+          default: 0.0
+    RankingFeatures:
+      properties:
+        story_title:
+          type: string
+        source_alexa_rank:
+          type: integer
+          default: 0
+        read_count:
+          type: integer
+          default: 0
+        shared_count:
+          type: integer
+          default: 0
+        angry_count:
+          type: integer
+          default: 0
+        cry_count:
+          type: integer
+          default: 0
+        neutral_count:
+          type: integer
+          default: 0
+        smile_count:
+          type: integer
+          default: 0
+        happy_count:
+          type: integer
+          default: 0
+        source_id:
+          type: string
+        author_id:
+          type: string
+        most_frequent_keyword:
+          type: string
+        most_frequent_entity:
+          type: string

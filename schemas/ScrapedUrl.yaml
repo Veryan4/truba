@@ -1,0 +1,11 @@
+components:
+  schemas:
+    ScrapedUrl:
+      properties:
+        published_at:
+          type: string
+          format: date-time
+        source_name:
+          type: string
+        url:
+          type: string

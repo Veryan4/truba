@@ -1,7 +1,7 @@
-from shared.types import story_types, feature_types
+import project_types
 
 
-def extract_solr_features(string: str) -> feature_types.SolrFeatures:
+def extract_solr_features(string: str) -> project_types.SolrFeatures:
   """Converts the string of features returned from Solr to typed object.
 
     Args:
@@ -13,12 +13,12 @@ def extract_solr_features(string: str) -> feature_types.SolrFeatures:
 
   arr = string.split(',')
   dic = {str(item.split('=')[0]): float(item.split('=')[1]) for item in arr}
-  features = feature_types.SolrFeatures(**dic)
+  features = project_types.SolrFeatures(**dic)
   return features
 
 
 def extract_ranking_features(
-    story: story_types.Story) -> feature_types.RankingFeatures:
+    story: project_types.Story) -> project_types.RankingFeatures:
   """Extracts features used for tensor flow recommendations.
 
     Args:
@@ -28,7 +28,7 @@ def extract_ranking_features(
         The extreacted RankingFeatures.
     """
 
-  ranking_features = feature_types.RankingFeatures()
+  ranking_features = project_types.RankingFeatures()
   if story.title:
     ranking_features.story_title = story.title
   if story.source and story.source.rank_in_alexa:

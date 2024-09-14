@@ -22,8 +22,11 @@ ENV PATH="/opt/venv/bin:$PATH"
 
 COPY ./ml/ .
 COPY ./shared/ ./shared/
+COPY ./schemas/ ./schemas/
 
 RUN python ./shared/setup.py
+
+RUN datamodel-codegen  --input ./schemas/AllTypes.yaml --aliases ./schemas/aliases.json --output project_types.py
 
 CMD gunicorn --workers=4 --worker-class=uvicorn.workers.UvicornH11Worker --bind=0.0.0.0:5158 controller:app
 

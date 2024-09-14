@@ -13,6 +13,10 @@ You then need to install the dependencies
 ```
 pip install -r requirements.txt
 ```
+You then need to generate the shared models
+```
+datamodel-codegen  --input ../schemas/AllTypes.yaml --aliases ../schemas/aliases.json --output project_types.py
+```
 
 After adding the required .env values, you can then run one of the services with `python <name-of-service>` 
 

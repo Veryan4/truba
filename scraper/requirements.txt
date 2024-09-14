@@ -11,3 +11,4 @@ more_itertools
 python-dateutil
 stop-words
 spacy[lookups]
+datamodel-code-generator

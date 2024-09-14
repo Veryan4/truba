@@ -5,7 +5,7 @@ import importlib
 from typing import List, Tuple, Optional
 from fastapi.encoders import jsonable_encoder
 
-from shared.types import story_types, source_types, scraped_url_types
+import project_types
 from shared import setup, tracing
 
 current_module = 'Scraper'
@@ -21,7 +21,7 @@ def reset_sources() -> None:
     tracing.log(current_module, 'error', 'Unable to reset sources')
 
 
-def get_sources() -> Optional[Tuple[source_types.Source]]:
+def get_sources() -> Optional[Tuple[project_types.Source]]:
   """Retrieves the list of current sources from the Core service.
 
     Returns:
@@ -35,11 +35,11 @@ def get_sources() -> Optional[Tuple[source_types.Source]]:
     tracing.log(current_module, 'error', 'No Sources found')
     return None
   source_dict = response.json()
-  return tuple(source_types.Source(**source) for source in source_dict)
+  return tuple(project_types.Source(**source) for source in source_dict)
 
 
-def push_stories_to_core(source: source_types.Source,
-                         stories: List[story_types.Story]):
+def push_stories_to_core(source: project_types.Source,
+                         stories: List[project_types.Story]):
   """Submits the scraped stories for a given source back to the Core
   service for storage.
 
@@ -53,7 +53,7 @@ def push_stories_to_core(source: source_types.Source,
   requests.post(setup.get_base_core_service_url() + '/stories',
                 json=json_to_push)
   recently_scraped_urls = [
-      scraped_url_types.ScrapedUrl(published_at=scraped_story.published_at,
+      project_types.ScrapedUrl(published_at=scraped_story.published_at,
                                    source_name=source.name,
                                    url=scraped_story.url)
       for scraped_story in stories
@@ -67,7 +67,7 @@ def push_stories_to_core(source: source_types.Source,
   tracing.log(current_module, 'info', message_to_log)
 
 
-def get_source_class(source: source_types.Source):
+def get_source_class(source: project_types.Source):
   """Loads the appropriate Source module for extracting the information.
 
     Args:

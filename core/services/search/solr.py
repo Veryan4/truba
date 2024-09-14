@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 from services.user import user, personalization
 from services import mongo
 from shared import setup
-from shared.types import story_types, search_types
+import project_types
 
 DAYS_OF_STORIES_IN_SOLR = 10
 STORIES_PER_SOURCE = 90
@@ -42,7 +42,7 @@ def get_operator(operator: int) -> str:
     return " OR "
 
 
-def generic_search(search_query: search_types.SearchQuery):
+def generic_search(search_query: project_types.SearchQuery):
   """Translates the SearchQuery to a query Solr will understand,
   executes said query and returns the results.
 
@@ -168,9 +168,9 @@ def refill_stories(source_id: str) -> dict:
         "source.id": source_id
     }
     source_stories = mongo.get("Story", mongo_filter, limit=STORIES_PER_SOURCE)
-    stories = [story_types.Story(**story) for story in source_stories]
+    stories = [project_types.Story(**story) for story in source_stories]
     stories_in_solr = [
-        story_types.convert_story_to_story_in_solr(s) for s in stories
+        convert_story_to_story_in_solr(s) for s in stories
     ]
     stories_to_push = [x.dict() for x in stories_in_solr if x is not None]
     result = get_connection().add(stories_to_push)
@@ -229,3 +229,31 @@ def reset() -> dict:
   requests.post(setup.get_base_ml_service_url() + "/model-store/reset",
                 json=json_to_push)
   return refill()
+
+def convert_story_to_story_in_solr(story: project_types.Story) -> project_types.StoryInSolr:
+  author_name = None
+  author_id = None
+  if story.author:
+    author_name = story.author.name
+    author_id = str(story.author.author_id)
+  source_name = None
+  source_id = None
+  if story.source:
+    source_name = story.source.name
+    source_id = str(story.source.source_id)
+  return project_types.StoryInSolr(id=story.id,
+                     StoryId=str(story.story_id),
+                     Title=story.title,
+                     Body=story.body,
+                     Summary=story.summary,
+                     PublishedAt=str(story.published_at),
+                     Author=author_name,
+                     AuthorId=author_id,
+                     Source=source_name,
+                     SourceId=source_id,
+                     StoryUrl=story.url,
+                     Images=story.images,
+                     Language=story.language,
+                     Keywords=[k.keyword.text for k in story.keywords],
+                     Entities=[e.entity.text for e in story.entities],
+                     EntityLinks=[e.entity.links for e in story.entities])

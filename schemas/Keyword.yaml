@@ -1,0 +1,22 @@
+components:
+  schemas:
+    Keyword:
+      properties:
+        _id:
+          type: any
+        text:
+          type: string
+        language:
+          type: string
+    KeywordInStory:
+      properties:
+        keyword:
+          $ref: '#/components/schemas/Keyword'
+        frequency:
+          type: integer
+    KeywordInStoryDB:
+      properties:
+        text:
+          type: string
+        frequency:
+          type: integer

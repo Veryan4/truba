@@ -3,7 +3,8 @@ from datetime import datetime
 from freezegun import freeze_time
 
 from services.story import story
-from shared.types import story_types, author_types, data_set_types
+from tests import mocks
+import project_types
 from tests.services.search.test_features import mock_ranking_features
 
 
@@ -14,14 +15,14 @@ def test_insert_stories(mocker: MockerFixture):
   spy_story = mocker.patch('services.story.story.add_or_update_stories')
   spy_delete_story = mocker.patch('services.story.story.remove_old_stories')
 
-  story.insert_stories((story_types.mock_story(), ))
+  story.insert_stories((mocks.mock_story(), ))
 
-  spy_author.assert_called_once_with((author_types.mock_author(), ))
+  spy_author.assert_called_once_with((mocks.mock_author(), ))
   spy_entity.assert_called_once_with(
-      tuple(ent.entity for ent in story_types.mock_story().entities))
+      tuple(ent.entity for ent in mocks.mock_story().entities))
   spy_keyword.assert_called_once_with(
-      tuple(word.keyword for word in story_types.mock_story().keywords))
-  spy_story.assert_called_with((story_types.mock_story(), ))
+      tuple(word.keyword for word in mocks.mock_story().keywords))
+  spy_story.assert_called_with((mocks.mock_story(), ))
   spy_delete_story.assert_called_once()
 
 
@@ -41,12 +42,12 @@ def test_add_or_update_stories(mocker: MockerFixture):
   spy = mocker.patch('services.story.story.mongo.add_or_update',
                      return_value=True)
   spy_converter = mocker.patch(
-      'services.story.story.story_types.convert_story_to_story_in_db',
+      'services.story.story.convert_story_to_story_in_db',
       return_value=mock_story_in_db())
 
-  assert story.add_or_update_stories((story_types.mock_story(), )) == True
+  assert story.add_or_update_stories((mocks.mock_story(), )) == True
 
-  spy_converter.assert_called_with(story_types.mock_story())
+  spy_converter.assert_called_with(mocks.mock_story())
   spy.assert_called_with((mock_story_in_db().dict(), ), "Story")
 
 
@@ -54,13 +55,13 @@ def test_get_by_id(mocker: MockerFixture):
   spy = mocker.patch('services.story.story.mongo.get',
                      return_value=[mock_story_in_db().dict()])
   spy_builder = mocker.patch('services.story.story.build_stories_from_db',
-                             return_value=[story_types.mock_story()])
+                             return_value=[mocks.mock_story()])
 
   assert story.get_by_id(str(
-      story_types.mock_story().story_id, )) == story_types.mock_story()
+      mocks.mock_story().story_id, )) == mocks.mock_story()
 
   spy.assert_called_once_with("Story",
-                              {"story_id": story_types.mock_story().story_id})
+                              {"story_id": mocks.mock_story().story_id})
   spy_builder.assert_called_once_with([mock_story_in_db().dict()])
 
 
@@ -70,11 +71,11 @@ def test_update_feedback_counts(mocker: MockerFixture):
   spy_set = mocker.patch('services.story.story.mongo.add_or_update',
                          return_value=True)
 
-  assert story.update_feedback_counts(str(story_types.mock_story().story_id),
+  assert story.update_feedback_counts(str(mocks.mock_story().story_id),
                                       'shared') == True
 
   spy_get.assert_called_once_with(
-      "Story", {"story_id": story_types.mock_story().story_id}, limit=1)
+      "Story", {"story_id": mocks.mock_story().story_id}, limit=1)
   current_story = mock_story_in_db().dict()
   current_story["shared_count"] += 1
   spy_set.assert_called_once_with(current_story, "Story")
@@ -85,10 +86,10 @@ def test_get_public_stories(mocker: MockerFixture):
   spy = mocker.patch('services.story.story.mongo.get_grouped',
                      return_value=[mock_story_in_db().dict()])
   spy_builder = mocker.patch('services.story.story.build_stories_from_db',
-                             return_value=[story_types.mock_story()])
+                             return_value=[mocks.mock_story()])
 
   assert story.get_public_stories("en") == (
-      story_types.convert_story_to_short_story(story_types.mock_story()), )
+      story.convert_story_to_short_story(mocks.mock_story()), )
 
   spy.assert_called_once_with(
       "Story", {
@@ -102,33 +103,33 @@ def test_get_public_stories(mocker: MockerFixture):
 
 
 class Testget_recommended_stories:
-  user_id = str(story_types.mock_story().story_id)
+  user_id = str(mocks.mock_story().story_id)
 
   def test_hasRecommendedStories(self, requests_mock, mocker: MockerFixture):
     spy_read = mocker.patch('services.story.story.read_story.get_story_ids',
                             return_value=[])
     mocker.patch('services.story.story.UUID',
-                 return_value=story_types.mock_story().story_id)
+                 return_value=mocks.mock_story().story_id)
     mocker.patch('services.story.story.setup.get_base_ml_service_url',
                  return_value="http://ml:8080")
     requests_mock.get("http://ml:8080/recommendations/" + self.user_id + "/en",
-                      json=[story_types.mock_story().json()])
+                      json=[mocks.mock_story().json()])
 
     spy_get = mocker.patch('services.story.story.mongo.get',
                            return_value=[mock_story_in_db().dict()])
     spy_builder = mocker.patch('services.story.story.build_stories_from_db',
-                               return_value=[story_types.mock_story()])
+                               return_value=[mocks.mock_story()])
 
     assert story.get_recommended_stories(
-        self.user_id, "en") == (story_types.convert_story_to_short_story(
-            story_types.mock_story()), )
+        self.user_id, "en") == (story.convert_story_to_short_story(
+            mocks.mock_story()), )
 
     spy_read.assert_called_once_with(self.user_id)
 
     spy_get.assert_called_once_with("Story", {
         "language": "en",
         "story_id": {
-            "$in": (story_types.mock_story().story_id, )
+            "$in": (mocks.mock_story().story_id, )
         }
     },
                                     limit=12)
@@ -139,7 +140,7 @@ class Testget_recommended_stories:
     spy_read = mocker.patch('services.story.story.read_story.get_story_ids',
                             return_value=[])
     mocker.patch('services.story.story.UUID',
-                 return_value=story_types.mock_story().story_id)
+                 return_value=mocks.mock_story().story_id)
     mocker.patch('services.story.story.setup.get_base_ml_service_url',
                  return_value="http://ml:8080")
     requests_mock.get("http://ml:8080/recommendations/" + self.user_id + "/en",
@@ -148,11 +149,11 @@ class Testget_recommended_stories:
     spy_get_grouped = mocker.patch('services.story.story.mongo.get_grouped',
                                    return_value=[mock_story_in_db().dict()])
     spy_builder = mocker.patch('services.story.story.build_stories_from_db',
-                               return_value=[story_types.mock_story()])
+                               return_value=[mocks.mock_story()])
 
     assert story.get_recommended_stories(
-        self.user_id, "en") == (story_types.convert_story_to_short_story(
-            story_types.mock_story()), )
+        self.user_id, "en") == (story.convert_story_to_short_story(
+            mocks.mock_story()), )
 
     spy_read.assert_called_once_with(self.user_id)
     spy_get_grouped.assert_called_once_with(
@@ -170,16 +171,16 @@ class Testget_recommended_stories:
 @freeze_time("2021-01-04")
 def test_get_single_story(mocker: MockerFixture):
   mocker.patch('services.story.story.UUID',
-               return_value=story_types.mock_story().story_id)
+               return_value=mocks.mock_story().story_id)
   spy_get_grouped = mocker.patch('services.story.story.mongo.get_grouped',
                                  return_value=[mock_story_in_db().dict()])
   spy_builder = mocker.patch('services.story.story.build_stories_from_db',
-                             return_value=[story_types.mock_story()])
+                             return_value=[mocks.mock_story()])
 
   assert story.get_single_story(
-      [str(story_types.mock_story().story_id)],
-      "en") == story_types.convert_story_to_short_story(
-          story_types.mock_story())
+      [str(mocks.mock_story().story_id)],
+      "en") == story.convert_story_to_short_story(
+          mocks.mock_story())
 
   spy_builder.assert_called_once_with([mock_story_in_db().dict()])
   spy_get_grouped.assert_called_once_with(
@@ -190,7 +191,7 @@ def test_get_single_story(mocker: MockerFixture):
               '$lt': datetime(2021, 1, 4, 0, 0, 0, 0)
           },
           "story_id": {
-              "$nin": (story_types.mock_story().story_id, )
+              "$nin": (mocks.mock_story().story_id, )
           }
       }, "source_id")
 
@@ -200,7 +201,7 @@ def test_update_tf_index(mocker: MockerFixture):
   spy_get = mocker.patch('services.story.story.mongo.get',
                          return_value=[mock_story_in_db().dict()])
   spy_builder = mocker.patch('services.story.story.build_stories_from_db',
-                             return_value=[story_types.mock_story()])
+                             return_value=[mocks.mock_story()])
   spy_ranking_features = mocker.patch(
       'services.story.story.features.extract_ranking_features',
       return_value=mock_ranking_features())
@@ -208,7 +209,7 @@ def test_update_tf_index(mocker: MockerFixture):
   assert story.update_tf_index("en") == [mock_ranking_data()]
 
   spy_builder.assert_called_once_with([mock_story_in_db().dict()])
-  spy_ranking_features.assert_called_once_with(story_types.mock_story())
+  spy_ranking_features.assert_called_once_with(mocks.mock_story())
   spy_get.assert_called_once_with(
       "Story", {
           "language": "en",
@@ -219,8 +220,8 @@ def test_update_tf_index(mocker: MockerFixture):
       })
 
 
-def mock_ranking_data() -> data_set_types.RankingData:
-    mock_story = story_types.mock_story()
+def mock_ranking_data() -> project_types.RankingData:
+    mock_story = mocks.mock_story()
     return {
         "story_id": mock_story.story_id,
         "story_title": mock_story.title,
@@ -239,9 +240,9 @@ def mock_ranking_data() -> data_set_types.RankingData:
     }
 
 
-def mock_story_in_db() -> story_types.StoryInDb:
-  mocked_story = story_types.mock_story()
-  return story_types.StoryInDb(
+def mock_story_in_db() -> project_types.StoryInDb:
+  mocked_story = mocks.mock_story()
+  return project_types.StoryInDb(
       id="",
       story_id=mocked_story.story_id,
       title=mocked_story.title,

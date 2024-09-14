@@ -11,7 +11,7 @@ from pydantic import BaseModel, Field
 
 from services.solr import solr_model
 from services import mongo
-from shared.types import search_types
+import project_types
 from shared import bson_id
 
 current_module = 'rank_net'
@@ -39,7 +39,7 @@ def get_stories_from_solr(modelId):
     startDate: str = day
     endDate: str = day - 1
 
-    ltrParams = search_types.LtrParams(
+    ltrParams = project_types.LtrParams(
         model_name="defaultmodel",
         request_handler="query",
         params=[{
@@ -47,7 +47,7 @@ def get_stories_from_solr(modelId):
         }],
         fields=["id", "score", "StoryId", "[features]"])
 
-    searchQuery = search_types.SearchQuery(terms="*",
+    searchQuery = project_types.SearchQuery(terms="*",
                                            user_id=modelId,
                                            count=storiesPerDay,
                                            start_date=startDate,
@@ -279,7 +279,7 @@ def rank_net(modelId):
     }
 
     if oldrank_net_model:
-      oldrank_net_model.model_config = dict_config
+      oldrank_net_model.model_configuration = dict_config
       oldrank_net_model.RankNetConfig = solr_model
       oldrank_net_model.score = score
       oldrank_net_model.accuracy = acc
@@ -287,7 +287,7 @@ def rank_net(modelId):
       return oldrank_net_model
     else:
       rankNetModel = solr_model.SolrModel(model_id=modelId,
-                                          model_config=dict_config,
+                                          model_configuration=dict_config,
                                           RankNetConfig=solr_model,
                                           score=score,
                                           accuracy=acc)

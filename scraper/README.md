@@ -1,6 +1,6 @@
-## Core Api
+## Scraper
 
-This service manages all back-end communication. There is a back-end facing (Controller.py), front-end facing (UiContrller.py), and async (Worker.py) copy of the same image.
+This job runes on a schedule and scrapes the data of the news sources and feeds it to Core API for it to be fed to the DB.
 
 ## List of scraped sources
 
@@ -18,6 +18,16 @@ yes | cp -r -f ../shared .
 You then need to install the dependencies
 ```
 pip install -r requirements.txt
+```
+You then need to generate the shared models
+```
+datamodel-codegen  --input ../schemas/AllTypes.yaml --aliases ../schemas/aliases.json --output project_types.py
+```
+
+Make sure to install the spacy language modules
+```
+python -m spacy download en_core_web_sm \ 
+    && python -m spacy download fr_core_news_sm
 ```
 
 After adding the required .env values you can then run `python Scraper.py`

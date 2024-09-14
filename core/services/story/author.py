@@ -2,12 +2,12 @@ from uuid import UUID
 from typing import Tuple, Optional
 
 from services import mongo
-from shared.types import author_types
+import project_types
 
 DB_COLLECTION_NAME = "Author"
 
 
-def add_new_authors(authors: Tuple[author_types.Author, ...]):
+def add_new_authors(authors: Tuple[project_types.Author, ...]):
   """Stores new Authors to the Mongo database.
 
     Args:
@@ -35,7 +35,7 @@ def add_new_authors(authors: Tuple[author_types.Author, ...]):
   return None
 
 
-def get_by_name(author_name: str) -> Optional[author_types.Author]:
+def get_by_name(author_name: str) -> Optional[project_types.Author]:
   """Retrieves an Author fom the database given its name.
 
     Args:
@@ -49,11 +49,11 @@ def get_by_name(author_name: str) -> Optional[author_types.Author]:
   mongo_filter = {"name": author_name}
   authors = mongo.get(DB_COLLECTION_NAME, mongo_filter, limit=1)
   if authors:
-    return author_types.Author(**authors[0])
+    return project_types.Author(**authors[0])
   return None
 
 
-def get_by_id(author_id: str) -> Optional[author_types.Author]:
+def get_by_id(author_id: str) -> Optional[project_types.Author]:
   """Retrieves an Author from the database given its id.
 
     Args:
@@ -67,11 +67,11 @@ def get_by_id(author_id: str) -> Optional[author_types.Author]:
   mongo_filter = {"author_id": UUID(author_id)}
   authors = mongo.get(DB_COLLECTION_NAME, mongo_filter, limit=1)
   if authors:
-    return author_types.Author(**authors[0])
+    return project_types.Author(**authors[0])
   return None
 
 
-def get_by_ids(author_ids: Tuple[UUID, ...]) -> Tuple[author_types.Author]:
+def get_by_ids(author_ids: Tuple[UUID, ...]) -> Tuple[project_types.Author]:
   """Retrieves a list of Authors from the database given their ids.
 
     Args:
@@ -84,7 +84,7 @@ def get_by_ids(author_ids: Tuple[UUID, ...]) -> Tuple[author_types.Author]:
 
   mongo_filter = {"author_id": {"$in": list(author_ids)}}
   authors = mongo.get(DB_COLLECTION_NAME, mongo_filter, limit=len(author_ids))
-  return tuple(author_types.Author(**author) for author in authors)
+  return tuple(project_types.Author(**author) for author in authors)
 
 
 def update_reputation(author_id: UUID, reward: float):

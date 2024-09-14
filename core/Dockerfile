@@ -9,8 +9,10 @@ ENV PATH="/opt/venv/bin:$PATH"
 
 COPY ./core/ .
 COPY ./shared/ ./shared/
+COPY ./schemas/ ./schemas/
 
 RUN pip install -r requirements.txt
+RUN datamodel-codegen  --input ./schemas/AllTypes.yaml --aliases ./schemas/aliases.json --output project_types.py
 
 RUN pip install -r requirements-for-tests.txt
 RUN pytest -vv tests

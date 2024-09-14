@@ -3,3 +3,4 @@
 /.idea
 test.py
 shared/
+project_types.py

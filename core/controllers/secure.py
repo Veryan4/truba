@@ -6,7 +6,7 @@ from services.search import search
 from services.story import story
 from services.user import user, personalization, auth, feedback, favorite
 from services import redis
-from shared.types import story_types, search_types
+import project_types
 
 router = APIRouter()
 
@@ -71,14 +71,14 @@ async def get_personalization_items(language: str,
 
 
 @router.get("/recommended-news/{language}",
-            response_model=Tuple[story_types.ShortStory, ...])
+            response_model=Tuple[project_types.ShortStory, ...])
 def get_recommended_stories(language: str,
                             user_id: str = Depends(auth.get_current_user_id)):
   return story.get_recommended_stories(user_id, language)
 
 
 @router.post("/single-article/{language}",
-             response_model=story_types.ShortStory)
+             response_model=project_types.ShortStory)
 def get_single_story(language: str,
                      not_id_list: List[str],
                      user_id: str = Depends(auth.get_current_user_id)):
@@ -125,16 +125,16 @@ def update_from_user_entity(fave: favorite.Favorite,
   return {"result": result}
 
 
-@router.post("/search", response_model=List[story_types.ShortStory])
-def get_stories(search_query: search_types.SearchQuery,
+@router.post("/search", response_model=List[project_types.ShortStory])
+def get_stories(search_query: project_types.SearchQuery,
                 user_id: str = Depends(auth.get_current_user_id)):
   search_query.user_id = user_id
   return search.simple_search(search_query)
 
 
 @router.post("/search/personalized",
-             response_model=List[story_types.ShortStory])
-def get_personalized_stories(search_query: search_types.SearchQuery,
+             response_model=List[project_types.ShortStory])
+def get_personalized_stories(search_query: project_types.SearchQuery,
                              user_id: str = Depends(auth.get_current_user_id)):
   search_query.user_id = user_id
   return search.solr_search_with_personalization(search_query)

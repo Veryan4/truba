@@ -8,7 +8,7 @@ from urllib.parse import quote
 from services import formatter
 from services.source_story_parser import SourceStoryParser, log_error
 from services import rss_item
-from shared.types import source_types, story_types
+import project_types
 from shared import setup, tracing
 
 current_module = 'Source Scraper'
@@ -16,13 +16,13 @@ current_module = 'Source Scraper'
 
 class SourceScraper:
 
-  def __init__(self, source: source_types.Source):
+  def __init__(self, source: project_types.Source):
     self.source_story_parser = SourceStoryParser
     self.rss_feed = self.get_rss_feed(source.rss_feed)
     if self.rss_feed:
       self.stories = self.scrape_stories(source)
 
-  def scrape_stories(self, source: source_types.Source):
+  def scrape_stories(self, source: project_types.Source):
     scraped_urls = self.get_scraped_urls(source.name)
     rss_items = self.extract_rss_items()
     return self.scrape_source(source, rss_items, scraped_urls)
@@ -79,9 +79,9 @@ class SourceScraper:
     page = requests.get(url, headers={'User-Agent': 'My User Agent 1.0'})
     return BeautifulSoup(page.content, 'html.parser')
 
-  def scrape_source(self, source: source_types.Source,
+  def scrape_source(self, source: project_types.Source,
                      rss_items: List[rss_item.RssItem],
-                     scraped_urls: List[str]) -> List[story_types.Story]:
+                     scraped_urls: List[str]) -> List[project_types.Story]:
     stories = []
     current_date = datetime.now()
     for article_item in rss_items:

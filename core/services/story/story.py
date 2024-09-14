@@ -7,8 +7,8 @@ from services.search import features
 from services.story import author, source, entity, keyword
 from services.user import read_story
 from services import mongo
-from shared.types import story_types, data_set_types
 from shared import setup
+import project_types
 
 DB_COLLECTION_NAME = "Story"
 STORY_DAYS_TO_EXPIRY = 90
@@ -16,7 +16,7 @@ PREVIOUS_DAYS_OF_NEWS = 1
 RANKING_DATA_FAVORITE_COUNT = 50
 
 
-def insert_stories(stories: Tuple[story_types.Story, ...]):
+def insert_stories(stories: Tuple[project_types.Story, ...]):
   """Adds new stories to the database as well as new authors if
   they are found within the stories.
 
@@ -60,7 +60,7 @@ def remove_old_stories():
 
 
 def build_stories_from_db(
-    stories_in_db: Tuple[Dict, ...]) -> Tuple[story_types.Story, ...]:
+    stories_in_db: Tuple[Dict, ...]) -> Tuple[project_types.Story, ...]:
   """Assemble a Story from it's component parts in DB
 
     Args:
@@ -128,11 +128,11 @@ def build_stories_from_db(
         })
         keywords_for_story.append(keyword_in_story_db)
     story_dict["keywords"] = keywords_for_story
-    stories.append(story_types.Story(**story_dict))
+    stories.append(project_types.Story(**story_dict))
   return tuple(stories)
 
 
-def add_or_update_stories(stories: Tuple[story_types.Story, ...]):
+def add_or_update_stories(stories: Tuple[project_types.Story, ...]):
   """Adds stories to the database with no checks. Use insert_stories() instead.
 
     Args:
@@ -144,11 +144,11 @@ def add_or_update_stories(stories: Tuple[story_types.Story, ...]):
     """
 
   stories_to_push = tuple(
-      story_types.convert_story_to_story_in_db(s).dict() for s in stories)
+      convert_story_to_story_in_db(s).dict() for s in stories)
   return mongo.add_or_update(stories_to_push, DB_COLLECTION_NAME)
 
 
-def get_by_id(story_id: str) -> Optional[story_types.Story]:
+def get_by_id(story_id: str) -> Optional[project_types.Story]:
   """Retrieves the story from the database by id.
 
     Args:
@@ -192,7 +192,7 @@ def update_feedback_counts(story_id: str, feedback_type: str):
 
 
 def get_public_stories(
-    language: str = "en") -> Tuple[story_types.ShortStory, ...]:
+    language: str = "en") -> Tuple[project_types.ShortStory, ...]:
   """Retrieves stories that are not using personalization, and that
   are to be viewed by anyone.
 
@@ -218,13 +218,13 @@ def get_public_stories(
   stories = mongo.get_grouped(DB_COLLECTION_NAME, mongo_filter, "source_id")
   formatted_stories = build_stories_from_db(stories)
   return tuple(
-      story_types.convert_story_to_short_story(story)
+      convert_story_to_short_story(story)
       for story in formatted_stories)
 
 
 def get_recommended_stories(user_id: str,
                             language: str = "en"
-                            ) -> Tuple[story_types.ShortStory, ...]:
+                            ) -> Tuple[project_types.ShortStory, ...]:
   """Retrieves stories that are recommended for a user.
 
     Args:
@@ -255,7 +255,7 @@ def get_recommended_stories(user_id: str,
     stories = mongo.get(DB_COLLECTION_NAME, mongo_filter, limit=12)
     formatted_stories = build_stories_from_db(stories)
     return tuple(
-        story_types.convert_story_to_short_story(s) for s in formatted_stories)
+        convert_story_to_short_story(s) for s in formatted_stories)
   end = datetime.utcnow()
   delta = timedelta(days=PREVIOUS_DAYS_OF_NEWS)
   start = end - delta
@@ -264,12 +264,12 @@ def get_recommended_stories(user_id: str,
   stories = mongo.get_grouped(DB_COLLECTION_NAME, mongo_filter, "source_id")
   formatted_stories = build_stories_from_db(stories)
   return tuple(
-      story_types.convert_story_to_short_story(s) for s in formatted_stories)
+      convert_story_to_short_story(s) for s in formatted_stories)
 
 
 # Need to handle if personalization request
 def get_single_story(not_id_list: List[str],
-                     language: str) -> story_types.ShortStory:
+                     language: str) -> project_types.ShortStory:
   """Retrieves a single news story. This is used to return a story to
   the front-end after one has disappeared after having been rated.
 
@@ -298,11 +298,11 @@ def get_single_story(not_id_list: List[str],
   stories = mongo.get_grouped(DB_COLLECTION_NAME, mongo_filter, "source_id")
   formatted_stories = build_stories_from_db(stories)
   if formatted_stories:
-    return story_types.convert_story_to_short_story(formatted_stories[0])
+    return convert_story_to_short_story(formatted_stories[0])
   return None
 
 
-def update_tf_index(language: str) -> List[data_set_types.RankingData]:
+def update_tf_index(language: str) -> List[project_types.RankingData]:
   """Extracts the features from news stories of the previous n days,
   which are then packaged as Ranking Data for the updating of the tensor flow
   index used to return recommended stories. This needs to be done after every
@@ -336,3 +336,73 @@ def update_tf_index(language: str) -> List[data_set_types.RankingData]:
       data_entry.update(story_features.dict())
       ranking_data.append(data_entry)
   return ranking_data
+
+
+def convert_story_to_story_in_db(story: project_types.Story) -> project_types.StoryInDb:
+  author_id = None
+  if story.author:
+    author_id = story.author.author_id
+  source_id = None
+  if story.source:
+    source_id = story.source.source_id
+  keywords = []
+  for keyword in story.keywords:
+    keyword_dict = keyword.dict()
+    keyword_dict.update({'text': keyword.keyword.text})
+    keyword_dict.pop('keyword', None)
+    keywords.append(keyword_dict)
+  entities = []
+  for entity in story.entities:
+    entity_dict = entity.dict()
+    entity_dict.update({'links': entity.entity.links})
+    entity_dict.pop('entity', None)
+    entities.append(entity_dict)
+  return project_types.StoryInDb(id=story.id,
+                   story_id=story.story_id,
+                   title=story.title,
+                   body=story.body,
+                   summary=story.summary,
+                   published_at=story.published_at,
+                   author_id=author_id,
+                   source_id=source_id,
+                   url=story.url,
+                   images=story.images,
+                   language=story.language,
+                   keywords=keywords,
+                   entities=entities,
+                   read_count=story.read_count,
+                   shared_count=story.shared_count,
+                   angry_count=story.angry_count,
+                   cry_count=story.cry_count,
+                   neutral_count=story.neutral_count,
+                   smile_count=story.smile_count,
+                   happy_count=story.happy_count)
+
+def convert_story_to_short_story(story: project_types.Story) -> project_types.ShortStory:
+  author_name = None
+  author_id = None
+  if story.author:
+    author_name = story.author.name
+    author_id = str(story.author.author_id)
+  source_name = None
+  source_id = None
+  if story.source:
+    source_name = story.source.name
+    source_id = str(story.source.source_id)
+  images = None
+  if story.images:
+    images = story.images[0]
+  return project_types.ShortStory(story_id=str(story.story_id),
+                    title=story.title,
+                    summary=story.summary,
+                    published_at=story.published_at,
+                    author=author_name,
+                    author_id=author_id,
+                    source=source_name,
+                    source_id=source_id,
+                    keywords=[k.keyword.text for k in story.keywords],
+                    entities=[e.entity.text for e in story.entities],
+                    entity_links=[e.entity.links for e in story.entities],
+                    url=story.url,
+                    image=images,
+                    language=story.language)

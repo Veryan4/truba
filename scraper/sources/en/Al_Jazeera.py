@@ -1,11 +1,11 @@
 from services.source_scraper import SourceScraper
 from services.source_story_parser import SourceStoryParser, log_error
-from shared.types import source_types
+import project_types
 
 
 class Al_Jazeera(SourceScraper):
 
-  def __init__(self, source: source_types.Source):
+  def __init__(self, source: project_types.Source):
     self.source_story_parser = Al_JazeeraParser
     self.rss_feed = self.get_rss_feed(source.rss_feed)
     if self.rss_feed:

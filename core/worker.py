@@ -4,7 +4,7 @@ from rq import Worker, Queue, Connection
 import os
 
 from shared import *
-from shared.types import *
+from project_types import *
 from services.search import *
 from services.story import *
 from services.user import *

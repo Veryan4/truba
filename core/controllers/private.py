@@ -5,13 +5,13 @@ from services.search import solr
 from services.story import story, source, author, scraped_url
 from services.user import user, feedback
 from services import redis
-from shared.types import source_types, author_types, story_types, scraped_url_types, data_set_types, search_types
+import project_types
 
 router = APIRouter()
 
 
 @router.post('/stories')
-def add_stories(stories: Tuple[story_types.Story, ...]):
+def add_stories(stories: Tuple[project_types.Story, ...]):
   redis.worker_queue.enqueue(story.insert_stories, stories)
   return {'addStoriesJob': "Job Queued"}
 
@@ -24,13 +24,13 @@ def get_scraped_urls(source_name: str):
   return urls
 
 @router.post('/scraped')
-def add_scraped_urls(scrapped_urls: Tuple[scraped_url_types.ScrapedUrl, ...]):
+def add_scraped_urls(scrapped_urls: Tuple[project_types.ScrapedUrl, ...]):
   redis.worker_queue.enqueue(scraped_url.add_scraped_urls, scrapped_urls)
   return {'add_scraped_urls': "Job Queued"}
 
 
 @router.get('/sources/{language}',
-            response_model=Tuple[source_types.Source, ...])
+            response_model=Tuple[project_types.Source, ...])
 def get_sources(language: str):
   sources = source.get_all_sources(language)
   if not sources:
@@ -44,7 +44,7 @@ def reset_sources():
   return {'result': 'Sources Reset'}
 
 
-@router.get('/authors/name', response_model=author_types.Author)
+@router.get('/authors/name', response_model=project_types.Author)
 def get_author_by_name(author_name: str):
   current_author = author.get_by_name(author_name)
   if not current_author:
@@ -53,7 +53,7 @@ def get_author_by_name(author_name: str):
 
 
 @router.get('/training/{user_id}',
-            response_model=List[data_set_types.RankingData])
+            response_model=List[project_types.RankingData])
 def get_training_feedbacks(user_id: str):
   result = feedback.get_tf_training_data(user_id)
   if not result:
@@ -81,7 +81,7 @@ def get_user_subscriptions(language: str):
 
 
 @router.get('/news/{language}',
-            response_model=Tuple[story_types.ShortStory, ...])
+            response_model=Tuple[project_types.ShortStory, ...])
 def get_public_stories(language: str):
   return story.get_public_stories(language)
 
@@ -92,7 +92,7 @@ def update_ranking_index(language: str):
 
 
 @router.get('/solr/features')
-def get_solr_features(search_query: search_types.SearchQuery):
+def get_solr_features(search_query: project_types.SearchQuery):
   return solr.generic_search(search_query)
 
 

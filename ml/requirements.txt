@@ -14,3 +14,4 @@ pandas
 pathlib
 contextvars
 fastparquet
+datamodel-code-generator

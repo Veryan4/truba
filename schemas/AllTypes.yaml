@@ -1,0 +1,46 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: Swagger Petstore
+  license:
+    name: MIT
+components:
+  schemas:
+    Author:
+      $ref: "./Author.yaml#/components/schemas/Author"
+    Entity:
+      $ref: "./Entity.yaml#/components/schemas/Entity"
+    EntityInStory:
+      $ref: "./Entity.yaml#/components/schemas/EntityInStory"
+    EntityInStoryDB:
+      $ref: "./Entity.yaml#/components/schemas/EntityInStoryDB"
+    Keyword:
+      $ref: "./Keyword.yaml#/components/schemas/Keyword"
+    KeywordInStory:
+      $ref: "./Keyword.yaml#/components/schemas/KeywordInStory"
+    KeywordInStoryDB:
+      $ref: "./Keyword.yaml#/components/schemas/KeywordInStoryDB"
+    Source:
+      $ref: "./Source.yaml#/components/schemas/Source"
+    RankingData:
+      $ref: "./DataSet.yaml#/components/schemas/RankingData"
+    ScrapedUrl:
+      $ref: "./ScrapedUrl.yaml#/components/schemas/ScrapedUrl"
+    RankingFeatures:
+      $ref: "./Feature.yaml#/components/schemas/RankingFeatures"
+    SolrFeatures:
+      $ref: "./Feature.yaml#/components/schemas/SolrFeatures"
+    LtrParams:
+      $ref: "./Search.yaml#/components/schemas/LtrParams"
+    SearchQuery:
+      $ref: "./Search.yaml#/components/schemas/SearchQuery"
+    StoryWithFeatures:
+      $ref: "./Search.yaml#/components/schemas/StoryWithFeatures"
+    Story:
+      $ref: "./Story.yaml#/components/schemas/Story"
+    StoryInDb:
+      $ref: "./Story.yaml#/components/schemas/StoryInDb"
+    ShortStory:
+      $ref: "./Story.yaml#/components/schemas/ShortStory"
+    StoryInSolr:
+      $ref: "./Story.yaml#/components/schemas/StoryInSolr"

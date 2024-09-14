@@ -11,7 +11,7 @@ import spacy
 from services.source_story_parser import SourceStoryParser
 from services import rss_item
 from shared import setup, tracing
-from shared.types import story_types, source_types, entity_types, author_types, keyword_types
+import project_types
 
 current_module = 'Formatter'
 
@@ -24,7 +24,7 @@ else:
   nlp = spacy.load('en_core_web_sm')
 
 
-def get_author_by_name(author_name: str) -> Optional[author_types.Author]:
+def get_author_by_name(author_name: str) -> Optional[project_types.Author]:
   """Searches the Core service to find the author if they have been
   previously saved.
 
@@ -42,14 +42,14 @@ def get_author_by_name(author_name: str) -> Optional[author_types.Author]:
   if response.status_code == 404:
     return None
   author_dict = response.json()
-  author = author_types.Author(**author_dict)
+  author = project_types.Author(**author_dict)
   return author
 
 
 def get_entities_and_keywords(
     text: str
-) -> Tuple[List[entity_types.EntityInStory],
-           List[keyword_types.KeywordInStory]]:
+) -> Tuple[List[project_types.EntityInStory],
+           List[project_types.KeywordInStory]]:
   """Extacts the Entities and the Keywords of any given text.
 
     Args:
@@ -77,10 +77,10 @@ def get_entities_and_keywords(
         if ent.label_ and ent.label_ not in ignore_labels:
           lower_case_entity_texts.append(text)
           links = text + ent.label_
-          entity = entity_types.Entity(text=ent.text,
+          entity = project_types.Entity(text=ent.text,
                                        type=ent.label_,
                                        links=links)
-          entity_in_story = entity_types.EntityInStory(
+          entity_in_story = project_types.EntityInStory(
               entity=entity, frequency=word_freq[text])
           entities.append(entity_in_story)
   lemmas = tuple(token.lemma_.lower() for token in doc
@@ -89,18 +89,18 @@ def get_entities_and_keywords(
   lemma_freq = Counter(lemmas)
   unique_lemmas = set(lemmas)
   for lemma in unique_lemmas:
-    keyword = keyword_types.Keyword(text=lemma,
+    keyword = project_types.Keyword(text=lemma,
                                     language=os.getenv('SCRAPER_LANGUAGE'))
-    keyword_in_story = keyword_types.KeywordInStory(
+    keyword_in_story = project_types.KeywordInStory(
         keyword=keyword, frequency=lemma_freq[lemma])
     keywords.append(keyword_in_story)
   return entities, keywords
 
 
 def format_story(
-    source: source_types.Source, article_url: str,
+    source: project_types.Source, article_url: str,
     parsed_story: SourceStoryParser,
-    article_item: rss_item.RssItem) -> Optional[story_types.Story]:
+    article_item: rss_item.RssItem) -> Optional[project_types.Story]:
   try:
     image_url = parsed_story.story_image_url
     title = parsed_story.story_title
@@ -121,9 +121,9 @@ def format_story(
     if not author:
       if author_name:
         author_name = author_name.strip()
-        author = author_types.Author(name=author_name, affiliation=[source])
+        author = project_types.Author(name=author_name, affiliation=[source])
       else:
-        author = author_types.Author(name=source.name, affiliation=[source])
+        author = project_types.Author(name=source.name, affiliation=[source])
 
     # extract Entities and Keywords from Title and Body
     entities = []
@@ -169,7 +169,7 @@ def format_story(
       except Exception:
         publication_date = datetime.now()
 
-    return story_types.Story(title=title,
+    return project_types.Story(title=title,
                              body=body,
                              summary=description,
                              source=source,

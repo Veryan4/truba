@@ -4,12 +4,12 @@ import os
 from typing import Tuple, Optional
 
 from services import mongo
-from shared.types import source_types
+import project_types
 
 DB_COLLECTION_NAME = "Source"
 
 
-def add_new_sources(sources: Tuple[source_types.Source, ...]):
+def add_new_sources(sources: Tuple[project_types.Source, ...]):
   """Stores new sources to the Mongo database.
 
     Args:
@@ -36,7 +36,7 @@ def add_new_sources(sources: Tuple[source_types.Source, ...]):
   return None
 
 
-def get_by_name(source_name: str) -> Optional[source_types.Source]:
+def get_by_name(source_name: str) -> Optional[project_types.Source]:
   """Retrieves the source from the database by name.
 
     Args:
@@ -50,11 +50,11 @@ def get_by_name(source_name: str) -> Optional[source_types.Source]:
   mongo_filter = {"name": source_name}
   sources = mongo.get(DB_COLLECTION_NAME, mongo_filter, limit=1)
   if sources:
-    return source_types.Source(**sources[0])
+    return project_types.Source(**sources[0])
   return None
 
 
-def get_by_id(source_id: str) -> Optional[source_types.Source]:
+def get_by_id(source_id: str) -> Optional[project_types.Source]:
   """Retrieves the source from the database by id.
 
     Args:
@@ -68,11 +68,11 @@ def get_by_id(source_id: str) -> Optional[source_types.Source]:
   mongo_filter = {"source_id": source_id}
   sources = mongo.get(DB_COLLECTION_NAME, mongo_filter, limit=1)
   if sources:
-    return source_types.Source(**sources[0])
+    return project_types.Source(**sources[0])
   return None
 
 
-def get_by_ids(source_ids: Tuple[str, ...]) -> Tuple[source_types.Source]:
+def get_by_ids(source_ids: Tuple[str, ...]) -> Tuple[project_types.Source]:
   """Retrieves a list of Sources from the database given their ids.
 
     Args:
@@ -85,10 +85,10 @@ def get_by_ids(source_ids: Tuple[str, ...]) -> Tuple[source_types.Source]:
 
   mongo_filter = {"source_id": {"$in": list(source_ids)}}
   sources = mongo.get(DB_COLLECTION_NAME, mongo_filter, limit=len(source_ids))
-  return tuple(source_types.Source(**source) for source in sources)
+  return tuple(project_types.Source(**source) for source in sources)
 
 
-def get_source_name(source_id: str) -> Optional[source_types.Source]:
+def get_source_name(source_id: str) -> Optional[project_types.Source]:
   """Retrieves a sources name given its id.
 
     Args:
@@ -106,7 +106,7 @@ def get_source_name(source_id: str) -> Optional[source_types.Source]:
   return None
 
 
-def get_all_sources(language: str) -> Tuple[source_types.Source, ...]:
+def get_all_sources(language: str) -> Tuple[project_types.Source, ...]:
   """Retrieves a sources name given its id.
 
     Args:
@@ -122,7 +122,7 @@ def get_all_sources(language: str) -> Tuple[source_types.Source, ...]:
   if not sources:
     reset_sources()
     sources = mongo.get(DB_COLLECTION_NAME, mongo_filter)
-  return tuple(source_types.Source(**source) for source in sources)
+  return tuple(project_types.Source(**source) for source in sources)
 
 
 def reset_sources():
@@ -144,13 +144,13 @@ def reset_sources():
     if response:
       sources_dict = response.json()
       sources_list = tuple(
-          source_types.Source(**source["fields"])
+          project_types.Source(**source["fields"])
           for source in sources_dict["records"])
   except Exception:
     with open('../../data/scraper_data/sources_list.json') as json_file:
       sources_dict = json.load(json_file)
       sources = sources_dict["sources"]
-      sources_list = tuple(source_types.Source(**source) for source in sources)
+      sources_list = tuple(project_types.Source(**source) for source in sources)
       sources_to_push = tuple(s.dict() for s in sources_list)
   if sources_to_push:
     mongo.remove(DB_COLLECTION_NAME, {})

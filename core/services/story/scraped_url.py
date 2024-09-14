@@ -2,13 +2,13 @@ from datetime import datetime, timedelta
 from typing import Tuple
 
 from services import mongo
-from shared.types import scraped_url_types
+import project_types
 
 DB_COLLECTION_NAME = "ScrapedUrl"
 DAYS_OF_PREVIOUSLY_SCRAPED = 3
 
 
-def add_scraped_urls(scraped_urls: Tuple[scraped_url_types.ScrapedUrl, ...]):
+def add_scraped_urls(scraped_urls: Tuple[project_types.ScrapedUrl, ...]):
   """Adds urls which have been scraped to the database.
 
     Args:

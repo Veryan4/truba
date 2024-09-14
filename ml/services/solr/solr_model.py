@@ -13,7 +13,7 @@ class SolrModel(BaseModel):
   model_id: str
   linear_model: dict = None
   rank_net_model: dict = None
-  model_config: dict = None
+  model_configuration: dict = None
   score: float = 0.0
   accuracy: float = 0.0
   last_update: datetime = None

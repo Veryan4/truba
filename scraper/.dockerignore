@@ -3,3 +3,4 @@
 redis/
 __pycache__/
 .idea/
+project_types.py

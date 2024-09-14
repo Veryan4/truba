@@ -1,12 +1,12 @@
 from typing import Tuple
 
 from services import mongo
-from shared.types import keyword_types
+import project_types
 
 DB_COLLECTION_NAME = "Keyword"
 
 
-def add_new_keywords(keywords: Tuple[keyword_types.Keyword, ...]):
+def add_new_keywords(keywords: Tuple[project_types.Keyword, ...]):
   """Stores new keywords to the Mongo database.
 
     Args:
@@ -36,7 +36,7 @@ def add_new_keywords(keywords: Tuple[keyword_types.Keyword, ...]):
 
 
 def get_by_texts(keyword_texts: Tuple[str, ...],
-                 language: str = "en") -> Tuple[keyword_types.Keyword]:
+                 language: str = "en") -> Tuple[project_types.Keyword]:
   """Retrieves a list of keywords from the database given their ids.
 
     Args:
@@ -51,4 +51,4 @@ def get_by_texts(keyword_texts: Tuple[str, ...],
   keywords = mongo.get(DB_COLLECTION_NAME,
                        mongo_filter,
                        limit=len(keyword_texts))
-  return tuple(keyword_types.Keyword(**keyword) for keyword in keywords)
+  return tuple(project_types.Keyword(**keyword) for keyword in keywords)

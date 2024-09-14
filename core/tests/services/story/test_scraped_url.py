@@ -3,7 +3,7 @@ from datetime import datetime
 from freezegun import freeze_time
 
 from services.story import scraped_url
-from shared.types import scraped_url_types
+import project_types
 
 
 def test_add_scraped_urls(mocker: MockerFixture):
@@ -11,7 +11,7 @@ def test_add_scraped_urls(mocker: MockerFixture):
   spy = mocker.patch('services.story.scraped_url.mongo.add_or_update',
                      return_value=True)
 
-  test_list = (scraped_url_types.ScrapedUrl(
+  test_list = (project_types.ScrapedUrl(
       published_at=datetime(2021, 4, 4, 8, 0, 0, 0),
       source_name="BBC",
       url="https://bbc.com/news-story"), )

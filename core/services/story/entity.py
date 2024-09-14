@@ -1,12 +1,12 @@
 from typing import Tuple
 
 from services import mongo
-from shared.types import entity_types
+import project_types
 
 DB_COLLECTION_NAME = "Entity"
 
 
-def add_new_entities(entities: Tuple[entity_types.Entity, ...]):
+def add_new_entities(entities: Tuple[project_types.Entity, ...]):
   """Stores new entities to the Mongo database.
 
     Args:
@@ -34,7 +34,7 @@ def add_new_entities(entities: Tuple[entity_types.Entity, ...]):
   return None
 
 
-def get_by_links(entity_links: Tuple[str, ...]) -> Tuple[entity_types.Entity]:
+def get_by_links(entity_links: Tuple[str, ...]) -> Tuple[project_types.Entity]:
   """Retrieves a list of Entities from the database given their ids.
 
     Args:
@@ -49,4 +49,4 @@ def get_by_links(entity_links: Tuple[str, ...]) -> Tuple[entity_types.Entity]:
   entities = mongo.get(DB_COLLECTION_NAME,
                        mongo_filter,
                        limit=len(entity_links))
-  return tuple(entity_types.Entity(**entity) for entity in entities)
+  return tuple(project_types.Entity(**entity) for entity in entities)

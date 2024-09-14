@@ -11,7 +11,7 @@ from email.mime.multipart import MIMEMultipart
 from email.utils import formataddr
 
 from shared import setup
-from shared.types import story_types
+import project_types
 
 sender_email = os.getenv("GMAIL_ADDRESS")
 password = os.getenv("GMAIL_PASSWORD")
@@ -153,7 +153,7 @@ def send_reset_password_email(to_email: str):
 
 
 def send_daily_snap_emails(to_emails: Tuple[str, ...],
-                           stories: Tuple[story_types.ShortStory, ...]):
+                           stories: Tuple[project_types.ShortStory, ...]):
   """Sends an email to the provided emails which contains n news stories.
 
     Args:
@@ -171,7 +171,7 @@ def send_daily_snap_emails(to_emails: Tuple[str, ...],
 
 
 def build_daily_snap_email(
-    to_email: str, stories: Tuple[story_types.ShortStory,
+    to_email: str, stories: Tuple[project_types.ShortStory,
                                   ...]) -> MIMEMultipart:
   """Sends an email to the provided emails which contains n news stories.
 
@@ -574,7 +574,7 @@ def attach_image(filename: str, message: MIMEMultipart, index: int):
     message.attach(part)
 
 
-def short_stroy_to_text(story: story_types.ShortStory, rank: int) -> str:
+def short_stroy_to_text(story: project_types.ShortStory, rank: int) -> str:
   """Generate a string of text to be inserted into an email given the info
   found in a story.
 
@@ -595,7 +595,7 @@ def short_stroy_to_text(story: story_types.ShortStory, rank: int) -> str:
     """
 
 
-def short_stroy_to_html(story: story_types.ShortStory, index: int) -> str:
+def short_stroy_to_html(story: project_types.ShortStory, index: int) -> str:
   """Generate a string of HTML to be inserted into an email given the info
   found in a story.
 

@@ -16,6 +16,7 @@ pysolr
 yapf
 pylint
 pymongo
+datamodel-code-generator
 #ControllerUI
 python-jose[cryptography]
 passlib[bcrypt]

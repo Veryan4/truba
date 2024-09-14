@@ -4,7 +4,8 @@ from datetime import datetime
 from freezegun import freeze_time
 
 from services.user import feedback
-from shared.types import data_set_types, story_types
+import project_types
+from tests import mocks
 from tests.services.search.test_features import mock_ranking_features
 
 
@@ -58,7 +59,7 @@ def test_get_tf_training_data(mocker: MockerFixture):
       'services.user.feedback.convert_feedback_type_to_relevancy_rate',
       return_value=5.0)
   spy_story = mocker.patch('services.user.feedback.story.get_by_id',
-                           return_value=story_types.mock_story())
+                           return_value=mocks.mock_story())
   spy_feature = mocker.patch(
       'services.user.feedback.features.extract_ranking_features',
       return_value=mock_ranking_features())
@@ -70,8 +71,8 @@ def test_get_tf_training_data(mocker: MockerFixture):
 
   spy_get.assert_called_once_with(mock_user_feedback().user_id)
   spy_convert.assert_called_once_with(feedback.FeedbackType.shared)
-  spy_story.assert_called_once_with(str(story_types.mock_story().story_id))
-  spy_feature.assert_called_once_with(story_types.mock_story())
+  spy_story.assert_called_once_with(str(mocks.mock_story().story_id))
+  spy_feature.assert_called_once_with(mocks.mock_story())
 
 
 @freeze_time("2021-01-04")
@@ -79,7 +80,7 @@ def test_received(mocker: MockerFixture):
   mocker.patch('services.user.feedback.read_story.add')
   spy_add = mocker.patch('services.user.feedback.add', return_value=True)
   spy_story = mocker.patch('services.user.feedback.story.get_by_id',
-                           return_value=story_types.mock_story())
+                           return_value=mocks.mock_story())
   spy_feedback = mocker.patch(
       'services.user.feedback.story.update_feedback_counts')
   spy_favorite = mocker.patch(
@@ -90,38 +91,38 @@ def test_received(mocker: MockerFixture):
   assert feedback.received(mock_user_feedback()) == True
 
   spy_add.assert_called_once_with(mock_user_feedback())
-  spy_story.assert_called_once_with(str(story_types.mock_story().story_id))
+  spy_story.assert_called_once_with(str(mocks.mock_story().story_id))
   spy_feedback.assert_called_once_with(mock_user_feedback().story_id,
                                        mock_user_feedback().feedback_type)
   spy_favorite.has_calls([
       call(mock_user_feedback().user_id,
-           story_types.mock_story().keywords[0].keyword.text,
-           story_types.mock_story().keywords[0].keyword.text,
+           mocks.mock_story().keywords[0].keyword.text,
+           mocks.mock_story().keywords[0].keyword.text,
            0.1,
            "FavoriteKeyword",
            language="en"),
       call(mock_user_feedback().user_id,
-           story_types.mock_story().entities[0].entity.links,
-           story_types.mock_story().entities[0].entity.text,
+           mocks.mock_story().entities[0].entity.links,
+           mocks.mock_story().entities[0].entity.text,
            0.1,
            "FavoriteEntity",
            language="en"),
       call(mock_user_feedback().user_id,
-           story_types.mock_story().source.source_id,
-           story_types.mock_story().source.name,
+           mocks.mock_story().source.source_id,
+           mocks.mock_story().source.name,
            0.1,
            "FavoriteSource",
            language="en"),
       call(mock_user_feedback().user_id,
-           story_types.mock_story().author.author_id,
-           story_types.mock_story().author.name,
+           mocks.mock_story().author.author_id,
+           mocks.mock_story().author.name,
            0.1,
            "FavoriteAuthor",
            language="en"),
   ])
-  spy_author.assert_called_once_with(story_types.mock_story().author.author_id,
+  spy_author.assert_called_once_with(mocks.mock_story().author.author_id,
                                      0.1)
-  spy_source.assert_called_once_with(story_types.mock_story().source.source_id,
+  spy_source.assert_called_once_with(mocks.mock_story().source.source_id,
                                      0.1)
 
 
@@ -135,9 +136,9 @@ def mock_user_feedback() -> feedback.UserFeedback:
                                feedback_type=feedback.FeedbackType.shared)
 
 
-def mock_ranking_data() -> data_set_types.RankingData:
-    mock_story = story_types.mock_story()
-    return data_set_types.RankingData(story_id=mock_user_feedback().story_id,
+def mock_ranking_data() -> project_types.RankingData:
+    mock_story = mocks.mock_story()
+    return project_types.RankingData(story_id=mock_user_feedback().story_id,
                                     user_id=mock_user_feedback().user_id,
                                     story_title=mock_story.title,
                                     time_stamp=datetime.timestamp(
