@@ -25,7 +25,7 @@ spec:
       containers:
         - name: {{ $service.name }}
           {{ if $service.isCustomImage }}
-          image: "registry.truba.news/{{ $service.imageName }}:{{ $env }}"
+          image: "{{ $.Values.registry }}/{{ $service.imageName }}:{{ $env }}"
           {{ else }}
           image: {{ $service.imageName }}
           {{ end }}

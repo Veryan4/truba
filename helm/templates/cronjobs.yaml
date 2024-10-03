@@ -56,7 +56,7 @@ spec:
             - name: docker-registry
           containers:
             - name: training
-              image: "registry.truba.news/ml:{{ . }}"
+              image: "{{ $.Values.registry }}/ml:{{ . }}"
               imagePullPolicy: Always
               env:
                 - name: SERVICE_NAME
@@ -147,7 +147,7 @@ spec:
             - name: docker-registry
           containers:
             - name: push
-              image: "registry.truba.news/core:{{ . }}"
+              image: "{{ $.Values.registry }}/core:{{ . }}"
               imagePullPolicy: Always
               env:
                 - name: SERVICE_NAME
@@ -225,7 +225,7 @@ spec:
             - name: docker-registry
           containers:
             - name: scraper
-              image: "registry.truba.news/scraper:{{ . }}"
+              image: "{{ $.Values.registry }}/scraper:{{ . }}"
               imagePullPolicy: Always
               env:
                 - name: SERVICE_NAME
@@ -280,7 +280,7 @@ spec:
             - name: docker-registry
           containers:
             - name: scraper-fr
-              image: "registry.truba.news/scraper:{{ . }}"
+              image: "{{ $.Values.registry }}/scraper:{{ . }}"
               imagePullPolicy: Always
               env:
                 - name: SERVICE_NAME

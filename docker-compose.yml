@@ -2,7 +2,7 @@ version: "3.7"
 
 services:
   web:
-    image: registry.truba.news/web:develop
+    image: veryan4/web:develop
     build:
       context: ./
       dockerfile: ./web/Dockerfile
@@ -10,31 +10,31 @@ services:
         - ENVIRONMENT=develop
 
   core:
-    image: registry.truba.news/core:develop
+    image: veryan4/core:develop
     build:
       context: ./
       dockerfile: ./core/Dockerfile
 
   scraper:
-    image: registry.truba.news/scraper:develop
+    image: veryan4/scraper:develop
     build:
       context: ./
       dockerfile: ./scraper/Dockerfile
 
   ml:
-    image: registry.truba.news/ml:develop
+    image: veryan4/ml:develop
     build:
       context: ./
       dockerfile: ./ml/Dockerfile
 
   solr:
-    image: registry.truba.news/solr:develop
+    image: veryan4/solr:develop
     build:
       context: ./
       dockerfile: ./solr/Dockerfile
 
   jupyter:
-    image: registry.truba.news/jupyter
+    image: veryan4/jupyter
     build:
       context: ./
       dockerfile: ./jupyter/Dockerfile

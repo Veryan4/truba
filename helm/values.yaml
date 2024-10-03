@@ -6,11 +6,12 @@ environments:
 
 domainName: truba.news
 
+registry: veryan4
+
 configMap:
   redisQueue: "controller"
   defaultUserId: "1a9c14f8-6610-4793-89b3-128f78d2b720"
   publicVapid: "BAQE9ZzSk_rjUO3q-7jpmI_ml4C_EFefijwFfJSlwpqqXB01PaPOYorJJmVlN7WrbseedqMoy-6ZWSSZJQlECWE"
-  dockerUser: veryan4
   airtableId: "appXAWgdvcKQpJKiz"
   gmailSenderEmail: "info@truba.news"
   gmailSenderName: "truba news"
@@ -22,8 +23,6 @@ secrets:
   mongoPw: foobar
   googleClientId: foobar
   privateVapid: foobar
-  dockerPassword: foobar
-  dockerRegistry: foobar
   dockerConfig: foobar
   gmailPassword: foobar
   airtableApiKey: foobar

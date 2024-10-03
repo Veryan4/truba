@@ -15,7 +15,6 @@ data:
   REDIS_QUEUE: "{{ .Values.configMap.redisQueue }}"
   DEFAULT_USER_ID: "{{ .Values.configMap.defaultUserId }}"
   PUBLIC_VAPID: "{{ .Values.configMap.publicVapid }}"
-  DOCKER_USERNAME: "{{ .Values.configMap.dockerUser}}"
   JAEGER_AGENT_HOSTNAME: "jaeger-agent"
   JAEGER_AGENT_PORT: "6831"
   SOLR_HOSTNAME: "core-solr"
