@@ -110,7 +110,7 @@ class Testget_recommended_stories:
                             return_value=[])
     mocker.patch('services.story.story.UUID',
                  return_value=mocks.mock_story().story_id)
-    mocker.patch('services.story.story.setup.get_base_ml_service_url',
+    mocker.patch('os.getenv',
                  return_value="http://ml:8080")
     requests_mock.get("http://ml:8080/recommendations/" + self.user_id + "/en",
                       json=[mocks.mock_story().json()])
@@ -141,7 +141,7 @@ class Testget_recommended_stories:
                             return_value=[])
     mocker.patch('services.story.story.UUID',
                  return_value=mocks.mock_story().story_id)
-    mocker.patch('services.story.story.setup.get_base_ml_service_url',
+    mocker.patch('os.getenv',
                  return_value="http://ml:8080")
     requests_mock.get("http://ml:8080/recommendations/" + self.user_id + "/en",
                       json=[],

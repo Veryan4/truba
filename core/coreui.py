@@ -2,16 +2,17 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from brotli_asgi import BrotliMiddleware
 import os
+from dotenv import load_dotenv
 
 from controllers import secure, public, socket
-from shared import setup, tracing
+from shared import  tracing
 
 app = FastAPI()
 
 origins = []
-
-origins.append(setup.get_www_client_domain_name())
-origins.append(setup.get_client_domain_name())
+load_dotenv()
+origins.append(os.getenv("APP_WWW_URL"))
+origins.append(os.getenv("APP_URL"))
 if os.getenv("ENVIRONMENT") != "production":
   origins.append("http://localhost:4200")
   origins.append("http://localhost:3000")

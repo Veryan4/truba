@@ -26,7 +26,7 @@ def test_get_personalization(mocker: MockerFixture):
 
 
 def test_add_solr_model(requests_mock, mocker: MockerFixture):
-  mocker.patch('services.user.personalization.setup.get_base_ml_service_url',
+  mocker.patch('os.getenv',
                return_value="http://ml:8080")
   requests_mock.get("http://ml:8080/model-store/" + mock_user().user_id,
                     text='OK')

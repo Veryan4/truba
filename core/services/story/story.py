@@ -7,7 +7,7 @@ from services.search import features
 from services.story import author, source, entity, keyword
 from services.user import read_story
 from services import mongo
-from shared import setup
+import os
 import project_types
 
 DB_COLLECTION_NAME = "Story"
@@ -246,7 +246,7 @@ def get_recommended_stories(user_id: str,
   not_id_list = tuple(UUID(i) for i in read_story_ids)
   if not_id_list:
     mongo_filter["story_id"].update({"$nin": not_id_list})
-  response = requests.get(setup.get_base_ml_service_url() +
+  response = requests.get(os.getenv("ML_URL") +
                           "/recommendations/" + user_id + "/" + language)
   if response:
     story_ids = tuple(response.json())

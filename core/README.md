@@ -4,12 +4,7 @@ This service manages all back-end communication. There is a back-end facing (cor
 
 ### Running
  
-Make sure to copy the shared interfaces before running
-```
-yes | cp -r -f ../shared .
-```
-
-You then need to install the dependencies
+You need to install the dependencies
 ```
 pip install -r requirements.txt
 ```
@@ -20,7 +15,7 @@ datamodel-codegen  --input ../schemas/AllTypes.yaml --aliases ../schemas/aliases
 
 After adding the required .env values, you can then run one of the services with `python <name-of-service>` 
 
-Available services: core.py, coreui.py, socket.py, push.py, or worker.py
+Available services: core.py, coreui.py, push.py, or worker.py
 
 ### Tests
 

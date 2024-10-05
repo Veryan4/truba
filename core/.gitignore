@@ -1,3 +1,6 @@
 __pycache__
 shared/
 project_types.py
+.env
+vendor/
+models/

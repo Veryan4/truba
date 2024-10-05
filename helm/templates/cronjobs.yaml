@@ -83,25 +83,15 @@ spec:
                     secretKeyRef:
                       name: dark-secrets
                       key: MONGO_PASSWORD
-                - name: ML_HOSTNAME
+                - name: ML_URL
                   valueFrom:
                     configMapKeyRef:
-                      key: ML_HOSTNAME
+                      key: ML_URL
                       name: configs
-                - name: ML_PORT
+                - name: CORE_URL
                   valueFrom:
                     configMapKeyRef:
-                      key: ML_PORT
-                      name: configs
-                - name: CORE_HOSTNAME
-                  valueFrom:
-                    configMapKeyRef:
-                      key: CORE_HOSTNAME
-                      name: configs
-                - name: CORE_PORT
-                  valueFrom:
-                    configMapKeyRef:
-                      key: CORE_PORT
+                      key: CORE_URL
                       name: configs
                 - name: JAEGER_AGENT_HOSTNAME
                   valueFrom:
@@ -184,10 +174,10 @@ spec:
                     configMapKeyRef:
                       key: PUBLIC_VAPID
                       name: configs
-                - name: DOMAIN_NAME
+                - name: APP_URL
                   valueFrom:
                     configMapKeyRef:
-                      key: DOMAIN_NAME
+                      key: APP_URL
                       name: configs
                 - name: GMAIL_ADDRESS
                   valueFrom:
@@ -232,15 +222,10 @@ spec:
                   value: scraper
                 - name: ENVIRONMENT
                   value: {{ . }}
-                - name: CORE_HOSTNAME
+                - name: CORE_URL
                   valueFrom:
                     configMapKeyRef:
-                      key: CORE_HOSTNAME
-                      name: configs
-                - name: CORE_PORT
-                  valueFrom:
-                    configMapKeyRef:
-                      key: CORE_PORT
+                      key: CORE_URL
                       name: configs
                 - name: JAEGER_AGENT_HOSTNAME
                   valueFrom:
@@ -287,15 +272,10 @@ spec:
                   value: scraper_fr
                 - name: ENVIRONMENT
                   value: {{ . }}
-                - name: CORE_HOSTNAME
+                - name: CORE_URL
                   valueFrom:
                     configMapKeyRef:
-                      key: CORE_HOSTNAME
-                      name: configs
-                - name: CORE_PORT
-                  valueFrom:
-                    configMapKeyRef:
-                      key: CORE_PORT
+                      key: CORE_URL
                       name: configs
                 - name: JAEGER_AGENT_HOSTNAME
                   valueFrom:

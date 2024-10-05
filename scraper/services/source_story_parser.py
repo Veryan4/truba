@@ -1,7 +1,7 @@
 import traceback
 from bs4 import BeautifulSoup
 
-from shared import tracing
+from services import tracing
 
 current_module = 'Source Story Parsers'
 

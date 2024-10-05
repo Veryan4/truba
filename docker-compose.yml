@@ -43,12 +43,10 @@ services:
       - '8888:8888'
     environment:
       - ENVIRONMENT=develop
-      - CORE_HOSTNAME=localhost
-      - CORE_PORT=5057
+      - CORE_URL=http://localhost:5057
       - CORE_DB_HOSTNAME=localhost
       - CORE_DB_PORT=27017
       - MONGO_USERNAME=foo
       - MONGO_PASSWORD=bar
-      - ML_HOSTNAME=localhost
-      - ML_PORT=5158
+      - ML_URL=http://localhost:5158
 

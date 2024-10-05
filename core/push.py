@@ -1,18 +1,21 @@
 import os
 import json
 from pywebpush import webpush, WebPushException
-from shared import setup, tracing
+from dotenv import load_dotenv
+from shared import tracing
 from services.story import story
 from services.user import user, email
 
 current_module = 'Push'
 languages = ("en", "fr")
 
+load_dotenv()
+
 VAPID_PRIVATE_KEY = os.getenv("PRIVATE_VAPID")
 VAPID_PUBLIC_KEY = os.getenv("PUBLIC_VAPID")
 VAPID_CLAIMS = {
     "sub": "mailto:info@truba.news",
-    "aud:": setup.get_client_domain_name()
+    "aud:": os.getenv("APP_URL")
 }
 
 

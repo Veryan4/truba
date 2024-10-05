@@ -5,9 +5,10 @@ import pandas as pd
 import numpy as np
 import tensorflow as tf
 import tensorflow_recommenders as tfrs
+import os
 
 from services import mongo
-from shared import setup, bson_id
+from classes import bson_id
 
 RANKING_MODEL_WEIGHTS_DIR = "tf_models/my_model_weights"
 RANKING_MODEL_DATASET_DIR = "tf_models/dataset.parquet"
@@ -501,7 +502,7 @@ def get_indexes():
     print("Failed to load model index.")
     return None
   for language in LANGUAGES:
-    response = requests.get(setup.get_base_core_service_url() +
+    response = requests.get(os.getenv("CORE_URL") +
                             "/update-index/" + language)
     if not response:
       print("Failed to initialize " + language +

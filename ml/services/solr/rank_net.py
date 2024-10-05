@@ -9,10 +9,10 @@ from tensorflow.keras.metrics import categorical_accuracy
 from typing import List
 from pydantic import BaseModel, Field
 
-from services.solr import solr_model
+from ml.services.solr import solr_models
 from services import mongo
 import project_types
-from shared import bson_id
+from classes import bson_id
 
 current_module = 'rank_net'
 max_score = 1.0
@@ -193,7 +193,7 @@ def rank_net(modelId):
   score, acc = model.evaluate([test_X[:, :dim], test_X[:, dim:]],
                               batch_size=BATCH_SIZE)
 
-  oldrank_net_model = solr_model.get_solr_model(modelId)
+  oldrank_net_model = solr_models.get_solr_model(modelId)
   if oldrank_net_model:
     max_score = oldrank_net_model.score
     min_accuracy = oldrank_net_model.accuracy

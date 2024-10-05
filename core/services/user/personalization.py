@@ -4,7 +4,7 @@ from uuid import UUID
 import requests
 
 from services.user import user, favorite
-from shared import setup
+import os
 
 FAVORITE_ITEM_COUNT = 10
 
@@ -45,7 +45,7 @@ def get_personalization(user_id: str, language: str) -> Personalization:
 
 #TODO: For eventual Solr implementation
 def add_solr_model(model_id: str):
-  res = requests.get(setup.get_base_ml_service_url() + "/model-store/" +
+  res = requests.get(os.getenv("ML_URL") + "/model-store/" +
                      model_id)
   return res
 

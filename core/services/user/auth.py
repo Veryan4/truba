@@ -12,7 +12,6 @@ import os
 import requests
 
 from services.user import user, email
-from shared import setup
 
 RESET_PASSWORD_TOKEN_EXPIRE_MINUTES = 15
 ACCESS_TOKEN_EXPIRE_DAYS = 3
@@ -214,8 +213,7 @@ def forgot_password(user_email: str):
   current_user = user.update_reset_password_token(user_dict, random_bytes)
   if type(current_user) == str:
     return current_user
-  url = setup.get_client_domain_name(
-  ) + "/password?token=" + reset_password_token
+  url = os.getenv("APP_URL") + "/password?token=" + reset_password_token
   return email.send_forgot_password_email(current_user.email, url)
 
 

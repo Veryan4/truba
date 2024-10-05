@@ -9,8 +9,7 @@ from dateutil import parser
 import spacy
 
 from services.source_story_parser import SourceStoryParser
-from services import rss_item
-from shared import setup, tracing
+from services import rss_item, tracing
 import project_types
 
 current_module = 'Formatter'
@@ -37,7 +36,7 @@ def get_author_by_name(author_name: str) -> Optional[project_types.Author]:
     """
 
   author = None
-  response = requests.get(setup.get_base_core_service_url() +
+  response = requests.get(os.getenv("CORE_URL") +
                           '/authors/name?author_name=' + quote(author_name))
   if response.status_code == 404:
     return None

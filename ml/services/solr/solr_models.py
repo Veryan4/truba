@@ -5,7 +5,7 @@ import json
 import requests
 from fastapi.encoders import jsonable_encoder
 from services import mongo
-from shared import bson_id
+from classes import bson_id
 
 
 class SolrModel(BaseModel):

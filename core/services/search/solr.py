@@ -7,7 +7,6 @@ from datetime import datetime, timedelta
 
 from services.user import user, personalization
 from services import mongo
-from shared import setup
 import project_types
 
 DAYS_OF_STORIES_IN_SOLR = 10
@@ -226,7 +225,7 @@ def reset() -> dict:
                  json=payload)
   model_ids = user.get_ids()
   json_to_push = jsonable_encoder(model_ids)
-  requests.post(setup.get_base_ml_service_url() + "/model-store/reset",
+  requests.post(os.getenv("ML_URL") + "/model-store/reset",
                 json=json_to_push)
   return refill()
 

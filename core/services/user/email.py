@@ -10,7 +10,6 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.utils import formataddr
 
-from shared import setup
 import project_types
 
 sender_email = os.getenv("GMAIL_ADDRESS")
@@ -26,7 +25,7 @@ def send_user_init_email(to_email: str):
 
     """
 
-  url = setup.get_client_domain_name() + "/email"
+  url = os.getenv("APP_URL") + "/email"
   text = f"""\
     Hello,
     You have just created an account at truba.news, kindly use the following link to confirm your email address.: {url}"""
@@ -48,7 +47,7 @@ def send_user_init_email(to_email: str):
     """
 
   message = MIMEMultipart("alternative")
-  message["Subject"] = "Confirm Account Creation - " + setup.get_client_domain_name()
+  message["Subject"] = "Confirm Account Creation - " + os.getenv("APP_URL")
   message["From"] = formataddr((os.getenv("GMAIL_SENDER_NAME"), sender_email))
   message["To"] = to_email
   part1 = MIMEText(text, "plain")
@@ -92,7 +91,7 @@ def send_forgot_password_email(to_email: str, url: str):
     """
 
   message = MIMEMultipart("alternative")
-  message["Subject"] = "Password help - " + setup.get_client_domain_name()
+  message["Subject"] = "Password help - " + os.getenv("APP_URL")
   message["From"] = formataddr((os.getenv("GMAIL_SENDER_NAME"), sender_email))
   message["To"] = to_email
   part1 = MIMEText(text, "plain")
@@ -137,8 +136,7 @@ def send_reset_password_email(to_email: str):
     """
 
   message = MIMEMultipart("alternative")
-  message["Subject"] = "Pwd Reset Successful -" + setup.get_client_domain_name(
-  )
+  message["Subject"] = "Pwd Reset Successful -" + os.getenv("APP_URL")
   message["From"] = formataddr((os.getenv("GMAIL_SENDER_NAME"), sender_email))
   message["To"] = to_email
   part1 = MIMEText(text, "plain")
@@ -187,7 +185,7 @@ def build_daily_snap_email(
   number_of_stories = 5
 
   message = MIMEMultipart("alternative")
-  message["Subject"] = "The Daily Snap - " + setup.get_client_domain_name()
+  message["Subject"] = "The Daily Snap - " + os.getenv("APP_URL")
   message["From"] = sender_email
   message["To"] = to_email
   attach_image("truba_logo.png", message, number_of_stories + 0)
@@ -375,7 +373,7 @@ def build_daily_snap_email(
     <!--<![endif]-->
     <div align="center" class="img-container center fixedwidth" style="padding-right: 0px;padding-left: 0px;">
     <!--[if mso]><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr style="line-height:0px"><td style="padding-right: 0px;padding-left: 0px;" align="center"><![endif]-->
-    <div style="font-size:1px;line-height:5px"> </div><a href="{setup.get_client_domain_name()}" style="outline:none" tabindex="-1" target="_blank"><img align="center" alt="Company Logo" border="0" class="center fixedwidth" src="cid:{number_of_stories}" style="text-decoration: none; -ms-interpolation-mode: bicubic; height: auto; border: 0; width: 550px; max-width: 100%; display: block;" title="Company Logo" width="550"/></a>
+    <div style="font-size:1px;line-height:5px"> </div><a href="{os.getenv("APP_URL")}" style="outline:none" tabindex="-1" target="_blank"><img align="center" alt="Company Logo" border="0" class="center fixedwidth" src="cid:{number_of_stories}" style="text-decoration: none; -ms-interpolation-mode: bicubic; height: auto; border: 0; width: 550px; max-width: 100%; display: block;" title="Company Logo" width="550"/></a>
     <div style="font-size:1px;line-height:5px"> </div>
     <!--[if mso]></td></tr></table><![endif]-->
     </div>
@@ -456,7 +454,7 @@ def build_daily_snap_email(
     <!--[if mso]><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding-right: 10px; padding-left: 10px; padding-top: 10px; padding-bottom: 10px; font-family: serif"><![endif]-->
     <div style="color:#fafafa;font-family:'Merriwheater', 'Georgia', serif;line-height:1.2;padding-top:10px;padding-right:10px;padding-bottom:10px;padding-left:10px;">
     <div class="txtTinyMce-wrapper" style="font-size: 12px; line-height: 1.2; color: #fafafa; font-family: 'Merriwheater', 'Georgia', serif; mso-line-height-alt: 14px;">
-    <p style="margin: 0; font-size: 12px; text-align: center; line-height: 1.2; word-break: break-word; mso-line-height-alt: 14px; margin-top: 0; margin-bottom: 0;"><a href="{setup.get_client_domain_name()}/unsubscribe?{urllib.parse.urlencode({'email': to_email})}" rel="noopener" style="text-de
+    <p style="margin: 0; font-size: 12px; text-align: center; line-height: 1.2; word-break: break-word; mso-line-height-alt: 14px; margin-top: 0; margin-bottom: 0;"><a href="{os.getenv("APP_URL")}/unsubscribe?{urllib.parse.urlencode({'email': to_email})}" rel="noopener" style="text-de
     coration: none; color: #fff;" target="_blank"><span style="font-size: 14px;">Unsubscribe</span></a></p>
     </div>
     </div>
@@ -526,7 +524,7 @@ def build_daily_snap_email(
       except requests.exceptions.RequestException:
         pass
     if not response:
-      image_url = setup.get_client_domain_name()
+      image_url = os.getenv("APP_URL")
       image_url += f"""/assets/images/newspapers/{str(randrange(13))}.jpg"""
     response = requests.get(image_url)
     if not response:

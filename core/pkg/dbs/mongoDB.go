@@ -1,0 +1,198 @@
+package dbs
+
+import (
+	"context"
+	"fmt"
+	"os"
+
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+)
+
+var dbName = os.Getenv("ENVIRONMENT")
+var mongoUri = "mongodb://" + os.Getenv("MONGO_USERNAME") + ":" + os.Getenv(
+	"MONGO_PASSWORD") + "@" + os.Getenv(
+	"CORE_DB_HOSTNAME") + ".default.svc.cluster.local:" + os.Getenv(
+	"CORE_DB_PORT") + "/" + dbName + "?authSource=admin"
+var myDb = dbConnection()
+
+type MongoObjId struct {
+	Id primitive.ObjectID `bson:"_id"`
+}
+
+func dbConnection() *mongo.Database {
+	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
+	opts := options.Client().ApplyURI(mongoUri).SetServerAPIOptions(serverAPI).SetCompressors([]string{"zlib"})
+	client, err := mongo.Connect(context.TODO(), opts)
+	if err != nil {
+		panic(err)
+	}
+	defer func() {
+		if err = client.Disconnect(context.TODO()); err != nil {
+			panic(err)
+		}
+	}()
+	// Send a ping to confirm a successful connection
+	var result bson.M
+	if err := client.Database(dbName).RunCommand(context.TODO(), bson.D{{"ping", 1}}).Decode(&result); err != nil {
+		panic(err)
+	}
+	fmt.Println("Pinged your deployment. You successfully connected to MongoDB!")
+
+	return client.Database(dbName)
+}
+
+func Get[T any](collection string,
+	filter interface{},
+	limit int64,
+	sort string,
+	reverse bool) []T {
+	col := myDb.Collection(collection)
+	var findOptions *options.FindOptions
+	if limit > 0 {
+		findOptions = findOptions.SetLimit(limit)
+	}
+	if sort != "" {
+		var sortDirection int8 = 1
+		if reverse {
+			sortDirection = -1
+		}
+		findOptions = findOptions.SetSort(bson.D{{sort, sortDirection}})
+	}
+	results, err := col.Find(context.TODO(), filter, findOptions)
+	if err != nil {
+		if err != mongo.ErrNoDocuments {
+			fmt.Printf("Error retrieving documents from %s\n", collection)
+		}
+		return make([]T, 0)
+	}
+	var list []T
+	if err := results.All(context.TODO(), &list); err != nil {
+		panic(err)
+	}
+	return list
+}
+
+func GetSingle[T any](collection string, filter interface{}) T {
+	documents := Get[T](collection, filter, 1, "", false)
+	return documents[0]
+}
+
+func GetDistinctValues(collection string,
+	filter interface{},
+	distinct string) []string {
+	col := myDb.Collection(collection)
+	results, err := col.Distinct(context.TODO(), distinct, filter)
+	if err != nil {
+		if err != mongo.ErrNoDocuments {
+			fmt.Printf("Error retrieving documents from %s\n", collection)
+		}
+		return make([]string, 0)
+	}
+	strings := make([]string, len(results))
+	for i, v := range results {
+		strings[i] = fmt.Sprint(v)
+	}
+	return strings
+}
+
+func GetGrouped[T any](collection string,
+	filter interface{},
+	groupBy string,
+	limit int64,
+	sort string,
+	reverse bool) []T {
+	col := myDb.Collection(collection)
+	aggregate := []bson.M{
+		{"$match": filter},
+		{"$group": bson.M{"_id": ("$" + groupBy), "items": bson.M{"$push": "$$ROOT"}}},
+	}
+	if sort != "" {
+		var sortDirection int8 = 1
+		if reverse {
+			sortDirection = -1
+		}
+		aggregate = append(aggregate, bson.M{"$sort": bson.M{sort: sortDirection}})
+	}
+	if limit != 0 {
+		aggregate = append(aggregate, bson.M{"$limit": limit})
+	}
+	results, err := col.Aggregate(context.TODO(), aggregate)
+	if err != nil {
+		if err != mongo.ErrNoDocuments {
+			fmt.Printf("Error retrieving documents from %s\n", collection)
+		}
+		return make([]T, 0)
+	}
+	var list []T
+	if err := results.All(context.TODO(), &list); err != nil {
+		panic(err)
+	}
+	return list
+}
+
+func AddOrUpdateMany(collection string, documents []interface{}) int64 {
+	col := myDb.Collection(collection)
+	operations := []mongo.WriteModel{}
+	for _, document := range documents {
+		val, ok := document.(MongoObjId)
+		if ok {
+			update := mongo.NewUpdateOneModel().SetFilter(bson.D{{"_id", val.Id}}).SetUpdate(bson.D{{"$set", document}}).SetUpsert(true)
+			operations = append(operations, update)
+		} else {
+			insert := mongo.NewInsertOneModel().SetDocument(document)
+			operations = append(operations, insert)
+		}
+	}
+	results, err := col.BulkWrite(context.TODO(), operations)
+	if err != nil {
+		panic(err)
+	}
+	return results.UpsertedCount
+}
+
+func AddOrUpdateOne(collection string, document interface{}) int64 {
+	documents := make([]interface{}, 0)
+	documents = append(documents, document)
+	return AddOrUpdateMany(collection, documents)
+}
+
+func Remove(collection string, filter interface{}) int64 {
+	col := myDb.Collection(collection)
+	result, err := col.DeleteMany(context.TODO(), filter)
+	if err != nil {
+		panic(err)
+	}
+	return result.DeletedCount
+}
+
+func GetFieldWithLongestList[T any](collection string, filter interface{}, field string) T {
+	col := myDb.Collection(collection)
+	aggregate := []bson.M{
+		{"$match": filter},
+		{"$unwind": "$" + field},
+		{
+			"$group": bson.M{
+				"_id": "$_id",
+				"len": bson.M{"$sum": 1},
+			},
+		},
+		{"$sort": bson.M{"len": -1}},
+		{"$limit": 1},
+	}
+
+	results, err := col.Aggregate(context.TODO(), aggregate)
+	if err != nil {
+		if err != mongo.ErrNoDocuments {
+			fmt.Printf("Error retrieving documents from %s\n", collection)
+			panic(err)
+		}
+	}
+	var result MongoObjId
+	results.Decode(&result)
+	filter2 := bson.M{"_id": result.Id}
+	documents := Get[T](collection, filter2, 1, "", false)
+	return documents[0]
+}

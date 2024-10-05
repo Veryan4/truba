@@ -4,12 +4,11 @@ import re
 import requests
 from typing import List
 from urllib.parse import quote
+import os
 
-from services import formatter
+from services import formatter, rss_item, tracing
 from services.source_story_parser import SourceStoryParser, log_error
-from services import rss_item
 import project_types
-from shared import setup, tracing
 
 current_module = 'Source Scraper'
 
@@ -67,7 +66,7 @@ class SourceScraper:
     return item.find('link').text
 
   def get_scraped_urls(self, source_name: str) -> List[str]:
-    response = requests.get(setup.get_base_core_service_url() +
+    response = requests.get(os.getenv("CORE_URL") +
                             '/scraped?source_name=' + quote(source_name))
     if response.status_code == 404:
       tracing.log(current_module, 'error',

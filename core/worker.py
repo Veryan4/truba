@@ -2,6 +2,7 @@
 import redis
 from rq import Worker, Queue, Connection
 import os
+from dotenv import load_dotenv
 
 from shared import *
 from project_types import *
@@ -12,6 +13,8 @@ from services import *
 
 # Provide queue names to listen to as arguments to this script,
 # similar to rq worker
+
+load_dotenv()
 
 redis_url = "redis://" + os.getenv("REDIS_HOSTNAME") + ":" + os.getenv(
     "REDIS_PORT")

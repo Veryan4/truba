@@ -8,7 +8,6 @@ RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
 COPY ./core/ .
-COPY ./shared/ ./shared/
 COPY ./schemas/ ./schemas/
 
 RUN pip install -r requirements.txt
@@ -26,8 +25,5 @@ ENV PATH="/opt/venv/bin:$PATH"
 
 COPY ./core/ .
 RUN rm -r ./tests
-COPY ./shared/ ./shared/
-
-RUN python ./shared/setup.py
 
 CMD gunicorn --workers=4 --worker-class=uvicorn.workers.UvicornH11Worker --bind=0.0.0.0:5057 core:app

@@ -1,12 +1,13 @@
 import requests
-from services import ranking
-from shared import tracing, setup
+import os
+from services import ranking, tracing
+from dotenv import load_dotenv
 
 current_module = 'Training'
 
 
 def get_user_ids():
-  response = requests.get(setup.get_base_core_service_url() + "/user/ids")
+  response = requests.get(os.getenv("CORE_URL") + "/user/ids")
   if response:
     user_ids = list(response.json())
     return user_ids
@@ -14,7 +15,7 @@ def get_user_ids():
 
 
 def get_features(user_id: str):
-  response = requests.get(setup.get_base_core_service_url() + "/training/" +
+  response = requests.get(os.getenv("CORE_URL") + "/training/" +
                           user_id)
   if response:
     data_entries = list(response.json())
@@ -38,4 +39,5 @@ def train():
 
 # Call Train() when file is called
 if __name__ == '__main__':
+  load_dotenv()
   train()

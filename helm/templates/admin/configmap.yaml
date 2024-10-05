@@ -4,12 +4,11 @@ metadata:
   name: configs
   namespace: default
 data:
-  CORE_HOSTNAME: "{{ .Values.services.core.name }}"
+  CORE_URL: "http://{{ .Values.services.core.name }}:{{ .Values.services.core.port }}"
   CORE_PORT: "{{ .Values.services.core.port }}"
   CORE_DB_HOSTNAME: "mongo"
   CORE_DB_PORT: "27017"
-  ML_HOSTNAME: "{{ .Values.services.ml.name }}"
-  ML_PORT: "{{ .Values.services.ml.port }}"
+  ML_URL: "http://{{ .Values.services.ml.name }}:{{ .Values.services.ml.port }}"
   REDIS_HOSTNAME: "{{ .Values.services.coreRedis.name }}"
   REDIS_PORT: "{{ .Values.services.coreRedis.port }}"
   REDIS_QUEUE: "{{ .Values.configMap.redisQueue }}"

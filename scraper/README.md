@@ -10,12 +10,7 @@ When adding a new source to the list, a scraper class for the source must also b
 
 ### Running
  
-Make sure to copy the shared interfaces before running
-```
-yes | cp -r -f ../shared .
-```
-
-You then need to install the dependencies
+You need to install the dependencies
 ```
 pip install -r requirements.txt
 ```

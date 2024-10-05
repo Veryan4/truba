@@ -8,12 +8,7 @@ Working on implementing LTR for a SOLR search engine, taking inspiration from he
 
 ### Running
  
-Make sure to copy the shared interfaces before running
-```
-yes | cp -r -f ../shared .
-```
-
-You then need to install the dependencies
+You need to install the dependencies
 ```
 pip install -r requirements.txt
 ```
