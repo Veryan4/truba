@@ -26,16 +26,6 @@ components:
       $ref: "./DataSet.yaml#/components/schemas/RankingData"
     ScrapedUrl:
       $ref: "./ScrapedUrl.yaml#/components/schemas/ScrapedUrl"
-    RankingFeatures:
-      $ref: "./Feature.yaml#/components/schemas/RankingFeatures"
-    SolrFeatures:
-      $ref: "./Feature.yaml#/components/schemas/SolrFeatures"
-    LtrParams:
-      $ref: "./Search.yaml#/components/schemas/LtrParams"
-    SearchQuery:
-      $ref: "./Search.yaml#/components/schemas/SearchQuery"
-    StoryWithFeatures:
-      $ref: "./Search.yaml#/components/schemas/StoryWithFeatures"
     Story:
       $ref: "./Story.yaml#/components/schemas/Story"
     StoryInDb:

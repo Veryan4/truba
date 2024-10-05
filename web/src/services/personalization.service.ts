@@ -27,15 +27,18 @@ function getPersonalization(user: User): Promise<Recommendation> {
 
 function postUpdatePersonalization(
   type: string,
-  favoriteItem: FavoriteItem
+  favoriteItem: FavoriteItem,
 ): Promise<any> {
-  return httpService.post<any>(appConfig.backendApi + type, favoriteItem);
+  return httpService.post<any>(
+    appConfig.backendApi + "favorite/" + type,
+    favoriteItem,
+  );
 }
 
 function postFeedback(
   searchTerm: string,
   storyId: string,
-  feedBackType: FeedbackType
+  feedBackType: FeedbackType,
 ): void {
   const currentUser = userService.getUser();
   if (!currentUser) return;

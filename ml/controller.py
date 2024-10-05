@@ -1,9 +1,10 @@
 from fastapi import FastAPI, HTTPException
 from typing import List
 import tensorflow as tf
-from services.solr import solr_model
-from services import ranking
-from shared import tracing
+from dotenv import load_dotenv
+from services import ranking, tracing
+
+load_dotenv()
 
 app = FastAPI()
 app.add_middleware(tracing.OpentracingMiddleware)
@@ -19,17 +20,6 @@ if indexes:
 @app.on_event('startup')
 async def startup():
   tracing.init_tracer(app)
-
-
-@app.post('/model-store/reset')
-def reset_solr_models(model_ids: List[str]):
-  return solr_model.reset_model_store(model_ids)
-
-
-@app.get('/model-store/{model_id}')
-def add_solr_model(model_id: str):
-  model = solr_model.load_solr_model_to_store(model_id)
-  return model.dict()
 
 
 @app.get('/recommendations/{user_id}/{language}')
