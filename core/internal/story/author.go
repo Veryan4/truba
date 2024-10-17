@@ -3,6 +3,7 @@ package story
 import (
 	"core/internal/dbs"
 	"core/internal/models"
+	"core/internal/utils"
 
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
@@ -45,7 +46,7 @@ func GetAuthorByName(name string) (models.Author, error) {
 func GetAuthorById(authorId string) (models.Author, error) {
 	id, err := uuid.Parse(authorId)
 	if err != nil {
-		panic(err)
+		return models.Author{}, utils.LogError(err.Error())
 	}
 	mongoFilter := bson.M{"author_id": id}
 	return dbs.GetSingle[models.Author](authorCollection, mongoFilter)
@@ -64,6 +65,7 @@ func UpdateAuthorReputation(author_id uuid.UUID, reward float32) bool {
 	mongoFilter := bson.M{"author_id": author_id}
 	author, err := dbs.GetSingle[models.Author](authorCollection, mongoFilter)
 	if err != nil {
+		utils.LogError(err.Error())
 		return false
 	}
 	if author.Reputation == nil {

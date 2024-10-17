@@ -4,6 +4,7 @@ import (
 	"context"
 	"core/internal/user"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -84,6 +85,10 @@ func Secure() Middleware {
 }
 
 func RespondWithError(w http.ResponseWriter, code int, message string) {
+	defer func() {
+		s := fmt.Sprintf("%n "+message, code)
+		log.Printf(s)
+	}()
 	RespondWithJSON(w, code, map[string]string{"error": message})
 }
 

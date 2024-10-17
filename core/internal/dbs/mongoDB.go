@@ -2,9 +2,11 @@ package dbs
 
 import (
 	"context"
-	"errors"
 	"fmt"
+	"log"
 	"os"
+
+	"core/internal/utils"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -30,17 +32,16 @@ func dbConnection() *mongo.Database {
 	if err != nil {
 		panic(err)
 	}
-	defer func() {
-		if err = client.Disconnect(context.TODO()); err != nil {
-			panic(err)
-		}
-	}()
-	// Send a ping to confirm a successful connection
+	//defer func() {
+	//	if err = client.Disconnect(context.TODO()); err != nil {
+	//		panic(err)
+	//	}
+	//}()
 	var result bson.M
 	if err := client.Database(dbName).RunCommand(context.TODO(), bson.D{{"ping", 1}}).Decode(&result); err != nil {
 		panic(err)
 	}
-	fmt.Println("Pinged your deployment. You successfully connected to MongoDB!")
+	log.Println("Pinged your deployment. You successfully connected to MongoDB!")
 
 	return client.Database(dbName)
 }
@@ -65,13 +66,13 @@ func Get[T any](collection string,
 	results, err := col.Find(context.TODO(), filter, findOptions)
 	if err != nil {
 		if err != mongo.ErrNoDocuments {
-			fmt.Printf("Error retrieving documents from %s\n", collection)
+			log.Printf("Error retrieving documents from %s\n", collection)
 		}
 		return make([]T, 0)
 	}
 	var list []T
 	if err := results.All(context.TODO(), &list); err != nil {
-		fmt.Printf("Error marshalling list for %s\n", collection)
+		log.Printf("Error marshalling list for %s\n", collection)
 		return make([]T, 0)
 	}
 	return list
@@ -81,7 +82,7 @@ func GetSingle[T any](collection string, filter interface{}) (T, error) {
 	documents := Get[T](collection, filter, 1, "", false)
 	if len(documents) == 0 {
 		var document T
-		return document, errors.New("Failed to retrive single document")
+		return document, utils.LogError("Failed to retrive single document %s\n", collection)
 	}
 	return documents[0], nil
 }
@@ -128,13 +129,13 @@ func GetGrouped[T any](collection string,
 	results, err := col.Aggregate(context.TODO(), aggregate)
 	if err != nil {
 		if err != mongo.ErrNoDocuments {
-			fmt.Printf("Error retrieving documents from %s\n", collection)
+			log.Printf("Error retrieving documents from %s\n", collection)
 		}
 		return make([]T, 0)
 	}
 	var list []T
 	if err := results.All(context.TODO(), &list); err != nil {
-		fmt.Printf("Error marshalling list for %s\n", collection)
+		log.Printf("Error marshalling list for %s\n", collection)
 		return make([]T, 0)
 	}
 	return list
@@ -155,7 +156,7 @@ func AddOrUpdateMany(collection string, documents []interface{}) int64 {
 	}
 	results, err := col.BulkWrite(context.TODO(), operations)
 	if err != nil {
-		fmt.Printf("Failed to bulk Upsert %s\n", collection)
+		log.Printf("Failed to bulk Upsert %s\n", collection)
 		return 0
 	}
 	return results.UpsertedCount
@@ -171,7 +172,7 @@ func Remove(collection string, filter interface{}) int64 {
 	col := myDb.Collection(collection)
 	result, err := col.DeleteMany(context.TODO(), filter)
 	if err != nil {
-		fmt.Printf("Failed to bulk Delete %s\n", collection)
+		log.Printf("Failed to bulk Delete %s\n", collection)
 		return 0
 	}
 	return result.DeletedCount

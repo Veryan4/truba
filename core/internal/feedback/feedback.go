@@ -5,6 +5,7 @@ import (
 	"core/internal/models"
 	"core/internal/story"
 	"core/internal/user"
+	"core/internal/utils"
 	"time"
 
 	"github.com/google/uuid"
@@ -168,25 +169,26 @@ func FeedbackReceived(userFeedback UserFeedback) error {
 	}
 	currentStory, er := story.GetStoryById(userFeedback.StoryId)
 	if er != nil {
-		return er
+		return utils.LogError(er.Error())
 	}
 	uid, err := uuid.Parse(userFeedback.StoryId)
 	if err != nil {
-		return err
+		return utils.LogError(err.Error())
 	}
 	story.UpdateFeedbackCounts(uid, ConvertFeedbackTypeToString(userFeedback.FeedbackType))
-	if reward != 0 {
-		for _, keyword := range *currentStory.Keywords {
-			user.UpdateFromStory(userFeedback.UserId, *keyword.Keyword.Text, *keyword.Keyword.Text, reward, user.FAVORITE_KEYWORD_DB_COLLECTION_NAME, *currentStory.Language)
-		}
-		for _, entity := range *currentStory.Entities {
-			user.UpdateFromStory(userFeedback.UserId, *entity.Entity.Links, *entity.Entity.Text, reward, user.FAVORITE_ENTITY_DB_COLLECTION_NAME, *currentStory.Language)
-		}
-		user.UpdateFromStory(userFeedback.UserId, currentStory.Source.SourceId, *currentStory.Source.Name, reward, user.FAVORITE_ENTITY_DB_COLLECTION_NAME, *currentStory.Language)
-		story.UpdateSourceReputation(currentStory.Source.SourceId, reward)
-		user.UpdateFromStory(userFeedback.UserId, currentStory.Author.AuthorId.String(), *currentStory.Author.Name, reward, user.FAVORITE_ENTITY_DB_COLLECTION_NAME, *currentStory.Language)
-		story.UpdateAuthorReputation(currentStory.Author.AuthorId, reward)
+	if reward == 0 {
+		return nil
 	}
+	for _, keyword := range *currentStory.Keywords {
+		user.UpdateFromStory(userFeedback.UserId, *keyword.Keyword.Text, *keyword.Keyword.Text, reward, user.FAVORITE_KEYWORD_DB_COLLECTION_NAME, *currentStory.Language)
+	}
+	for _, entity := range *currentStory.Entities {
+		user.UpdateFromStory(userFeedback.UserId, *entity.Entity.Links, *entity.Entity.Text, reward, user.FAVORITE_ENTITY_DB_COLLECTION_NAME, *currentStory.Language)
+	}
+	user.UpdateFromStory(userFeedback.UserId, currentStory.Source.SourceId, *currentStory.Source.Name, reward, user.FAVORITE_ENTITY_DB_COLLECTION_NAME, *currentStory.Language)
+	story.UpdateSourceReputation(currentStory.Source.SourceId, reward)
+	user.UpdateFromStory(userFeedback.UserId, currentStory.Author.AuthorId.String(), *currentStory.Author.Name, reward, user.FAVORITE_ENTITY_DB_COLLECTION_NAME, *currentStory.Language)
+	story.UpdateAuthorReputation(currentStory.Author.AuthorId, reward)
 	return nil
 }
 

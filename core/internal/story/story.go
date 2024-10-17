@@ -2,7 +2,6 @@ package story
 
 import (
 	"encoding/json"
-	"errors"
 	"net/http"
 	"os"
 	"slices"
@@ -11,6 +10,7 @@ import (
 	"core/internal/dbs"
 	"core/internal/models"
 	"core/internal/user"
+	"core/internal/utils"
 
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
@@ -98,12 +98,12 @@ func AddOrUpdateStories(stories []models.Story) bool {
 func GetStoryById(storyId string) (models.Story, error) {
 	id, err := uuid.Parse(storyId)
 	if err != nil {
-		panic(err)
+		return models.Story{}, utils.LogError(err.Error())
 	}
 	mongoFilter := bson.M{"story_id": id}
 	currentStory := dbs.Get[models.StoryInDb](storyCollection, mongoFilter, 1, "", false)
 	if len(currentStory) == 0 {
-		return models.Story{}, errors.New("Couldn't find Story")
+		return models.Story{}, utils.LogError("Couldn't find Story")
 	}
 	return BuildStoriesFromDB(currentStory)[0], nil
 }
@@ -287,7 +287,7 @@ func GetSingleStory(not_id_list []uuid.UUID, language string) (models.ShortStory
 	}
 	stories := dbs.Get[models.StoryInDb](storyCollection, mongoFilter, -1, "", false)
 	if len(stories) == 0 {
-		return models.ShortStory{}, errors.New("Could not find another story")
+		return models.ShortStory{}, utils.LogError("Could not find another story")
 	}
 	return BuildShortStoriesFromDB(stories)[0], nil
 }

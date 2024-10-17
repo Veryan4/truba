@@ -2,13 +2,14 @@ package story
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 
 	"core/internal/dbs"
 	"core/internal/models"
+	"core/internal/utils"
 
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -34,6 +35,7 @@ func UpdateSourceReputation(sourceId string, reward float32) bool {
 	mongoFilter := bson.M{"source_id": sourceId}
 	source, err := dbs.GetSingle[models.Source](sourceCollection, mongoFilter)
 	if err != nil {
+		utils.LogError(err.Error())
 		return false
 	}
 	if source.Reputation == nil {
@@ -47,7 +49,7 @@ func UpdateSourceReputation(sourceId string, reward float32) bool {
 func GetSourceName(sourceId string) (*string, error) {
 	source, err := GetSourceById(sourceId)
 	if err != nil {
-		return nil, err
+		return nil, utils.LogError(err.Error())
 	}
 	return source.Name, nil
 }
@@ -79,7 +81,7 @@ func ResetSources() bool {
 	} else {
 		jsonFile, err := os.Open("../../data/scraper_data/sources_list.json")
 		if err != nil {
-			fmt.Println("Error opening sources_list.json")
+			log.Println("Error opening sources_list.json")
 			return false
 		}
 		defer jsonFile.Close()

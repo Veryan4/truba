@@ -23,8 +23,8 @@ func main() {
 	} else {
 		r.Schemes("https", "http", "wss", "ws")
 	}
-	r.Use(controllers.CORSMiddleware)
 	r.Use(controllers.LoggingMiddleware)
+	r.Use(controllers.CORSMiddleware)
 	// TODO look into brotli compression
 	http.ListenAndServe(":"+os.Getenv("CORE_UI_PORT"), r)
 }
