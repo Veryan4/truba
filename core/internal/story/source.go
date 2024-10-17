@@ -2,13 +2,14 @@ package story
 
 import (
 	"encoding/json"
-	"fmt"
-	"io"
+	"log"
 	"net/http"
 	"os"
 
+	"core/data"
 	"core/internal/dbs"
 	"core/internal/models"
+	"core/internal/utils"
 
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -34,6 +35,7 @@ func UpdateSourceReputation(sourceId string, reward float32) bool {
 	mongoFilter := bson.M{"source_id": sourceId}
 	source, err := dbs.GetSingle[models.Source](sourceCollection, mongoFilter)
 	if err != nil {
+		utils.LogError(err.Error())
 		return false
 	}
 	if source.Reputation == nil {
@@ -47,7 +49,7 @@ func UpdateSourceReputation(sourceId string, reward float32) bool {
 func GetSourceName(sourceId string) (*string, error) {
 	source, err := GetSourceById(sourceId)
 	if err != nil {
-		return nil, err
+		return nil, utils.LogError(err.Error())
 	}
 	return source.Name, nil
 }
@@ -71,26 +73,25 @@ func ResetSources() bool {
 	res, err := client.Do(req)
 	sources := make([]interface{}, 0)
 	if err == nil {
+		defer res.Body.Close()
 		var airtableRecords AirTableRecords
 		json.NewDecoder(res.Body).Decode(&airtableRecords)
 		for _, record := range airtableRecords.Records {
 			sources = append(sources, record.Fields)
 		}
 	} else {
-		jsonFile, err := os.Open("../../data/scraper_data/sources_list.json")
+		jsonFile, err := data.ScraperData.ReadFile("scraper_data/sources_list.json")
 		if err != nil {
-			fmt.Println("Error opening sources_list.json")
+			log.Println("Error opening sources_list.json")
+			log.Println(err.Error())
 			return false
 		}
-		defer jsonFile.Close()
-		byteValue, _ := io.ReadAll(jsonFile)
 		var sourcesFile SourcesFile
-		json.Unmarshal(byteValue, &sourcesFile)
+		json.Unmarshal(jsonFile, &sourcesFile)
 		for _, source := range sourcesFile.Sources {
 			sources = append(sources, source)
 		}
 	}
-	defer res.Body.Close()
 	return dbs.AddOrUpdateMany(sourceCollection, sources) > 0
 }
 

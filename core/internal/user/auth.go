@@ -3,9 +3,10 @@ package user
 import (
 	"context"
 	"crypto/rand"
-	"errors"
 	"os"
 	"time"
+
+	"core/internal/utils"
 
 	"github.com/golang-jwt/jwt"
 	"golang.org/x/crypto/bcrypt"
@@ -58,7 +59,7 @@ func CreateAccessToken(data jwt.MapClaims, expiresDelta time.Duration) (string, 
 func GoogleTokenCheck(token string) (User, error) {
 	decodedToken, err := idtoken.Validate(context.Background(), token, os.Getenv("GOOGLE_CLIENT_ID"))
 	if err != nil {
-		panic(err)
+		return User{}, utils.LogError(err.Error())
 	}
 	return FindOrCreateUser(decodedToken.Claims["email"].(string), decodedToken.Claims["name"].(string))
 }
@@ -66,18 +67,21 @@ func GoogleTokenCheck(token string) (User, error) {
 func ForgotPassword(userEmail string) error {
 	currentUser, err := GetUserByEmail(userEmail)
 	if err != nil {
-		return err
+		return utils.LogError(err.Error())
 	}
 	resetPasswordTokenExpires := time.Duration(RESET_PASSWORD_TOKEN_EXPIRE_MINUTES) * time.Minute
 	randomByteCount := 20
 	randomBytes := make([]byte, randomByteCount)
 	_, er := rand.Read(randomBytes)
 	if er != nil {
-		return err
+		return utils.LogError(er.Error())
 	}
 	randomByteString := string(randomBytes[:])
 	resetPasswordToken, err := CreateAccessToken(jwt.MapClaims{"sub": randomByteString}, resetPasswordTokenExpires)
-	updatedUser := UpdateResetPasswordToken(currentUser, resetPasswordToken)
+	updatedUser, e := UpdateResetPasswordToken(currentUser, resetPasswordToken)
+	if e != nil {
+		return utils.LogError(e.Error())
+	}
 	url := os.Getenv("APP_URL") + "/password?token=" + resetPasswordToken
 	return SendForgotPasswordEmail(updatedUser.Email, url)
 }
@@ -85,15 +89,15 @@ func ForgotPassword(userEmail string) error {
 func ResetPassword(tokenString string, newPassword string) (User, error) {
 	tokenSub, err := GetTokenSub(tokenString)
 	if err != nil {
-		return User{}, errors.New("Failed to parse token")
+		return User{}, utils.LogError("Failed to parse token")
 	}
 	currentUser, er := ResetPasswordByToken(tokenSub, newPassword)
 	if er != nil {
-		return User{}, er
+		return User{}, utils.LogError(er.Error())
 	}
 	e := SendResetPasswordEmail(currentUser.Email)
 	if e != nil {
-		return User{}, e
+		return User{}, utils.LogError(e.Error())
 	}
 	return currentUser, nil
 }
@@ -103,7 +107,7 @@ func GetTokenSub(tokenString string) (string, error) {
 		return os.Getenv("JWT_SECRET"), nil
 	})
 	if err != nil {
-		return "", errors.New("Failed to parse token")
+		return "", utils.LogError("Failed to parse token")
 	}
 	claims := token.Claims.(jwt.MapClaims)
 	return claims["sub"].(string), nil

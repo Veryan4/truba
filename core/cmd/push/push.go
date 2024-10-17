@@ -50,8 +50,8 @@ func sendPushNotification(subscription string, notification []byte) {
 		VAPIDPrivateKey: os.Getenv("PRIVATE_VAPID"),
 		TTL:             30,
 	})
-	defer resp.Body.Close()
 	if err != nil {
 		return
 	}
+	defer resp.Body.Close()
 }

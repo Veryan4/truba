@@ -2,7 +2,7 @@ package user
 
 import (
 	"core/internal/dbs"
-	"errors"
+	"core/internal/utils"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -169,6 +169,6 @@ func GetFavoriteCollection(collection string) (string, error) {
 	case "entity":
 		return FAVORITE_ENTITY_DB_COLLECTION_NAME, nil
 	default:
-		return "", errors.New("No Favorite Collection Found")
+		return "", utils.LogError("No Favorite Collection Found")
 	}
 }

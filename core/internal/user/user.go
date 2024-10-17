@@ -1,10 +1,10 @@
 package user
 
 import (
-	"errors"
 	"time"
 
 	"core/internal/dbs"
+	"core/internal/utils"
 
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
@@ -43,7 +43,7 @@ func AddUser(createUser CreateUser) (User, error) {
 	mongoFilter := bson.M{"email": createUser.Email}
 	currentUsers := dbs.Get[User](userCollection, mongoFilter, -1, "", false)
 	if len(currentUsers) > 0 {
-		return User{}, errors.New("User already exists")
+		return User{}, utils.LogError("User already exists")
 	}
 	uid, err := uuid.NewUUID()
 	if err != nil {
@@ -62,7 +62,7 @@ func AddUser(createUser CreateUser) (User, error) {
 	}
 	result := dbs.AddOrUpdateOne(userCollection, newUser)
 	if result == 0 {
-		return User{}, errors.New("Failed to creat User in DB")
+		return User{}, utils.LogError("Failed to creat User in DB")
 	}
 	SendUserInitEmail(createUser.Email)
 	return dbs.GetSingle[User](userCollection, bson.M{"email": createUser.Email})
@@ -72,7 +72,7 @@ func UpdateUser(userUpdate User) (User, error) {
 	mongoFilter := bson.M{"user_id": userUpdate.UserId}
 	currentUser, err := dbs.GetSingle[User](userCollection, mongoFilter)
 	if err != nil {
-		return User{}, errors.New("User doesn't exist in DB")
+		return User{}, utils.LogError("User doesn't exist in DB")
 	}
 	currentUser.HasPersonalization = userUpdate.HasPersonalization
 	currentUser.IsPersonalized = userUpdate.IsPersonalized
@@ -88,7 +88,7 @@ func UpdateUser(userUpdate User) (User, error) {
 	}
 	result := dbs.AddOrUpdateOne(userCollection, currentUser)
 	if result == 0 {
-		return User{}, errors.New("Failed to update User in DB")
+		return User{}, utils.LogError("Failed to update User in DB")
 	}
 	return currentUser, nil
 }
@@ -124,7 +124,7 @@ func FindOrCreateUser(userEmail string, userName string) (User, error) {
 		SendUserInitEmail(userEmail)
 		return dbs.GetSingle[User](userCollection, bson.M{"email": userEmail})
 	}
-	return User{}, errors.New("failed to create user")
+	return User{}, utils.LogError("failed to create user")
 }
 
 func GetUserIds() []string {
@@ -160,12 +160,12 @@ func UnsubscribeUserEmail(userEmail string) bool {
 	return dbs.AddOrUpdateOne(userCollection, currentUser) > 1
 }
 
-func UpdateResetPasswordToken(currentUser User, randomBytes string) User {
+func UpdateResetPasswordToken(currentUser User, randomBytes string) (User, error) {
 	currentUser.ResetPasswordBytes = randomBytes
 	if dbs.AddOrUpdateOne(userCollection, currentUser) > 1 {
-		return currentUser
+		return currentUser, nil
 	}
-	panic("Failed to update User reset token")
+	return User{}, utils.LogError("Failed to update User reset token")
 }
 
 func ResetPasswordByToken(randomBytes string, password string) (User, error) {
@@ -180,5 +180,5 @@ func ResetPasswordByToken(randomBytes string, password string) (User, error) {
 	if dbs.AddOrUpdateOne(userCollection, currentUser) > 1 {
 		return currentUser, nil
 	}
-	return User{}, errors.New("Failed to update User password")
+	return User{}, utils.LogError("Failed to update User password")
 }

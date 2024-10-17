@@ -1,8 +1,6 @@
 package user
 
 import (
-	"core/internal/models"
-	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -11,6 +9,9 @@ import (
 	"os"
 	"strconv"
 	"strings"
+
+	"core/internal/models"
+	"core/internal/utils"
 
 	gomail "gopkg.in/mail.v2"
 )
@@ -48,7 +49,7 @@ func SendUserInitEmail(toEmail string) error {
 
 	d := gomail.NewDialer("smtp.gmail.com", 465, senderEmail, password)
 	if err := d.DialAndSend(message); err != nil {
-		return errors.New("Failed to send Initial email")
+		return utils.LogError("Failed to send Initial email")
 	}
 	return nil
 }
@@ -81,7 +82,7 @@ func SendForgotPasswordEmail(toEmail string, url string) error {
 
 	d := gomail.NewDialer("smtp.gmail.com", 465, senderEmail, password)
 	if err := d.DialAndSend(message); err != nil {
-		return errors.New("Failed to send forgot password email")
+		return utils.LogError("Failed to send forgot password email")
 	}
 	return nil
 }
@@ -115,7 +116,7 @@ func SendResetPasswordEmail(toEmail string) error {
 
 	d := gomail.NewDialer("smtp.gmail.com", 465, senderEmail, password)
 	if err := d.DialAndSend(message); err != nil {
-		return errors.New("Failed to send forgot password email")
+		return utils.LogError("Failed to send forgot password email")
 	}
 	return nil
 }
@@ -506,8 +507,8 @@ func saveStoryImage(currentStory models.ShortStory, index int) bool {
 	if e != nil {
 		return false
 	}
-	imageName := getImageNameFromUrl(*currentStory.Image)
 	defer response.Body.Close()
+	imageName := getImageNameFromUrl(*currentStory.Image)
 	file, err := os.Create("/tmp/" + imageName)
 	if err != nil {
 		return false
