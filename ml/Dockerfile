@@ -21,10 +21,7 @@ COPY --from=compile-image /opt/venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
 COPY ./ml/ .
-COPY ./shared/ ./shared/
 COPY ./schemas/ ./schemas/
-
-RUN python ./shared/setup.py
 
 RUN datamodel-codegen  --input ./schemas/AllTypes.yaml --aliases ./schemas/aliases.json --output project_types.py
 

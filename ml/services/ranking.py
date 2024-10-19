@@ -1,13 +1,17 @@
 from pydantic import BaseModel, Field
 from typing import Dict, Text, Any
 import requests
+import logging
 import pandas as pd
 import numpy as np
 import tensorflow as tf
 import tensorflow_recommenders as tfrs
+import os
 
 from services import mongo
-from shared import setup, bson_id
+from classes import bson_id
+
+logger = logging.getLogger(__name__)
 
 RANKING_MODEL_WEIGHTS_DIR = "tf_models/my_model_weights"
 RANKING_MODEL_DATASET_DIR = "tf_models/dataset.parquet"
@@ -498,20 +502,20 @@ def get_indexes():
   indexes = {}
   model = load_ranking_model()
   if not model:
-    print("Failed to load model index.")
+    logger.error("Failed to load model index.")
     return None
   for language in LANGUAGES:
-    response = requests.get(setup.get_base_core_service_url() +
+    response = requests.get(os.getenv("CORE_URL") +
                             "/update-index/" + language)
     if not response:
-      print("Failed to initialize " + language +
+      logger.error("Failed to initialize " + language +
             " index. Update Index call failed")
       return None
     recent_stories = list(response.json())
     df = pd.DataFrame(recent_stories)
     dic = dict(df)
     if not dic:
-      print("Failed to initialize " + language + " index. There was no Data")
+      logger.error("Failed to initialize " + language + " index. There was no Data")
       return None
     dataset = tf.data.Dataset.from_tensor_slices(dic)
 

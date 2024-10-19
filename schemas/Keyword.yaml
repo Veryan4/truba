@@ -4,6 +4,9 @@ components:
       properties:
         _id:
           type: any
+          x-go-type: primitive.ObjectID
+          x-go-type-import:
+            path: go.mongodb.org/mongo-driver/bson/primitive
         text:
           type: string
         language:

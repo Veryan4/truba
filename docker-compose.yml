@@ -26,29 +26,3 @@ services:
     build:
       context: ./
       dockerfile: ./ml/Dockerfile
-
-  solr:
-    image: veryan4/solr:develop
-    build:
-      context: ./
-      dockerfile: ./solr/Dockerfile
-
-  jupyter:
-    image: veryan4/jupyter
-    build:
-      context: ./
-      dockerfile: ./jupyter/Dockerfile
-    network_mode: "host"
-    ports:
-      - '8888:8888'
-    environment:
-      - ENVIRONMENT=develop
-      - CORE_HOSTNAME=localhost
-      - CORE_PORT=5057
-      - CORE_DB_HOSTNAME=localhost
-      - CORE_DB_PORT=27017
-      - MONGO_USERNAME=foo
-      - MONGO_PASSWORD=bar
-      - ML_HOSTNAME=localhost
-      - ML_PORT=5158
-

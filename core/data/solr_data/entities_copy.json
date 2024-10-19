@@ -1,6 +1,0 @@
-{
-    "add-copy-field" : {
-        "source":"Entities",
-        "dest":"Entities_tfidf"
-    }
-}

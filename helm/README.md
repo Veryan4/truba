@@ -31,7 +31,6 @@ You will want to add the CNAME records pointed towards your cloudflare tunnel
 - `<domain-name>`
 - `grafana.<domain-name>`
 - `mongo.<domain-name>`
-- `jaeger.<domain-name>`
 - `coreui.<domain-name>`
 - `develop.<domain-name>`
 - `developcoreui.<domain-name>`

@@ -7,7 +7,6 @@ export class IdValuePair {
 
 export class FavoriteItem {
   _id?: string;
-  id?: string;
   user_id?: string;
   identifier: string;
   value: string;
@@ -19,7 +18,7 @@ export class FavoriteItem {
   language: string;
 
   constructor(idValuePair: IdValuePair, user: User) {
-    this.user_id = user.id;
+    this.user_id = user.user_id;
     this.identifier = idValuePair.id;
     this.value = idValuePair.value;
     this.language = user.language;

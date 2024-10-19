@@ -1,9 +1,0 @@
-{
-    "add-field" : {
-        "name":"querytext",
-        "type":"text_tfidf",
-        "indexed":"true",
-        "stored":"true",
-        "multiValued":"true"
-    }
-}

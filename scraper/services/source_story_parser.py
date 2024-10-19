@@ -1,9 +1,9 @@
 import traceback
 from bs4 import BeautifulSoup
+import logging
 
-from shared import tracing
 
-current_module = 'Source Story Parsers'
+logger = logging.getLogger(__name__)
 
 
 def log_error(func):
@@ -13,7 +13,7 @@ def log_error(func):
       return func(*args)
     except Exception:
       message_to_log = traceback.format_exc()
-      tracing.log(current_module, 'exception', message_to_log)
+      logger.error(message_to_log)
       return None
 
   return inner

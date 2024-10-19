@@ -2,13 +2,13 @@ import requests
 import os
 import traceback
 import importlib
+import logging
 from typing import List, Tuple, Optional
 from fastapi.encoders import jsonable_encoder
 
 import project_types
-from shared import setup, tracing
 
-current_module = 'Scraper'
+logger = logging.getLogger(__name__)
 
 
 def reset_sources() -> None:
@@ -16,9 +16,9 @@ def reset_sources() -> None:
 
     """
 
-  response = requests.get(setup.get_base_core_service_url() + '/sources/reset')
+  response = requests.get(os.getenv("CORE_URL") + '/sources/reset')
   if response.status_code == 404:
-    tracing.log(current_module, 'error', 'Unable to reset sources')
+    logger.error('Unable to reset sources')
 
 
 def get_sources() -> Optional[Tuple[project_types.Source]]:
@@ -29,10 +29,10 @@ def get_sources() -> Optional[Tuple[project_types.Source]]:
 
     """
 
-  response = requests.get(setup.get_base_core_service_url() + '/sources/' +
+  response = requests.get(os.getenv("CORE_URL") + '/sources/' +
                           os.getenv("SCRAPER_LANGUAGE"))
   if response.status_code == 404:
-    tracing.log(current_module, 'error', 'No Sources found')
+    logger.error('No Sources found')
     return None
   source_dict = response.json()
   return tuple(project_types.Source(**source) for source in source_dict)
@@ -49,8 +49,11 @@ def push_stories_to_core(source: project_types.Source,
 
     """
 
+  if not stories:
+    logger.info('no stories to push for ' + source.name)
+    return
   json_to_push = jsonable_encoder(stories)
-  requests.post(setup.get_base_core_service_url() + '/stories',
+  requests.post(os.getenv("CORE_URL") + '/stories',
                 json=json_to_push)
   recently_scraped_urls = [
       project_types.ScrapedUrl(published_at=scraped_story.published_at,
@@ -60,11 +63,11 @@ def push_stories_to_core(source: project_types.Source,
   ]
   if recently_scraped_urls:
     scrapped_json = jsonable_encoder(recently_scraped_urls)
-    requests.post(setup.get_base_core_service_url() + '/scraped',
+    requests.post(os.getenv("CORE_URL") + '/scraped',
                   json=scrapped_json)
   message_to_log = str(
       len(stories)) + ' stories were extracted from the Source: ' + source.name
-  tracing.log(current_module, 'info', message_to_log)
+  logger.info(message_to_log)
 
 
 def get_source_class(source: project_types.Source):
@@ -99,17 +102,6 @@ def scrape():
       source_scraped = soucer_scraper(source)
       stories = source_scraped.stories
       push_stories_to_core(source, stories)
-      # solr is temporarily removed
-      #refill_solr()
     except Exception:
       message_to_log = traceback.format_exc()
-      tracing.log(current_module, 'error', message_to_log)
-
-
-def refill_solr():
-  """Attempts to trigger the Solr re-indexing after new stories have been added.
-
-    """
-
-  result = requests.get(setup.get_base_core_service_url() + '/solr/reset')
-  tracing.log(current_module, 'info', result)
+      logger.error(message_to_log)

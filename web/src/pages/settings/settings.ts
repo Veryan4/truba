@@ -217,10 +217,10 @@ class Settings extends LitElement {
     favorite_items: FavoriteItem[],
     recommended_items: FavoriteItem[]
   ): FavoriteItem[] {
-    const recommended = recommended_items.filter(
-      (rec) => !favorite_items.some((fav) => fav.identifier === rec.identifier)
-    );
-    return favorite_items.concat(recommended);
+    const recommended = recommended_items?.filter(
+      (rec) => !favorite_items?.some((fav) => fav.identifier === rec.identifier)
+    ) ?? [];
+    return favorite_items?.concat(recommended) ?? [];
   }
 
   toggle(item: FavoriteItem, type: string): void {
