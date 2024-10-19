@@ -9,11 +9,11 @@ components:
         user_id:
           type: string
         relevancy_rate:
-          type: number 
+          type: number
           default: 0.0
         time_stamp:
-          type: number 
-          default: 0.0
+          type: string
+          format: date-time
         story_title:
           type: string
         source_alexa_rank:

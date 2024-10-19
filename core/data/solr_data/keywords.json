@@ -1,9 +1,0 @@
-{
-    "replace-field" : {
-        "name":"Keywords",
-        "type":"text_general",
-        "indexed":"true",
-        "stored":"true",
-        "multiValued":"true"
-    }
-}

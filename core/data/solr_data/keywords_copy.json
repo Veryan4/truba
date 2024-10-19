@@ -1,6 +1,0 @@
-{
-    "add-copy-field" : {
-       "source":"Keywords",
-       "dest":"Keywords_tfidf"
-    }
-}
