@@ -1,33 +1,28 @@
-FROM python:3.11-slim-buster AS compile-image
+FROM golang:1.23-alpine AS build
 
-RUN apt-get update
-RUN apt-get install -y --no-install-recommends build-essential gcc
+WORKDIR /app
 
-RUN python -m venv /opt/venv
-# Make sure we use the virtualenv:
-ENV PATH="/opt/venv/bin:$PATH"
-
-COPY ./core/ .
-COPY ./shared/ ./shared/
-COPY ./schemas/ ./schemas/
-
-RUN pip install -r requirements.txt
-RUN datamodel-codegen  --input ./schemas/AllTypes.yaml --aliases ./schemas/aliases.json --output project_types.py
-
-RUN pip install -r requirements-for-tests.txt
-RUN pytest -vv tests
-RUN cd .. && pip uninstall -y -r requirements-for-tests.txt
-
-FROM python:3.11-slim-buster AS build-image
-COPY --from=compile-image /opt/venv /opt/venv
-
-# Make sure we use the virtualenv:
-ENV PATH="/opt/venv/bin:$PATH"
+COPY ./core/go.mod ./
+COPY ./core/go.sum ./
+RUN go mod download
 
 COPY ./core/ .
-RUN rm -r ./tests
-COPY ./shared/ ./shared/
+COPY ./schemas/ ../schemas/
 
-RUN python ./shared/setup.py
+RUN go run ./tools/tools.go
 
-CMD gunicorn --workers=4 --worker-class=uvicorn.workers.UvicornH11Worker --bind=0.0.0.0:5057 core:app
+RUN mkdir build
+RUN go build -C ./cmd/core/ -o ../../build
+RUN go build -C ./cmd/coreui/ -o ../../build
+RUN go build -C ./cmd/push/ -o ../../build
+RUN go build -C ./cmd/worker/ -o ../../build
+
+FROM alpine:latest
+
+WORKDIR /app
+
+RUN mkdir tmp
+COPY --from=build /app/data .
+COPY --from=build /app/build .
+
+CMD ["/app/core"]

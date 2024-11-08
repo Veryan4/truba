@@ -1,4 +1,4 @@
-FROM node:18 as builder
+FROM node:20 as builder
 
 WORKDIR /app
 COPY ./web/package.json /app
@@ -13,7 +13,7 @@ ARG ENVIRONMENT=develop
 
 RUN npm run "build-"$ENVIRONMENT
 
-FROM fholzer/nginx-brotli:v1.21.6
+FROM fholzer/nginx-brotli:v1.26.2
 
 ## Remove default nginx website
 RUN rm -rf /usr/share/nginx/html/*

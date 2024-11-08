@@ -20,6 +20,9 @@ class FeedbackEmojiComponent extends LitElement {
   @property({ type: String })
   story_id: string;
 
+  @property({ type: String })
+  source_id: string;
+
   constructor() {
     super();
   }
@@ -138,7 +141,7 @@ class FeedbackEmojiComponent extends LitElement {
         `#${feedbackType + "-" + this.story_id}`
       )!;
       articleEl.classList.add("active");
-      newsService.getSingleArticle(userService.getUser(), this.story_id).then(() => articleEl.classList.remove("active"));
+      newsService.getSingleArticle(userService.getUser(), this.story_id, this.source_id).then(() => articleEl.classList.remove("active"));
     }
   }
 }

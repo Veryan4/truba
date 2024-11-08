@@ -13,6 +13,7 @@ export const personalizationService = {
   postFeedback,
   toggleFavorite,
   removeFavorite,
+  addFavorite
 };
 
 function getPersonalization(user: User): Promise<Recommendation> {
@@ -27,20 +28,23 @@ function getPersonalization(user: User): Promise<Recommendation> {
 
 function postUpdatePersonalization(
   type: string,
-  favoriteItem: FavoriteItem
+  favoriteItem: FavoriteItem,
 ): Promise<any> {
-  return httpService.post<any>(appConfig.backendApi + type, favoriteItem);
+  return httpService.post<any>(
+    appConfig.backendApi + "favorite/" + type,
+    favoriteItem,
+  );
 }
 
 function postFeedback(
   searchTerm: string,
   storyId: string,
-  feedBackType: FeedbackType
+  feedBackType: FeedbackType,
 ): void {
   const currentUser = userService.getUser();
   if (!currentUser) return;
   const postData = {
-    user_id: currentUser.id,
+    user_id: currentUser.user_id,
     search_term: searchTerm,
     story_id: storyId,
     feedback_type: feedBackType,
@@ -57,7 +61,7 @@ function toggleFavorite(item: FavoriteItem, type: string): Promise<any> {
     item.relevancy_rate = 0.0;
   }
   const u = userService.getUser();
-  if (u) item.user_id = u.id;
+  if (u) item.user_id = u.user_id;
   return postUpdatePersonalization(type, item).catch((err) => {
     item.is_favorite = !item.is_favorite;
   });
@@ -67,6 +71,15 @@ function removeFavorite(item: FavoriteItem, type: string): Promise<any> {
   item.is_favorite = false;
   item.is_deleted = true;
   item.relevancy_rate = 0.0;
+  return postUpdatePersonalization(type, item).catch((err) => {
+    item.is_favorite = !item.is_favorite;
+  });
+}
+
+function addFavorite(item: FavoriteItem, type: string): Promise<any> {
+  item.is_favorite = true;
+  item.is_added = true;
+  item.relevancy_rate = 1.0;
   return postUpdatePersonalization(type, item).catch((err) => {
     item.is_favorite = !item.is_favorite;
   });

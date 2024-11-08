@@ -1,11 +1,12 @@
 {
   "name": "truba",
   "short_name": "truba",
-  "theme_color": "#000000",
-  "background_color": "#fafafa",
-  "display": "standalone",
-  "scope": "/",
   "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fafafa",
+  "lang": "en",
+  "scope": "/",
+  "theme_color": "#000000",
   "icons": [
     {
       "src": "/icons/icon-72x72.png",
@@ -52,8 +53,19 @@
     {
       "src": "/icons/icon-512x512.png",
       "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
       "type": "image/png",
-      "purpose": "maskable any"
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }

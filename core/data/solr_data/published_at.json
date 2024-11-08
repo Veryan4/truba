@@ -1,9 +1,0 @@
-{
-  "add-field": {
-    "name": "PublishedAt",
-    "type": "pdate",
-    "indexed": "true",
-    "stored": "true",
-    "multiValued": "false"
-  }
-}

@@ -2,9 +2,8 @@ requests
 python-dotenv
 fastapi
 bson
-jaeger_client
-prometheus_client
 pydantic
+pydantic[email,timezone]
 bs4
 lxml
 more_itertools

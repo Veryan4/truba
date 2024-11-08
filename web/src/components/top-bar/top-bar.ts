@@ -21,7 +21,7 @@ import "../../material-web";
 class TopBar extends LitElement {
   static styles = [mdcTopAppBarStyles, iconButtonStyles, styles];
 
-  private i18n = new TranslationController(this, {scope:"header"});
+  private i18n = new TranslationController(this, { scope: "header" });
   private user = new UserController(this);
   private device = new DeviceController(this);
   private theme = new ThemeController(this);
@@ -140,6 +140,7 @@ class TopBar extends LitElement {
     this.menu.open = false;
     await userService.signOut();
     await newsService.getNews(null);
+    routerService.navigate("/");
   }
 
   async language(lang: string): Promise<void> {

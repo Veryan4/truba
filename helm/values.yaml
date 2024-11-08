@@ -13,8 +13,8 @@ configMap:
   defaultUserId: "1a9c14f8-6610-4793-89b3-128f78d2b720"
   publicVapid: "BAQE9ZzSk_rjUO3q-7jpmI_ml4C_EFefijwFfJSlwpqqXB01PaPOYorJJmVlN7WrbseedqMoy-6ZWSSZJQlECWE"
   airtableId: "appXAWgdvcKQpJKiz"
-  gmailSenderEmail: "info@truba.news"
-  gmailSenderName: "truba news"
+  mailSenderEmail: "info@truba.news"
+  mailSenderName: "truba news"
 
 #DO NOT COMMIT CHANGES TO SECRET VALUES TO GIT
 secrets:
@@ -24,7 +24,7 @@ secrets:
   googleClientId: foobar
   privateVapid: foobar
   dockerConfig: foobar
-  gmailPassword: foobar
+  mailPassword: foobar
   airtableApiKey: foobar
 
 schedules:
@@ -43,12 +43,10 @@ services:
     isClusterPublic: true
     port: 5057
     command:
-      - gunicorn
-      - --workers=4
-      - --worker-class=uvicorn.workers.UvicornH11Worker
-      - --bind=0.0.0.0:5057
-      - core:app
+      - /app/core
     env:
+      coreUrl:
+        name: CORE_URL
       dbHostName:
         name: CORE_DB_HOSTNAME
       dbPort:
@@ -65,18 +63,8 @@ services:
         name: REDIS_PORT
       redisQueue:
         name: REDIS_QUEUE
-      solrHostname:
-        name: SOLR_HOSTNAME
-      solrPort:
-        name: SOLR_PORT
-      mlHostname:
-        name: ML_HOSTNAME
-      mlPort:
-        name: ML_PORT
-      jaegerHostname:
-        name: JAEGER_AGENT_HOSTNAME
-      jaegerPort:
-        name: JAEGER_AGENT_PORT
+      mlUrl:
+        name: ML_URL
       airtableApiKey:
         name: AIRTABLE_API_KEY
         isSecret: true
@@ -90,12 +78,10 @@ services:
     hasIngress: true
     port: 6168
     command:
-      - gunicorn
-      - --workers=4
-      - --worker-class=uvicorn.workers.UvicornH11Worker
-      - --bind=0.0.0.0:6168
-      - coreui:app
+      - /app/coreui
     env:
+      coreUiPort:
+        name: CORE_UI_PORT
       dbHostName:
         name: CORE_DB_HOSTNAME
       dbPort:
@@ -112,18 +98,8 @@ services:
         name: REDIS_PORT
       redisQueue:
         name: REDIS_QUEUE
-      solrHostname:
-        name: SOLR_HOSTNAME
-      solrPort:
-        name: SOLR_PORT
-      mlHostname:
-        name: ML_HOSTNAME
-      mlPort:
-        name: ML_PORT
-      jaegerHostname:
-        name: JAEGER_AGENT_HOSTNAME
-      jaegerPort:
-        name: JAEGER_AGENT_PORT
+      mlUrl:
+        name: ML_URL
       jwtSecret:
         name: JWT_SECRET
         isSecret: true
@@ -137,14 +113,16 @@ services:
         isSecret: true
       publicVapid:
         name: PUBLIC_VAPID
-      domainName:
-        name: DOMAIN_NAME
-      gmailAddress:
-        name: GMAIL_ADDRESS
-      gmailSenderName:
-        name: GMAIL_SENDER_NAME
-      gmailPassword:
-        name: GMAIL_PASSWORD
+      appUrl:
+        name: APP_URL
+      appWWWUrl:
+        name: APP_WWW_URL
+      mailAddress:
+        name: MAIL_ADDRESS
+      mailSenderName:
+        name: MAIL_SENDER_NAME
+      mailPassword:
+        name: MAIL_PASSWORD
         isSecret: true
       airtableApiKey:
         name: AIRTABLE_API_KEY
@@ -158,8 +136,7 @@ services:
     isCustomImage: true
     port: 6168
     command:
-      - python
-      - worker.py
+      - /app/worker
     env:
       dbHostName:
         name: CORE_DB_HOSTNAME
@@ -177,18 +154,8 @@ services:
         name: REDIS_PORT
       redisQueue:
         name: REDIS_QUEUE
-      solrHostname:
-        name: SOLR_HOSTNAME
-      solrPort:
-        name: SOLR_PORT
-      mlHostname:
-        name: ML_HOSTNAME
-      mlPort:
-        name: ML_PORT
-      jaegerHostname:
-        name: JAEGER_AGENT_HOSTNAME
-      jaegerPort:
-        name: JAEGER_AGENT_PORT
+      mlUrl:
+        name: ML_URL
       airtableApiKey:
         name: AIRTABLE_API_KEY
         isSecret: true
@@ -197,7 +164,7 @@ services:
 
   coreRedis:
     name: redis
-    imageName: redis:4.0.6-alpine
+    imageName: redis:7.2-alpine
     isClusterPublic: true
     port: 6379
     env:
@@ -248,15 +215,5 @@ services:
       mongoPW:
         name: MONGO_PASSWORD
         isSecret: true
-      solrHostname:
-        name: SOLR_HOSTNAME
-      solrPort:
-        name: SOLR_PORT
-      coreHostname:
-        name: CORE_HOSTNAME
-      corePort:
-        name: CORE_PORT
-      jaegerHostname:
-        name: JAEGER_AGENT_HOSTNAME
-      jaegerPort:
-        name: JAEGER_AGENT_PORT
+      coreUrl:
+        name: CORE_URL

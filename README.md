@@ -2,7 +2,7 @@
 
 # Truba
 
-This is an Open Source news application, built largely in Javascript and Python. The goal of this application is to give users control over their personalization, and to be as transparent as possible while doing so.
+This is an Open Source news application, built largely in Golang, Typescript, and Python. The goal of this application is to give users control over their personalization, and to be as transparent as possible while doing so.
 https://truba.news
 
 At the same time it aims to provide a boilerplate experience for self-hosting a fullstack application, enabling the rapid ability to do all of the following:

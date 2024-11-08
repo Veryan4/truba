@@ -92,15 +92,11 @@ function updateUser(user: any): Promise<User | null> {
     ? user.language
     : translateService.getLanguage();
   return httpService
-    .put(appConfig.backendApi + "users", {
-      id: user.id,
+    .patch(appConfig.backendApi + "users", {
       user_id: user.user_id,
       username: user.username,
-      email: user.email,
-      is_personalized: user.is_personalized,
       language: lang,
-      has_personalization: user.has_personalization,
-      rated_count: user.rated_count,
+      is_personalized: user.is_personalized,
       subscription: user.subscription,
     }, true)
     .then((data: any) => {
@@ -172,6 +168,7 @@ function subscribeUser(user: User) {
       reg.pushManager
         .subscribe({
           userVisibleOnly: true,
+          applicationServerKey: appConfig.publicVapid
         })
         .then((sub) => {
           user.subscription = sub;

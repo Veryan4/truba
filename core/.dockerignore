@@ -1,5 +1,4 @@
 .git/
 .gigtignore
-redis/
-__pycache__/
-project_types.py
+vendor/
+models/

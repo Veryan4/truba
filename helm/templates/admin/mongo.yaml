@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: mongo
-          image: mongo:4.2.3-bionic
+          image: mongo:8.0
           imagePullPolicy: IfNotPresent
           resources: {}
           env:

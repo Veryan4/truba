@@ -9,10 +9,11 @@ components:
         user_id:
           type: string
         relevancy_rate:
-          type: number 
+          type: number
           default: 0.0
         time_stamp:
-          type: number 
+          type: number
+          x-go-type: float64
           default: 0.0
         story_title:
           type: string

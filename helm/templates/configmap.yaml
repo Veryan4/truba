@@ -6,28 +6,28 @@ metadata:
   name: configs
   namespace: {{ . }}
 data:
-  CORE_HOSTNAME: "{{ $.Values.services.core.name }}"
-  CORE_PORT: "{{ $.Values.services.core.port }}"
+  CORE_URL: "http://{{ $.Values.services.core.name }}:{{ $.Values.services.core.port }}"
   CORE_UI_HOSTNAME: "{{ $.Values.services.coreUi.name }}"
   CORE_UI_PORT: "{{ $.Values.services.coreUi.port }}"
   CORE_DB_HOSTNAME: "mongo"
   CORE_DB_PORT: "27017"
-  ML_HOSTNAME: "{{ $.Values.services.ml.name }}"
-  ML_PORT: "{{ $.Values.services.ml.port }}"
+  ML_URL: "http://{{ $.Values.services.ml.name }}:{{ $.Values.services.ml.port }}"
   REDIS_HOSTNAME: "{{ $.Values.services.coreRedis.name }}"
   REDIS_PORT: "{{ $.Values.services.coreRedis.port }}"
   REDIS_QUEUE: "{{ $.Values.configMap.redisQueue }}"
   DEFAULT_USER_ID: "{{ $.Values.configMap.defaultUserId }}"
   PUBLIC_VAPID: "{{ $.Values.configMap.publicVapid }}"
   AIRTABLE_ID:  "{{ $.Values.configMap.airtableId }}"
-  GMAIL_ADDRESS: "{{ $.Values.configMap.gmailSenderEmail }}"
-  GMAIL_SENDER_NAME: "{{ $.Values.configMap.gmailSenderName }}"
-  DOMAIN_NAME: "{{ $.Values.domainName }}"
+  MAIL_ADDRESS: "{{ $.Values.configMap.mailSenderEmail }}"
+  MAIL_SENDER_NAME: "{{ $.Values.configMap.mailSenderName }}"
+  {{ if eq . "production" }}
+  APP_URL: "https://{{ $.Values.domainName }}"
+  APP_WWW_URL: "https:///www.{{ $.Values.domainName }}"
+  {{else}}
+  APP_URL: "https://{{ . }}.{{ $.Values.domainName }}"
+  APP_WWW_URL: "https://{{ $.Values.domainName }}"
+  {{end}}
   NGINX_HOST: "{{ $.Values.domainName }}"
   NGINX_PORT: "80"
-  JAEGER_AGENT_HOSTNAME: "jaeger-agent"
-  JAEGER_AGENT_PORT: "6831"
-  SOLR_HOSTNAME: "core-solr"
-  SOLR_PORT: "8983"
 ---
 {{ end }}

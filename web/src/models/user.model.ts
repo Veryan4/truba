@@ -1,5 +1,5 @@
 export class User {
-  id: string;
+  _id: string;
   user_id: string;
   email: string;
   username: string;
@@ -11,7 +11,7 @@ export class User {
   subscription: PushSubscription;
 
   constructor(user: any) {
-    this.id = user.id;
+    this._id = user._id;
     this.user_id = user.user_id;
     this.email = user.email;
     this.username = user.username;

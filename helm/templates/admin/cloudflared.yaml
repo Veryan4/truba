@@ -93,9 +93,7 @@ data:
     ingress:
     # The first rule proxies traffic to the httpbin sample Service defined in app.yaml
     - hostname: grafana.truba.news
-      service: http://prometheus-grafana:80
-    - hostname: jaeger.truba.news
-      service: http://jaeger-query:16686
+      service: http://grafana.grafana.svc.cluster.local:80
     - hostname: peer.truba.news
       service: http://peer:9000
 {{ range $ind, $env := .Values.environments }}

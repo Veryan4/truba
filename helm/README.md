@@ -31,7 +31,6 @@ You will want to add the CNAME records pointed towards your cloudflare tunnel
 - `<domain-name>`
 - `grafana.<domain-name>`
 - `mongo.<domain-name>`
-- `jaeger.<domain-name>`
 - `coreui.<domain-name>`
 - `develop.<domain-name>`
 - `developcoreui.<domain-name>`
@@ -50,8 +49,8 @@ configMap:
   defaultUserId: "1a9c14f8-6610-4793-89b3-128f78d2b720"
   publicVapid: foobar #values generate via the google console, see below
   airtableId: "appXAWgdvcKQpJKiz"
-  gmailSenderEmail: "info@truba.news"
-  gmailSenderName: "truba news"
+  mailSenderEmail: "info@truba.news"
+  mailSenderName: "truba news"
 
 secrets:
   #important to note that all secret values must be base 64 encoded
@@ -62,7 +61,7 @@ secrets:
   privateVapid: foobar # see below
   dockerConfig: foobar # see below
   airtableApiKey: foobar # see below
-  gmailPassword: foobar # see below
+  mailPassword: foobar # see below
 ```
 
 !!! VERY IMPORTANT !!!
@@ -77,7 +76,7 @@ htpasswd -nb <your-username> <you-password>
 
 Make sure to base encode 64 the value generated with `htpasswd` when setting the value in the values.yaml
 
-Ro send emails, you can create a gmail account and set the `gmailAddress` and `gmailPassword` values. For this to work however you will need to [Allow less secure apps to ON](https://myaccount.google.com/lesssecureapps) for the email account you created.
+To send emails, you can use the email provider of your choice. The emailing is currently setup with [resend](https://resend.com/). You can create an account and set the `mailAddress` and `mailPassword` values.
 
 The `airtableId` and `airtableApiKey` values can be used to access a custom airtable from the core services. The can be generated via the Airtable dashboard.
 
@@ -105,7 +104,7 @@ data:
 
 ## Helm
 
-After configuring the configmap and secret values in the values.yaml file, edit the `Chart.yaml` file to reflect your application `name` add `description`. 
+After configuring the configmap and secret values in the values.yaml file, edit the `Chart.yaml` file to reflect your application `name` add `description`.
 
 You can start by adding the metrics with the following:
 
@@ -125,6 +124,29 @@ After running the install, you will then need to use the upograde command:
 
 ```
 helm package . && helm upgrade <your-app-name> ./<your-app-name>-0.1.0.tgz
+```
+
+## Monitoring
+
+To add the log and trace collection you can apply the grafana tools with the following commands.
+```
+kubectl create namespace grafana
+helm upgrade grafana grafana/grafana -n grafana
+helm upgrade -n grafana alloy grafana/alloy --values alloy-values.yaml
+helm upgrade --values loki-values.yaml loki grafana/loki -n grafana
+helm upgrade tempo grafana/tempo -n grafana
+```
+
+This will install all the required applications in the grafana namespace. To access the dashbaord use the following
+
+```
+kubectl get secret --namespace grafana grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
+kubectl port-forward --namespace grafana service/grafana 3000:80
+```
+Then use the retrieved password with the username 'admin' when visiting localhost:3000. You will need to set-up the loki and tempo connections with the following values
+```
+http://loki-gateway
+http://tempo:3100
 ```
 
 ## Debugging

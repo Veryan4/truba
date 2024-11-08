@@ -2,8 +2,7 @@ requests
 python-dotenv
 uvicorn
 gunicorn
-jaeger_client
-prometheus_client
+opentelemetry-instrumentation-fastapi
 fastapi
 pydantic
 typing

@@ -1,5 +1,0 @@
-{
-    "delete-field" : { 
-        "name": "PublishedAt"
-    }
-}

@@ -95,8 +95,10 @@ class Settings extends LitElement {
           id="keywords"
           type="text"
           name="keywords"
-          @submit=${this.addKeyword}
         ></md-filled-text-field>
+        <md-filled-button @click=${this.addKeyword}
+            >${this.i18n.t("home.submit")}</md-filled-button
+          >
       </div>`;
   }
 
@@ -193,23 +195,23 @@ class Settings extends LitElement {
 
   initAvailableItems(personalization: Recommendation) {
     this.availableKeywords = this.setAvailableItems(
-      personalization.favorite_items.favorite_keywords,
-      personalization.recommended_items.favorite_keywords
+      personalization.favorite_items.favorite_keywords ?? [],
+      personalization.recommended_items.favorite_keywords ?? []
     );
 
     this.availableEntities = this.setAvailableItems(
-      personalization.favorite_items.favorite_entities,
-      personalization.recommended_items.favorite_entities
+      personalization.favorite_items.favorite_entities ?? [],
+      personalization.recommended_items.favorite_entities ?? []
     );
 
     this.availableSources = this.setAvailableItems(
-      personalization.favorite_items.favorite_sources,
-      personalization.recommended_items.favorite_sources
+      personalization.favorite_items.favorite_sources ?? [],
+      personalization.recommended_items.favorite_sources ?? []
     );
 
     this.availableAuthors = this.setAvailableItems(
-      personalization.favorite_items.favorite_authors,
-      personalization.recommended_items.favorite_authors
+      personalization.favorite_items.favorite_authors ?? [],
+      personalization.recommended_items.favorite_authors ?? []
     );
   }
 
@@ -267,20 +269,23 @@ class Settings extends LitElement {
     });
   }
 
-  addKeyword(event: InputEvent): void {
-    const value = event.data;
-
-    if (value) {
+  addKeyword(): void {
+    console.log(this.keywordInput);
+    const value = this.keywordInput.value;
+    if (value && !this.availableKeywords.some(item => item.value == value)) {
       const pair: IdValuePair = {
-        id: value!.trim(),
-        value: value!.trim(),
+        id: value.trim(),
+        value: value.trim(),
       };
       const item = new FavoriteItem(pair, userService.getUser()!);
       item.is_favorite = true;
       item.is_added = true;
-      this.availableKeywords.push(item);
+      item.relevancy_rate = 1.0;
+      personalizationService.addFavorite(item, "keyword").then(() => {
+        this.availableKeywords.push(item);
+        this.requestUpdate();
+        this.keywordInput.value = "";
+      })
     }
-
-    this.keywordInput.value = "";
   }
 }

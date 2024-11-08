@@ -148,13 +148,13 @@
   --md-outlined-button-container-shape: 4px;
   --md-outlined-button-label-text-font: var(--font-family);
   --md-filled-text-field-container-shape: 4px;
-  --md-filled-text-field-container-color: var(--input-fill);	
+  --md-filled-text-field-container-color: var(--input-fill);
   --md-filled-text-field-focus-active-indicator-color: var(--theme-color);
   --md-filled-text-field-input-text-font: var(--font-family);
   --md-filled-text-field-label-text-font: var(--font-family);
   --mdc-theme-text-primary-on-background: var(--primary-color);
   --md-checkbox-container-shape: 0px;
-  --md-switch-handle-color: darkgrey;
+  --md-switch-handle-color: dimgrey;
 }
 
 body {

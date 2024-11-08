@@ -1,13 +1,17 @@
 from pydantic import BaseModel, Field
 from typing import Dict, Text, Any
 import requests
+import logging
 import pandas as pd
 import numpy as np
 import tensorflow as tf
 import tensorflow_recommenders as tfrs
+import os
 
 from services import mongo
-from shared import setup, bson_id
+from classes import bson_id
+
+logger = logging.getLogger(__name__)
 
 RANKING_MODEL_WEIGHTS_DIR = "tf_models/my_model_weights"
 RANKING_MODEL_DATASET_DIR = "tf_models/dataset.parquet"
@@ -453,12 +457,12 @@ class NewsRankingModel(tfrs.models.Model):
 
 class RankingModel(BaseModel):
   id: bson_id.ObjectIdStr = Field(None, alias="_id")
-  model_id: str
+  ranking_model_id: str
   results: dict
 
 
 def get_ranking_model():
-  mongo_filter = {"model_id": "1"}
+  mongo_filter = {"ranking_model_id": "1"}
   ranking_models = mongo.get("RankingModel", mongo_filter, limit=1)
   if ranking_models:
     return RankingModel(**ranking_models[0])
@@ -469,7 +473,7 @@ def save_ranking_model(model, eval_dict):
   ranking_model = get_ranking_model()
   if not ranking_model:
     new_ranking_model = {
-        "model_id": "1",
+        "ranking_model_id": "1",
         "results": eval_dict
     }
     model.save_weights(filepath=RANKING_MODEL_WEIGHTS_DIR, save_format="tf")
@@ -498,20 +502,20 @@ def get_indexes():
   indexes = {}
   model = load_ranking_model()
   if not model:
-    print("Failed to load model index.")
+    logger.error("Failed to load model index.")
     return None
   for language in LANGUAGES:
-    response = requests.get(setup.get_base_core_service_url() +
+    response = requests.get(os.getenv("CORE_URL") +
                             "/update-index/" + language)
     if not response:
-      print("Failed to initialize " + language +
+      logger.error("Failed to initialize " + language +
             " index. Update Index call failed")
       return None
     recent_stories = list(response.json())
     df = pd.DataFrame(recent_stories)
     dic = dict(df)
     if not dic:
-      print("Failed to initialize " + language + " index. There was no Data")
+      logger.error("Failed to initialize " + language + " index. There was no Data")
       return None
     dataset = tf.data.Dataset.from_tensor_slices(dic)
 
@@ -528,7 +532,6 @@ def get_indexes():
     scann = tfrs.layers.factorized_top_k.ScaNN(model.query_model.embedding_model.user_embedding, num_reordering_candidates=1000, num_leaves=num_leaves)
     scann.index_from_dataset(
         tf.data.Dataset.zip((story_ids, story_id_embeddings)))
-    indexes.update({language: scann})
     indexes.update({language: scann})
   return indexes
 

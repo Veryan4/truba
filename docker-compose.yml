@@ -1,54 +1,26 @@
-version: "3.7"
-
 services:
   web:
-    image: veryan4/web:develop
+    image: "veryan4/web:${ENV}"
     build:
       context: ./
       dockerfile: ./web/Dockerfile
       args:
-        - ENVIRONMENT=develop
+        - "ENVIRONMENT=${ENV}"
 
   core:
-    image: veryan4/core:develop
+    image: "veryan4/core:${ENV}"
     build:
       context: ./
       dockerfile: ./core/Dockerfile
 
   scraper:
-    image: veryan4/scraper:develop
+    image: "veryan4/scraper:${ENV}"
     build:
       context: ./
       dockerfile: ./scraper/Dockerfile
 
   ml:
-    image: veryan4/ml:develop
+    image: "veryan4/ml:${ENV}"
     build:
       context: ./
       dockerfile: ./ml/Dockerfile
-
-  solr:
-    image: veryan4/solr:develop
-    build:
-      context: ./
-      dockerfile: ./solr/Dockerfile
-
-  jupyter:
-    image: veryan4/jupyter
-    build:
-      context: ./
-      dockerfile: ./jupyter/Dockerfile
-    network_mode: "host"
-    ports:
-      - '8888:8888'
-    environment:
-      - ENVIRONMENT=develop
-      - CORE_HOSTNAME=localhost
-      - CORE_PORT=5057
-      - CORE_DB_HOSTNAME=localhost
-      - CORE_DB_PORT=27017
-      - MONGO_USERNAME=foo
-      - MONGO_PASSWORD=bar
-      - ML_HOSTNAME=localhost
-      - ML_PORT=5158
-

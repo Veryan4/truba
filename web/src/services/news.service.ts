@@ -13,7 +13,6 @@ const NEWS_EVENT = "news-update";
 
 export const newsService = {
   newsStories: () => newsStories,
-  seenStoryIds,
   getNews,
   getSingleArticle,
   getRandomNewsImage,
@@ -105,13 +104,14 @@ function getPublicArticles(): Promise<Article[]> {
 
 async function getSingleArticle(
   user: User | null,
-  ratedId: string
+  ratedId: string,
+  sourceId: string
 ): Promise<Article[]> {
   const postData = [...seenStoryIds];
   let lang = "en";
   if (user) lang = user.language;
   await httpService
-    .post<Article>(appConfig.backendApi + "single-article/" + lang, postData)
+    .post<Article>(appConfig.backendApi + `single-article/${sourceId}/${lang}`, postData)
     .then(delay(700))
     .then((article: Article) => {
       newsStories = newsStories.filter((x) => x.story_id !== ratedId);

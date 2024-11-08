@@ -1,19 +1,20 @@
 import requests
 import traceback
 import os
+import logging
 from typing import Optional, Tuple, List
 from urllib.parse import quote
 from datetime import datetime
 from collections import Counter
+from uuid import uuid4
 from dateutil import parser
 import spacy
 
 from services.source_story_parser import SourceStoryParser
 from services import rss_item
-from shared import setup, tracing
 import project_types
 
-current_module = 'Formatter'
+logger = logging.getLogger(__name__)
 
 # SpaCy can only load one language at a time
 # That is why there is an image per language
@@ -37,7 +38,7 @@ def get_author_by_name(author_name: str) -> Optional[project_types.Author]:
     """
 
   author = None
-  response = requests.get(setup.get_base_core_service_url() +
+  response = requests.get(os.getenv("CORE_URL") +
                           '/authors/name?author_name=' + quote(author_name))
   if response.status_code == 404:
     return None
@@ -121,9 +122,9 @@ def format_story(
     if not author:
       if author_name:
         author_name = author_name.strip()
-        author = project_types.Author(name=author_name, affiliation=[source])
+        author = project_types.Author(name=author_name, author_id=uuid4(), affiliation=[source])
       else:
-        author = project_types.Author(name=source.name, affiliation=[source])
+        author = project_types.Author(name=source.name, author_id=uuid4(), affiliation=[source])
 
     # extract Entities and Keywords from Title and Body
     entities = []
@@ -169,7 +170,9 @@ def format_story(
       except Exception:
         publication_date = datetime.now()
 
-    return project_types.Story(title=title,
+    return project_types.Story(
+                             story_id=uuid4(),
+                             title=title,
                              body=body,
                              summary=description,
                              source=source,
@@ -183,5 +186,5 @@ def format_story(
 
   except Exception:
     message_to_log = traceback.format_exc()
-    tracing.log(current_module, 'exception', message_to_log)
+    logger.error(message_to_log)
     return None

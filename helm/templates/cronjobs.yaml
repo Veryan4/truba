@@ -9,10 +9,10 @@ spec:
   successfulJobsHistoryLimit: 0
   failedJobsHistoryLimit: 1
   concurrencyPolicy: Forbid
-  schedule: {{ $.Values.schedules.mlRestart }} 
+  schedule: {{ $.Values.schedules.mlRestart }}
   jobTemplate:
     spec:
-      backoffLimit: 1 
+      backoffLimit: 1
       activeDeadlineSeconds: 600 # timeout, makes most sense with
         # "waiting for rollout" variant specified below
       template:
@@ -49,7 +49,7 @@ spec:
   concurrencyPolicy: Forbid
   jobTemplate:
     spec:
-      backoffLimit: 1 
+      backoffLimit: 1
       template:
         spec:
           imagePullSecrets:
@@ -83,36 +83,24 @@ spec:
                     secretKeyRef:
                       name: dark-secrets
                       key: MONGO_PASSWORD
-                - name: ML_HOSTNAME
+                - name: ML_URL
                   valueFrom:
                     configMapKeyRef:
-                      key: ML_HOSTNAME
+                      key: ML_URL
                       name: configs
-                - name: ML_PORT
+                - name: CORE_URL
                   valueFrom:
                     configMapKeyRef:
-                      key: ML_PORT
+                      key: CORE_URL
                       name: configs
-                - name: CORE_HOSTNAME
-                  valueFrom:
-                    configMapKeyRef:
-                      key: CORE_HOSTNAME
-                      name: configs
-                - name: CORE_PORT
-                  valueFrom:
-                    configMapKeyRef:
-                      key: CORE_PORT
-                      name: configs
-                - name: JAEGER_AGENT_HOSTNAME
-                  valueFrom:
-                    configMapKeyRef:
-                      key: JAEGER_AGENT_HOSTNAME
-                      name: configs
-                - name: JAEGER_AGENT_PORT
-                  valueFrom:
-                    configMapKeyRef:
-                      key: JAEGER_AGENT_PORT
-                      name: configs
+                - name: OTEL_EXPORTER_OTLP_INSECURE
+                  value: "true"
+                - name: OTEL_EXPORTER_OTLP_ENDPOINT
+                  value: "http://alloy.grafana.svc.cluster.local:4317"
+                - name: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
+                  value: "http://alloy.grafana.svc.cluster.local:4317"
+                - name: OTEL_EXPORTER_OTLP_PROTOCOL
+                  value: "grpc"
               args:
                 - python
                 - training.py
@@ -140,7 +128,7 @@ spec:
   concurrencyPolicy: Forbid
   jobTemplate:
     spec:
-      backoffLimit: 1 
+      backoffLimit: 1
       template:
         spec:
           imagePullSecrets:
@@ -184,24 +172,36 @@ spec:
                     configMapKeyRef:
                       key: PUBLIC_VAPID
                       name: configs
-                - name: DOMAIN_NAME
+                - name: APP_URL
                   valueFrom:
                     configMapKeyRef:
-                      key: DOMAIN_NAME
+                      key: APP_URL
                       name: configs
-                - name: GMAIL_ADDRESS
+                - name: MAIL_SENDER_NAME
                   valueFrom:
                     configMapKeyRef:
-                      key: GMAIL_ADDRESS
+                      key: MAIL_SENDER_NAME
                       name: configs
-                - name: GMAIL_PASSWORD
+                - name: MAIL_ADDRESS
+                  valueFrom:
+                    configMapKeyRef:
+                      key: MAIL_ADDRESS
+                      name: configs
+                - name: MAIL_PASSWORD
                   valueFrom:
                     secretKeyRef:
                       name: dark-secrets
-                      key: GMAIL_PASSWORD
+                      key: MAIL_PASSWORD
+                - name: OTEL_EXPORTER_OTLP_INSECURE
+                  value: "true"
+                - name: OTEL_EXPORTER_OTLP_ENDPOINT
+                  value: "http://alloy.grafana.svc.cluster.local:4317"
+                - name: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
+                  value: "http://alloy.grafana.svc.cluster.local:4317"
+                - name: OTEL_EXPORTER_OTLP_PROTOCOL
+                  value: "grpc"
               args:
-                - python
-                - push.py
+                - /app/push
               ports:
                 - containerPort: 7073
           restartPolicy: Never
@@ -232,26 +232,19 @@ spec:
                   value: scraper
                 - name: ENVIRONMENT
                   value: {{ . }}
-                - name: CORE_HOSTNAME
+                - name: CORE_URL
                   valueFrom:
                     configMapKeyRef:
-                      key: CORE_HOSTNAME
+                      key: CORE_URL
                       name: configs
-                - name: CORE_PORT
-                  valueFrom:
-                    configMapKeyRef:
-                      key: CORE_PORT
-                      name: configs
-                - name: JAEGER_AGENT_HOSTNAME
-                  valueFrom:
-                    configMapKeyRef:
-                      key: JAEGER_AGENT_HOSTNAME
-                      name: configs
-                - name: JAEGER_AGENT_PORT
-                  valueFrom:
-                    configMapKeyRef:
-                      key: JAEGER_AGENT_PORT
-                      name: configs
+                - name: OTEL_EXPORTER_OTLP_INSECURE
+                  value: "true"
+                - name: OTEL_EXPORTER_OTLP_ENDPOINT
+                  value: "http://alloy.grafana.svc.cluster.local:4317"
+                - name: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
+                  value: "http://alloy.grafana.svc.cluster.local:4317"
+                - name: OTEL_EXPORTER_OTLP_PROTOCOL
+                  value: "grpc"
                 - name: SCRAPER_LANGUAGE
                   value: en
               args:
@@ -287,26 +280,19 @@ spec:
                   value: scraper_fr
                 - name: ENVIRONMENT
                   value: {{ . }}
-                - name: CORE_HOSTNAME
+                - name: CORE_URL
                   valueFrom:
                     configMapKeyRef:
-                      key: CORE_HOSTNAME
+                      key: CORE_URL
                       name: configs
-                - name: CORE_PORT
-                  valueFrom:
-                    configMapKeyRef:
-                      key: CORE_PORT
-                      name: configs
-                - name: JAEGER_AGENT_HOSTNAME
-                  valueFrom:
-                    configMapKeyRef:
-                      key: JAEGER_AGENT_HOSTNAME
-                      name: configs
-                - name: JAEGER_AGENT_PORT
-                  valueFrom:
-                    configMapKeyRef:
-                      key: JAEGER_AGENT_PORT
-                      name: configs
+                - name: OTEL_EXPORTER_OTLP_INSECURE
+                  value: "true"
+                - name: OTEL_EXPORTER_OTLP_ENDPOINT
+                  value: "http://alloy.grafana.svc.cluster.local:4317"
+                - name: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
+                  value: "http://alloy.grafana.svc.cluster.local:4317"
+                - name: OTEL_EXPORTER_OTLP_PROTOCOL
+                  value: "grpc"
                 - name: SCRAPER_LANGUAGE
                   value: fr
               args:

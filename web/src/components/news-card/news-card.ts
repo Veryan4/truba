@@ -136,7 +136,7 @@ class NewsCard extends LitElement {
     if (!this.user.value) return "";
     return html`
       <div class="demo-card__secondary">
-        <feedback-emojis story_id=${this.article.story_id}></feedback-emojis>
+        <feedback-emojis story_id=${this.article.story_id} source_id=${this.article.source.id}></feedback-emojis>
       </div>
     `;
   }

@@ -1,18 +1,17 @@
 from bs4 import BeautifulSoup
-from datetime import datetime
+from datetime import datetime, timezone
 import re
 import requests
 from typing import List
 from urllib.parse import quote
+import os
+import logging
 
-from services import formatter
+from services import formatter, rss_item
 from services.source_story_parser import SourceStoryParser, log_error
-from services import rss_item
 import project_types
-from shared import setup, tracing
 
-current_module = 'Source Scraper'
-
+logger = logging.getLogger(__name__)
 
 class SourceScraper:
 
@@ -31,7 +30,7 @@ class SourceScraper:
     response = requests.get(rss_url,
                             headers={'User-Agent': 'My User Agent 1.0'})
     if not response:
-      tracing.log(current_module, 'error', 'Failed to get RSS feed')
+      logger.error('Failed to get RSS feed')
       return None
     try:
       return BeautifulSoup(response.content, features='xml')
@@ -67,11 +66,10 @@ class SourceScraper:
     return item.find('link').text
 
   def get_scraped_urls(self, source_name: str) -> List[str]:
-    response = requests.get(setup.get_base_core_service_url() +
+    response = requests.get(os.getenv("CORE_URL") +
                             '/scraped?source_name=' + quote(source_name))
     if response.status_code == 404:
-      tracing.log(current_module, 'error',
-                  'failed to get ScrapedUrls for ' + source_name)
+      logger.error('failed to get ScrapedUrls for ' + source_name)
       return []
     return response.json()
 
@@ -106,5 +104,6 @@ class SourceScraper:
         time_since_published = current_date.replace(
             tzinfo=None) - story.published_at.replace(tzinfo=None)
         if time_since_published.days < 4:
+          story.published_at = story.published_at.replace(tzinfo=timezone.utc).isoformat()
           stories.append(story)
     return stories
