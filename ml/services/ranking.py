@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Dict, Text, Any
+from typing import Dict, Text, Union, Sequence, Optional, Tuple
 import requests
 import logging
 import pandas as pd
@@ -7,6 +7,7 @@ import numpy as np
 import tensorflow as tf
 import tensorflow_recommenders as tfrs
 import os
+import contextlib
 
 from services import mongo
 from classes import bson_id
@@ -51,7 +52,7 @@ class UserModel(tf.keras.Model):
     self.unique_user_ids = unique_user_ids
 
     self.user_embedding = tf.keras.Sequential([
-        tf.keras.layers.experimental.preprocessing.StringLookup(
+        tf.keras.layers.StringLookup(
             vocabulary=self.unique_user_ids, mask_token=None),
         tf.keras.layers.Embedding(
             len(self.unique_user_ids) + 1, embedding_dimension),
@@ -60,12 +61,12 @@ class UserModel(tf.keras.Model):
     self.timestamp_buckets = timestamp_buckets
 
     self.timestamp_embedding = tf.keras.Sequential([
-        tf.keras.layers.experimental.preprocessing.Discretization(
+        tf.keras.layers.Discretization(
             self.timestamp_buckets),
         tf.keras.layers.Embedding(
             len(self.timestamp_buckets) + 1, embedding_dimension),
     ])
-    self.normalized_timestamp = tf.keras.layers.experimental.preprocessing.Normalization(axis=None)
+    self.normalized_timestamp = tf.keras.layers.Normalization(axis=None)
 
     self.normalized_timestamp.adapt(timestamps)
 
@@ -113,7 +114,7 @@ class NewsModel(tf.keras.Model):
       vocab = string_features.batch(1_000_000).map(lambda x: x[feature_name])
       vocabulary = np.unique(np.concatenate(list(vocab)))
       self._embeddings[feature_name] = tf.keras.Sequential([
-          tf.keras.layers.experimental.preprocessing.StringLookup(
+          tf.keras.layers.StringLookup(
               vocabulary=vocabulary, mask_token=None),
           tf.keras.layers.Embedding(len(vocabulary) + 1, embedding_dimension)
       ])
@@ -122,7 +123,7 @@ class NewsModel(tf.keras.Model):
       vocab = int_features.batch(1_000_000).map(lambda x: x[feature_name])
       vocabulary = np.unique(np.concatenate(list(vocab)))
       self._embeddings[feature_name] = tf.keras.Sequential([
-          tf.keras.layers.experimental.preprocessing.IntegerLookup(
+          tf.keras.layers.IntegerLookup(
               vocabulary=vocabulary, mask_token=None),
           tf.keras.layers.Embedding(len(vocabulary) + 1, embedding_dimension)
       ])
@@ -270,27 +271,7 @@ class NewsRankingModel(tfrs.models.Model):
 
     tf.random.set_seed(42)
 
-    self.dataset = tf.data.Dataset.from_tensor_slices(
-        dict(pd.DataFrame(self.data_entries))).map(
-            lambda x: {
-                "story_id": x["story_id"],
-                "story_title": x["story_title"],
-                "user_id": x["user_id"],
-                "relevancy_rate": x["relevancy_rate"],
-                "time_stamp": x["time_stamp"],
-                "source_alexa_rank": x["source_alexa_rank"],
-                "read_count": x["read_count"],
-                "shared_count": x["shared_count"],
-                "angry_count": x["angry_count"],
-                "cry_count": x["cry_count"],
-                "neutral_count": x["neutral_count"],
-                "smile_count": x["smile_count"],
-                "happy_count": x["happy_count"],
-                "source_id": x["source_id"],
-                "author_id": x["author_id"],
-                "most_frequent_keyword": x["most_frequent_keyword"],
-                "most_frequent_entity": x["most_frequent_entity"]
-            })
+    self.dataset = tf.data.Dataset.from_tensor_slices(pd.DataFrame.from_dict(self.data_entries).to_dict(orient="list"))
 
     self.timestamps = np.concatenate(
         list(self.dataset.map(lambda x: x["time_stamp"]).batch(100)))
@@ -361,8 +342,9 @@ class NewsRankingModel(tfrs.models.Model):
         loss=tf.keras.losses.MeanSquaredError(),
         metrics=[tf.keras.metrics.RootMeanSquaredError()])
 
+    # temp workaround 'TempFactorizedTopK' should be replace with 'tfrs.metrics.FactorizedTopK'
     self.retrieval_task: tf.keras.layers.Layer = tfrs.tasks.Retrieval(
-        metrics=tfrs.metrics.FactorizedTopK(candidates=self.dataset.batch(
+        metrics=TempFactorizedTopK(candidates=self.dataset.batch(
             128).cache().map(self.candidate_model)))
 
     # The loss weights.
@@ -436,8 +418,8 @@ class NewsRankingModel(tfrs.models.Model):
         "query_model": self.query_model,
         "candidate_model": self.candidate_model,
         "rating_model": self.rating_model,
-        "ranking_task": self.rating_model,
-        "retrieval_task": self.rating_model,
+        "ranking_task": self.ranking_task,
+        "retrieval_task": self.retrieval_task,
         "ranking_weight": self.ranking_weight,
         "retrieval_weight": self.retrieval_weight
     }
@@ -512,12 +494,10 @@ def get_indexes():
             " index. Update Index call failed")
       return None
     recent_stories = list(response.json())
-    df = pd.DataFrame(recent_stories)
-    dic = dict(df)
-    if not dic:
+    if not recent_stories:
       logger.error("Failed to initialize " + language + " index. There was no Data")
       return None
-    dataset = tf.data.Dataset.from_tensor_slices(dic)
+    dataset = tf.data.Dataset.from_tensor_slices(pd.DataFrame.from_dict(recent_stories).to_dict(orient="list"))
 
     story_ids = dataset.map(lambda x: x["story_id"]).shuffle(
         10_000, seed=42, reshuffle_each_iteration=False).batch(100)
@@ -546,3 +526,212 @@ def save_scann(model):
 
 def get_scann():
   return tf.saved_model.load(RANKING_MODEL_SCANN_DIR)
+
+## End of module
+## Temp workaround until https://github.com/tensorflow/recommenders/pull/717 get merged
+
+class TempStreaming(tfrs.layers.factorized_top_k.TopK):
+  def __init__(self,
+               query_model: Optional[tf.keras.Model] = None,
+               k: int = 10,
+               handle_incomplete_batches: bool = True,
+               num_parallel_calls: int = tf.data.AUTOTUNE,
+               sorted_order: bool = True) -> None:
+
+    super().__init__(k=k)
+    self.query_model = query_model
+    self._candidates = None
+    self._handle_incomplete_batches = handle_incomplete_batches
+    self._num_parallel_calls = num_parallel_calls
+    self._sorted = sorted_order
+    self._counter = self.add_weight(name="counter", dtype=tf.int32, trainable=False)
+  def index_from_dataset(
+      self,
+      candidates: tf.data.Dataset
+  ) -> "TopK":
+    _check_candidates_with_identifiers(candidates)
+    self._candidates = candidates
+    return self
+
+  def index(  # pytype: disable=signature-mismatch  # overriding-parameter-type-checks
+      self,
+      candidates: tf.data.Dataset,
+      identifiers: Optional[tf.data.Dataset] = None) -> "Streaming":
+    raise NotImplementedError(
+        "The streaming top k class only accepts datasets. "
+        "Please call `index_from_dataset` instead."
+    )
+
+  def call(
+      self,
+      queries: Union[tf.Tensor, Dict[Text, tf.Tensor]],
+      k: Optional[int] = None,
+  ) -> Tuple[tf.Tensor, tf.Tensor]:
+    k = k if k is not None else self._k
+    if self._candidates is None:
+      raise ValueError("The `index` method must be called first to "
+                       "create the retrieval index.")
+    if self.query_model is not None:
+      queries = self.query_model(queries)
+    self._counter.assign(0)
+
+    def top_scores(candidate_index: tf.Tensor,
+                   candidate_batch: tf.Tensor) -> Tuple[tf.Tensor, tf.Tensor]:
+      scores = self._compute_score(queries, candidate_batch)
+      if self._handle_incomplete_batches:
+        k_ = tf.math.minimum(k, tf.shape(scores)[1])
+      else:
+        k_ = k
+      scores, indices = tf.math.top_k(scores, k=k_, sorted=self._sorted)
+      return scores, tf.gather(candidate_index, indices)
+
+    def top_k(state: Tuple[tf.Tensor, tf.Tensor],
+              x: Tuple[tf.Tensor, tf.Tensor]) -> Tuple[tf.Tensor, tf.Tensor]:
+      state_scores, state_indices = state
+      x_scores, x_indices = x
+      joined_scores = tf.concat([state_scores, x_scores], axis=1)
+      joined_indices = tf.concat([state_indices, x_indices], axis=1)
+      if self._handle_incomplete_batches:
+        k_ = tf.math.minimum(k, tf.shape(joined_scores)[1])
+      else:
+        k_ = k
+      scores, indices = tf.math.top_k(joined_scores, k=k_, sorted=self._sorted)
+      return scores, tf.gather(joined_indices, indices, batch_dims=1)
+
+    def enumerate_rows(batch: tf.Tensor) -> Tuple[tf.Tensor, tf.Tensor]:
+      starting_counter = self._counter.value
+      end_counter = self._counter.assign_add(tf.shape(batch)[0])
+      return tf.range(starting_counter, end_counter), batch
+    if not isinstance(self._candidates.element_spec, tuple):
+      candidates = self._candidates.map(enumerate_rows)
+      index_dtype = tf.int32
+    else:
+      candidates = self._candidates
+      index_dtype = self._candidates.element_spec[0].dtype
+    initial_state = (tf.zeros((tf.shape(queries)[0], 0), dtype=tf.float32),
+                     tf.zeros((tf.shape(queries)[0], 0), dtype=index_dtype))
+    with _wrap_batch_too_small_error(k):
+      results = (
+          candidates
+          .map(top_scores, num_parallel_calls=self._num_parallel_calls)
+          .reduce(initial_state, top_k))
+    return results
+  def is_exact(self) -> bool:
+    return True
+
+class TempFactorizedTopK(tfrs.metrics.factorized_top_k.Factorized):
+
+  def __init__(
+      self,
+      candidates: Union[tfrs.layers.factorized_top_k.TopK, tf.data.Dataset],
+      ks: Sequence[int] = (1, 5, 10, 50, 100),
+      name: str = "factorized_top_k",
+  ) -> None:
+    super().__init__(name=name)
+    if isinstance(candidates, tf.data.Dataset):
+      candidates = (
+          TempStreaming(k=max(ks))
+          .index_from_dataset(candidates)
+      )
+    self._ks = ks
+    self._candidates = candidates
+    self._top_k_metrics = [
+        tf.keras.metrics.Mean(
+            name=f"{self.name}/top_{x}_categorical_accuracy"
+        ) for x in ks
+    ]
+
+  def update_state(
+      self,
+      query_embeddings: tf.Tensor,
+      true_candidate_embeddings: tf.Tensor,
+      true_candidate_ids: Optional[tf.Tensor] = None,
+      sample_weight: Optional[tf.Tensor] = None,
+  ) -> tf.Operation:
+    if true_candidate_ids is None and not self._candidates.is_exact():
+      raise ValueError(
+          f"The candidate generation layer ({self._candidates}) does not return "
+          "exact results. To perform evaluation using that layer, you must "
+          "supply `true_candidate_ids`, which will be checked against "
+          "the candidate ids returned from the candidate generation layer."
+      )
+    positive_scores = tf.reduce_sum(
+        query_embeddings * true_candidate_embeddings, axis=1, keepdims=True)
+    top_k_predictions, retrieved_ids = self._candidates(
+        query_embeddings, k=max(self._ks))
+    update_ops = []
+    if true_candidate_ids is not None:
+      if len(true_candidate_ids.shape) == 1:
+        true_candidate_ids = tf.expand_dims(true_candidate_ids, 1)
+      nan_padding = tf.math.is_nan(top_k_predictions)
+      top_k_predictions = tf.where(
+          nan_padding,
+          tf.ones_like(top_k_predictions) * tf.float32.min,
+          top_k_predictions
+      )
+      is_sorted = (
+          top_k_predictions[:, :-1] - top_k_predictions[:, 1:]
+      )
+      tf.debugging.assert_non_negative(
+          is_sorted, message="Top-K predictions must be sorted."
+      )
+      ids_match = tf.cast(
+          tf.math.logical_and(
+              tf.math.equal(true_candidate_ids, retrieved_ids),
+              tf.math.logical_not(nan_padding)
+          ),
+          tf.float32
+      )
+      for k, metric in zip(self._ks, self._top_k_metrics):
+        match_found = tf.clip_by_value(
+            tf.reduce_sum(ids_match[:, :k], axis=1, keepdims=True),
+            0.0, 1.0
+        )
+        metric.update_state(match_found, sample_weight)
+        update_ops.append(metric.result())
+    else:
+      y_pred = tf.concat([positive_scores, top_k_predictions], axis=1)
+      for k, metric in zip(self._ks, self._top_k_metrics):
+        targets = tf.zeros(tf.shape(positive_scores)[0], dtype=tf.int32)
+        top_k_accuracy = tf.math.in_top_k(
+            targets=targets,
+            predictions=y_pred,
+            k=k
+        )
+        metric.update_state(top_k_accuracy, sample_weight)
+        update_ops.append(metric.result())
+    return tf.group(update_ops)
+
+def _check_candidates_with_identifiers(candidates: tf.data.Dataset) -> None:
+  spec = candidates.element_spec
+  if isinstance(spec, tuple):
+    if len(spec) != 2:
+      raise ValueError(
+          "The dataset must yield candidate embeddings or "
+          "tuples of (candidate identifiers, candidate embeddings). "
+          f"Got {spec} instead."
+      )
+    identifiers_spec, candidates_spec = spec
+    if candidates_spec.shape[0] != identifiers_spec.shape[0]:
+      raise ValueError(
+          "Candidates and identifiers have to have the same batch dimension. "
+          f"Got {candidates_spec.shape[0]} and {identifiers_spec.shape[0]}."
+      )
+
+@contextlib.contextmanager
+def _wrap_batch_too_small_error(k: int):
+  try:
+    yield
+  except tf.errors.InvalidArgumentError as e:
+    error_message = str(e)
+    if "input must have at least k columns" in error_message:
+      raise ValueError("Tried to retrieve k={k} top items, but the candidate "
+                       "dataset batch size is too small. This may be because "
+                       "your candidate batch size is too small or the last "
+                       "batch of your dataset is too small. "
+                       "To resolve this, increase your batch size, set the "
+                       "drop_remainder argument to True when batching your "
+                       "candidates, or set the handle_incomplete_batches "
+                       "argument to True in the constructor. ".format(k=k))
+    else:
+      raise
