@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: cloudflared
-        image: cloudflare/cloudflared:2024.6.1
+        image: cloudflare/cloudflared
         env:
           - name: TUNNEL_ORIGIN_CERT
             value: /etc/cloudflared/creds/credentials.json
