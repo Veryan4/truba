@@ -4,462 +4,244 @@ import requests
 import logging
 import pandas as pd
 import numpy as np
-import tensorflow as tf
-import tensorflow_recommenders as tfrs
+from sklearn import model_selection, preprocessing
+from sklearn.metrics import mean_squared_error
+import torch
+import torch.nn as nn
+from torch.utils.data import Dataset, DataLoader
+
 import os
 
 from services import mongo
 from classes import bson_id
 
 logger = logging.getLogger(__name__)
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-RANKING_MODEL_WEIGHTS_DIR = "tf_models/my_model_weights"
-RANKING_MODEL_DATASET_DIR = "tf_models/dataset.parquet"
-RANKING_MODEL_SCANN_DIR = "tf_models/my_model_scann"
+RANKING_MODEL_WEIGHTS_DIR = "ranking_models/my_model_weights"
+RANKING_MODEL_DATASET_DIR = "ranking_models/dataset.parquet"
+RANKING_MODEL_DIR = "ranking_models/model_scripted.pt"
 LANGUAGES = ("en", "fr")
+EPOCHS = 2
+BATCH_SIZE = 32
+
+class NewsRankingDataset(Dataset):
+
+    def __init__(self, story_id,
+      user_id, time_stamp, relevancy_rate, source_id, author_id,
+      most_frequent_entity, most_frequent_keyword, source_alexa_rank,
+      read_count, shared_count, angry_count, cry_count, happy_count, neutral_count, smile_count):
+
+        self.story_id = story_id
+        self.user_id = user_id
+        self.time_stamp = time_stamp
+        self.relevancy_rate = relevancy_rate
+        self.source_id = source_id
+        self.author_id = author_id
+        self.most_frequent_entity = most_frequent_entity
+        self.most_frequent_keyword = most_frequent_keyword
+        self.source_alexa_rank = source_alexa_rank
+        self.read_count = read_count
+        self.shared_count = shared_count
+        self.angry_count = angry_count
+        self.cry_count = cry_count
+        self.happy_count = happy_count
+        self.neutral_count = neutral_count
+        self.smile_count = smile_count
+
+    def __len__(self):
+        return len(self.story_id)
+
+    def __getitem__(self, item):
+        story_id = self.story_id[item]
+        user_id = self.user_id[item]
+        time_stamp = self.time_stamp[item]
+        relevancy_rate = self.relevancy_rate[item]
+        source_id = self.source_id[item]
+        author_id = self.author_id[item]
+        most_frequent_entity = self.most_frequent_entity[item]
+        most_frequent_keyword = self.most_frequent_keyword[item]
+        source_alexa_rank = self.source_alexa_rank[item]
+        read_count = self.read_count[item]
+        shared_count = self.shared_count[item]
+        angry_count = self.angry_count[item]
+        cry_count = self.cry_count[item]
+        happy_count = self.happy_count[item]
+        neutral_count = self.neutral_count[item]
+        smile_count = self.smile_count[item]
+
+        return {
+            "story_id": torch.tensor(story_id, dtype=torch.long),
+            "user_id": torch.tensor(user_id, dtype=torch.long),
+            "time_stamp": torch.tensor(time_stamp, dtype=torch.long),
+            "relevancy_rate": torch.tensor(relevancy_rate, dtype=torch.float),
+            "source_id": torch.tensor(source_id, dtype=torch.long),
+            "author_id": torch.tensor(author_id, dtype=torch.long),
+            "most_frequent_entity": torch.tensor(most_frequent_entity, dtype=torch.long),
+            "most_frequent_keyword": torch.tensor(most_frequent_keyword, dtype=torch.long),
+            "source_alexa_rank": torch.tensor(source_alexa_rank, dtype=torch.long),
+            "read_count": torch.tensor(read_count, dtype=torch.long),
+            "shared_count": torch.tensor(shared_count, dtype=torch.long),
+            "angry_count": torch.tensor(angry_count, dtype=torch.long),
+            "cry_count": torch.tensor(cry_count, dtype=torch.long),
+            "happy_count": torch.tensor(happy_count, dtype=torch.long),
+            "neutral_count": torch.tensor(neutral_count, dtype=torch.long),
+            "smile_count": torch.tensor(smile_count, dtype=torch.long),
+        }
+
+class NewsRecommendationModel(nn.Module):
+    def __init__(
+        self,
+        num_users,
+        num_stories,
+        embedding_size=256,
+        hidden_dim=256,
+        dropout_rate=0.2,
+    ):
+        super(NewsRecommendationModel, self).__init__()
+        self.num_users = num_users
+        self.num_stories = num_stories
+        self.embedding_size = embedding_size
+        self.hidden_dim = hidden_dim
+
+        self.user_embedding = nn.Embedding(
+            num_embeddings=self.num_users, embedding_dim=self.embedding_size
+        )
+        self.story_embedding = nn.Embedding(
+            num_embeddings=self.num_stories, embedding_dim=self.embedding_size
+        )
+
+        self.fc1 = nn.Linear(2 * self.embedding_size, self.hidden_dim)
+        self.fc2 = nn.Linear(self.hidden_dim, 1)
+
+        self.dropout = nn.Dropout(p=dropout_rate)
+
+        self.relu = nn.ReLU()
+
+    def forward(self, users, stories):
+        user_embedded = self.user_embedding(users)
+        story_embedded = self.story_embedding(stories)
+
+        combined = torch.cat([user_embedded, story_embedded], dim=1)
+
+        x = self.relu(self.fc1(combined))
+        x = self.dropout(x)
+        output = self.fc2(x)
+
+        return output
 
 def train_ranking_model(data_entries):
   data_frame = pd.DataFrame(data_entries)
-  model = NewsRankingModel(data_entries=data_frame)
-  model.compile(optimizer=tf.keras.optimizers.Adagrad(learning_rate=0.1))
 
-  dataset_size = tf.data.experimental.cardinality(model.dataset).numpy()
-  train_size = int(0.6 * dataset_size)
-  test_size = int(0.4 * dataset_size)
-  shuffled = model.dataset.shuffle(100_000,
-                                   seed=42,
-                                   reshuffle_each_iteration=False)
-  train = shuffled.take(train_size)
-  test = shuffled.skip(train_size).take(test_size)
-  cached_train = train.shuffle(100_000).batch(8192).cache()
-  cached_test = test.batch(4096).cache()
+  le_user = preprocessing.LabelEncoder()
+  le_story = preprocessing.LabelEncoder()
+  data_frame.user_id = le_user.fit_transform(data_frame.user_id.values)
+  data_frame.story_id = le_story.fit_transform(data_frame.story_id.values)
 
-  model.fit(cached_train, epochs=3)
-  eval_dict = model.evaluate(cached_test, return_dict=True)
-  rmse = eval_dict["root_mean_squared_error"]
-  result = save_ranking_model(model, eval_dict)
-  if result:
+  df_train, df_val = model_selection.train_test_split(
+      data_frame, test_size=0.1, random_state=3, stratify=data_frame.relevancy_rate.values
+  )
+
+  train_dataset = NewsRankingDataset(
+      user_id=df_train.user_id.values,
+      story_id=df_train.story_id.values,
+      relevancy_rate=df_train.relevancy_rate.values,
+  )
+
+  valid_dataset = NewsRankingDataset(
+    user_id=df_train.user_id.values,
+    story_id=df_train.story_id.values,
+    relevancy_rate=df_train.relevancy_rate.values,
+  )
+
+  train_loader = DataLoader(
+      train_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=8
+  )
+  val_loader = DataLoader(
+      valid_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=8
+  )
+
+  recommendation_model = NewsRecommendationModel(
+      num_users=len(le_user.classes_),
+      num_stories=len(le_story.classes_),
+      embedding_size=64,
+      hidden_dim=128,
+      dropout_rate=0.1,
+  ).to(device)
+
+  optimizer = torch.optim.Adam(recommendation_model.parameters(), lr=1e-3)
+  loss_func = nn.MSELoss()
+
+  total_loss = 0
+  log_progress_step = 100
+  losses = []
+  train_dataset_size = len(train_dataset)
+  logger.info(f"Training on {train_dataset_size} samples...")
+
+  recommendation_model.train()
+  for e in range(EPOCHS):
+      step_count = 0
+      for i, train_data in enumerate(train_loader):
+          output = recommendation_model(
+              train_data["users"].to(device), train_data["movies"].to(device)
+          )
+          # Reshape the model output to match the target's shape
+          output = output.squeeze()  # Removes the singleton dimension
+          ratings = (
+              train_data["ratings"].to(torch.float32).to(device)
+          )  # Assuming ratings is already 1D
+
+          loss = loss_func(output, ratings)
+          total_loss += loss.sum().item()
+          optimizer.zero_grad()
+          loss.backward()
+          optimizer.step()
+
+          step_count += len(train_data["users"])
+
+          if (
+              step_count % log_progress_step == 0 or i == len(train_loader) - 1
+          ):
+              log_progress(
+                  e, step_count, total_loss, log_progress_step, train_dataset_size, losses
+              )
+              total_loss = 0
+
+  recommendation_model.eval()
+
+  y_pred = []
+  y_true = []
+  with torch.no_grad():
+      for i, valid_data in enumerate(val_loader):
+          output = recommendation_model(
+              valid_data["users"].to(device), valid_data["movies"].to(device)
+          )
+          ratings = valid_data["ratings"].to(device)
+          y_pred.extend(output.cpu().numpy())
+          y_true.extend(ratings.cpu().numpy())
+
+  # Calculate RMSE
+  rmse = mean_squared_error(y_true, y_pred, squared=False)
+  should_save = save_ranking_model(recommendation_model, rmse)
+  if should_save:
     return "Model improved with RMSE score: " + str(rmse)
   return "Model did not improve with RMSE score: " + str(rmse)
 
+# Function to log progress
+def log_progress(epoch, step, total_loss, log_progress_step, data_size, losses):
 
-class UserModel(tf.keras.Model):
-  def __init__(self, embedding_dimension, unique_user_ids, timestamps,
-               timestamp_buckets, **kwargs):
-    super(UserModel, self).__init__(**kwargs)
-
-    self.unique_user_ids = unique_user_ids
-
-    self.user_embedding = tf.keras.Sequential([
-        tf.keras.layers.experimental.preprocessing.StringLookup(
-            vocabulary=self.unique_user_ids, mask_token=None),
-        tf.keras.layers.Embedding(
-            len(self.unique_user_ids) + 1, embedding_dimension),
-    ])
-
-    self.timestamp_buckets = timestamp_buckets
-
-    self.timestamp_embedding = tf.keras.Sequential([
-        tf.keras.layers.experimental.preprocessing.Discretization(
-            self.timestamp_buckets),
-        tf.keras.layers.Embedding(
-            len(self.timestamp_buckets) + 1, embedding_dimension),
-    ])
-    self.normalized_timestamp = tf.keras.layers.experimental.preprocessing.Normalization(axis=None)
-
-    self.normalized_timestamp.adapt(timestamps)
-
-    self._embeddings = {}
-
-
-  def call(self, features):
-    embeddings = []
-    embeddings.append(self.user_embedding(features["user_id"]))
-    embeddings.append(self.timestamp_embedding(features["time_stamp"]))
-    embeddings.append(tf.reshape(self.normalized_timestamp(features["time_stamp"]), (-1, 1)))
-    return tf.concat(embeddings, axis=1)
-
-  def get_config(self):
-    config = {
-        "user_embedding": self.user_embedding,
-        "timestamp_embedding": self.timestamp_embedding,
-        "normalized_timestamp": self.normalized_timestamp,
-        "_embeddings": self._embeddings
-    }
-    return config
-
-  @classmethod
-  def from_config(cls, config):
-    return cls(**config)
-
-
-class NewsModel(tf.keras.Model):
-  def __init__(self, embedding_dimension, string_features, int_features, **kwargs):
-    super(NewsModel, self).__init__(**kwargs)
-
-    self.string_feature_keys = [
-        "story_id", "story_title", "source_id", "author_id",
-        "most_frequent_keyword", "most_frequent_entity"
-    ]
-
-    self.int_feature_keys = [
-        "source_alexa_rank", "read_count", "shared_count", "angry_count",
-        "cry_count", "neutral_count", "smile_count", "happy_count"
-    ]
-
-    self._embeddings = {}
-
-    for feature_name in self.string_feature_keys:
-      vocab = string_features.batch(1_000_000).map(lambda x: x[feature_name])
-      vocabulary = np.unique(np.concatenate(list(vocab)))
-      self._embeddings[feature_name] = tf.keras.Sequential([
-          tf.keras.layers.experimental.preprocessing.StringLookup(
-              vocabulary=vocabulary, mask_token=None),
-          tf.keras.layers.Embedding(len(vocabulary) + 1, embedding_dimension)
-      ])
-
-    for feature_name in self.int_feature_keys:
-      vocab = int_features.batch(1_000_000).map(lambda x: x[feature_name])
-      vocabulary = np.unique(np.concatenate(list(vocab)))
-      self._embeddings[feature_name] = tf.keras.Sequential([
-          tf.keras.layers.experimental.preprocessing.IntegerLookup(
-              vocabulary=vocabulary, mask_token=None),
-          tf.keras.layers.Embedding(len(vocabulary) + 1, embedding_dimension)
-      ])
-
-  def call(self, features):
-    embeddings = []
-    for feature_name in self.string_feature_keys:
-      embedding_fn = self._embeddings[feature_name]
-      embeddings.append(embedding_fn(features[feature_name]))
-    for feature_name in self.int_feature_keys:
-      embedding_fn = self._embeddings[feature_name]
-      embeddings.append(embedding_fn(features[feature_name]))
-
-    return tf.concat(embeddings, axis=1)
-
-  def get_config(self):
-    config = {
-        "_embeddings": self._embeddings
-    }
-    return config
-
-  @classmethod
-  def from_config(cls, config):
-    return cls(**config)
-
-
-class QueryModel(tf.keras.Model):
-  def __init__(self,
-               layer_sizes,
-               embedding_dimension,
-               unique_user_ids,
-               timestamps,
-               timestamp_buckets,
-               use_cross_layer=False,
-               projection_dim=None,
-               **kwargs):
-    super(QueryModel, self).__init__(**kwargs)
-    # We first use the user model for generating embeddings.
-    self.embedding_model = UserModel(embedding_dimension, unique_user_ids,
-                                     timestamps, timestamp_buckets)
-
-    # Then construct the layers.
-    self._deep_layers = [
-        tf.keras.layers.Dense(layer_size, activation="relu")
-        for layer_size in layer_sizes
-    ]
-
-    if use_cross_layer:
-      self._cross_layer = tfrs.layers.dcn.Cross(
-          projection_dim=projection_dim, kernel_initializer="glorot_uniform")
-    else:
-      self._cross_layer = None
-
-    self._logit_layer = tf.keras.layers.Dense(1)
-
-  def call(self, inputs):
-    feature_embedding = self.embedding_model(inputs)
-    # Build Cross Network
-    if self._cross_layer is not None:
-      feature_embedding = self._cross_layer(feature_embedding)
-
-    # Build Deep Network
-    for deep_layer in self._deep_layers:
-      feature_embedding = deep_layer(feature_embedding)
-
-    return self._logit_layer(feature_embedding)
-
-  def get_config(self):
-    config = {
-        "embedding_model": self.embedding_model,
-        "_deep_layers": self._deep_layers,
-        "_cross_layer": self._cross_layer,
-        "_logit_layer": self._logit_layer
-    }
-    return config
-
-  @classmethod
-  def from_config(cls, config):
-    return cls(**config)
-
-
-class CandidateModel(tf.keras.Model):
-  def __init__(self,
-               layer_sizes,
-               embedding_dimension,
-               string_features,
-               int_features,
-               use_cross_layer=False,
-               projection_dim=None,
-               **kwargs):
-    super(CandidateModel, self).__init__(**kwargs)
-    self.embedding_model = NewsModel(embedding_dimension,
-                                     string_features,
-                                     int_features)
-
-    self._deep_layers = [
-        tf.keras.layers.Dense(layer_size, activation="relu")
-        for layer_size in layer_sizes
-    ]
-
-    if use_cross_layer:
-      self._cross_layer = tfrs.layers.dcn.Cross(
-          projection_dim=projection_dim, kernel_initializer="glorot_uniform")
-    else:
-      self._cross_layer = None
-
-    self._logit_layer = tf.keras.layers.Dense(1)
-
-  def call(self, inputs):
-    feature_embedding = self.embedding_model(inputs)
-    # Build Cross Network
-    if self._cross_layer is not None:
-      feature_embedding = self._cross_layer(feature_embedding)
-
-    # Build Deep Network
-    for deep_layer in self._deep_layers:
-      feature_embedding = deep_layer(feature_embedding)
-
-    return self._logit_layer(feature_embedding)
-
-  def get_config(self):
-    config = {
-        "embedding_model": self.embedding_model,
-        "_deep_layers": self._deep_layers,
-        "_cross_layer": self._cross_layer,
-        "_logit_layer": self._logit_layer
-    }
-    return config
-
-  @classmethod
-  def from_config(cls, config):
-    return cls(**config)
-
-
-class NewsRankingModel(tfrs.models.Model):
-  def __init__(self,
-               data_entries,
-               ranking_weight: float = 1.0,
-               retrieval_weight: float = 1.0,
-               layer_sizes=[32],
-               embedding_dimension=32,
-               **kwargs):
-    super(NewsRankingModel, self).__init__(**kwargs)
-    self.data_entries = data_entries
-
-    tf.random.set_seed(42)
-
-    self.dataset = tf.data.Dataset.from_tensor_slices(
-        dict(pd.DataFrame(self.data_entries))).map(
-            lambda x: {
-                "story_id": x["story_id"],
-                "story_title": x["story_title"],
-                "user_id": x["user_id"],
-                "relevancy_rate": x["relevancy_rate"],
-                "time_stamp": x["time_stamp"],
-                "source_alexa_rank": x["source_alexa_rank"],
-                "read_count": x["read_count"],
-                "shared_count": x["shared_count"],
-                "angry_count": x["angry_count"],
-                "cry_count": x["cry_count"],
-                "neutral_count": x["neutral_count"],
-                "smile_count": x["smile_count"],
-                "happy_count": x["happy_count"],
-                "source_id": x["source_id"],
-                "author_id": x["author_id"],
-                "most_frequent_keyword": x["most_frequent_keyword"],
-                "most_frequent_entity": x["most_frequent_entity"]
-            })
-
-    self.timestamps = np.concatenate(
-        list(self.dataset.map(lambda x: x["time_stamp"]).batch(100)))
-
-    self.timestamp_buckets = np.linspace(
-        self.timestamps.min(),
-        self.timestamps.max(),
-        num=1000,
-    ).tolist()
-
-    self.unique_user_ids = np.unique(
-        np.concatenate(
-            list(self.dataset.batch(1_000_000).map(lambda x: x["user_id"]))))
-
-    self.layer_sizes = layer_sizes
-    self.embedding_dimension = embedding_dimension
-
-    # Compute embeddings for users.
-    self.query_model = QueryModel(self.layer_sizes,
-                                  self.embedding_dimension,
-                                  self.unique_user_ids,
-                                  self.timestamps,
-                                  self.timestamp_buckets,
-                                  use_cross_layer=False,
-                                  projection_dim=None)
-
-    self.string_features = self.dataset.map(
-      lambda x: {
-          "story_id": x["story_id"],
-          "story_title": x["story_title"],
-          "source_id": x["source_id"],
-          "author_id": x["author_id"],
-          "most_frequent_keyword": x["most_frequent_keyword"],
-          "most_frequent_entity": x["most_frequent_entity"]
-        }
-      )
-
-    self.int_features = self.dataset.map(
-        lambda x: {
-            "source_alexa_rank": x["source_alexa_rank"],
-            "read_count": x["read_count"],
-            "shared_count": x["shared_count"],
-            "angry_count": x["angry_count"],
-            "cry_count": x["cry_count"],
-            "neutral_count": x["neutral_count"],
-            "smile_count": x["smile_count"],
-            "happy_count": x["happy_count"]
-        })
-
-    # Compute embeddings for stories.
-    self.candidate_model = CandidateModel(self.layer_sizes,
-                                          self.embedding_dimension,
-                                          self.string_features,
-                                          self.int_features,
-                                          use_cross_layer=False,
-                                          projection_dim=None)
-
-    # Compute predictions.
-    self.rating_model = tf.keras.Sequential([
-        # Learn multiple dense layers.
-        tf.keras.layers.Dense(256, activation="relu"),
-        tf.keras.layers.Dense(128, activation="relu"),
-        # Make ranking predictions in the final layer.
-        tf.keras.layers.Dense(1)
-    ])
-
-    self.ranking_task: tf.keras.layers.Layer = tfrs.tasks.Ranking(
-        loss=tf.keras.losses.MeanSquaredError(),
-        metrics=[tf.keras.metrics.RootMeanSquaredError()])
-
-    self.retrieval_task: tf.keras.layers.Layer = tfrs.tasks.Retrieval(
-        metrics=tfrs.metrics.FactorizedTopK(candidates=self.dataset.batch(
-            128).cache().map(self.candidate_model)))
-
-    # The loss weights.
-    self.ranking_weight = ranking_weight
-    self.retrieval_weight = retrieval_weight
-
-  def call(self, features: Dict[Text, tf.Tensor], training=False) -> tf.Tensor:
-    user_embeddings = self.query_model({
-        "user_id":
-        features["user_id"],
-        "time_stamp":
-        features["time_stamp"],
-    })
-    story_embeddings = self.candidate_model({
-        "story_id":
-        features["story_id"],
-        "story_title":
-        features["story_title"],
-        "source_alexa_rank":
-        features["source_alexa_rank"],
-        "read_count":
-        features["read_count"],
-        "shared_count":
-        features["shared_count"],
-        "angry_count":
-        features["angry_count"],
-        "cry_count":
-        features["cry_count"],
-        "neutral_count":
-        features["neutral_count"],
-        "smile_count":
-        features["smile_count"],
-        "happy_count":
-        features["happy_count"],
-        "source_id": features["source_id"],
-        "author_id": features["author_id"],
-        "most_frequent_keyword": features["most_frequent_keyword"],
-        "most_frequent_entity": features["most_frequent_entity"],
-    })
-
-    return (
-        user_embeddings,
-        story_embeddings,
-        # We apply the multi-layered rating model to a concatentation of
-        # user and movie embeddings.
-        self.rating_model(
-            tf.concat([user_embeddings, story_embeddings], axis=1)))
-
-  def compute_loss(self,
-                   features: Dict[Text, tf.Tensor],
-                   training=False) -> tf.Tensor:
-    rankings = features.pop("relevancy_rate")
-
-    user_embeddings, story_embeddings, ranking_predictions = self(features)
-
-    ranking_loss = self.ranking_task(
-        labels=rankings,
-        predictions=ranking_predictions,
+    avg_loss = total_loss / log_progress_step
+    logger.info(
+        f"\r{epoch+1:02d}/{EPOCHS:02d} | Step: {step}/{data_size} | Avg Loss: {avg_loss:<6.9f}"
     )
-    retrieval_loss = self.retrieval_task(user_embeddings, story_embeddings)
-
-    # And combine them using the loss weights.
-    return (self.ranking_weight * ranking_loss +
-            self.retrieval_weight * retrieval_loss)
-
-  def get_config(self):
-    config = {
-        "data_entries": self.data_entries,
-        "embedding_dimension": self.embedding_dimension,
-        "layer_sizes": self.layer_sizes,
-        "query_model": self.query_model,
-        "candidate_model": self.candidate_model,
-        "rating_model": self.rating_model,
-        "ranking_task": self.rating_model,
-        "retrieval_task": self.rating_model,
-        "ranking_weight": self.ranking_weight,
-        "retrieval_weight": self.retrieval_weight
-    }
-    return config
-
-  @classmethod
-  def from_config(cls, config):
-    conf = {
-        "data_entries": config["data_entries"],
-        "embedding_dimension": config["embedding_dimension"],
-        "layer_sizes": config["layer_sizes"],
-        "ranking_weight": config["ranking_weight"],
-        "retrieval_weight": config["retrieval_weight"]
-    }
-    return cls(**conf)
+    losses.append(avg_loss)
 
 
 class RankingModel(BaseModel):
   id: bson_id.ObjectIdStr = Field(None, alias="_id")
   ranking_model_id: str
-  results: dict
-
+  state_dict: dict
+  rmse: float
 
 def get_ranking_model():
   mongo_filter = {"ranking_model_id": "1"}
@@ -468,35 +250,52 @@ def get_ranking_model():
     return RankingModel(**ranking_models[0])
   return None
 
-
-def save_ranking_model(model, eval_dict):
+def save_ranking_model(model, rmse: float):
   ranking_model = get_ranking_model()
   if not ranking_model:
     new_ranking_model = {
         "ranking_model_id": "1",
-        "results": eval_dict
+        "state_dict": model.state_dict(),
+        "rmse": rmse
     }
-    model.save_weights(filepath=RANKING_MODEL_WEIGHTS_DIR, save_format="tf")
-    model.data_entries.to_parquet(RANKING_MODEL_DATASET_DIR)
+    model_scripted = torch.jit.script(model)
+    model_scripted.save(RANKING_MODEL_DIR)
     return mongo.add_or_update(new_ranking_model, "RankingModel")
-  if eval_dict["root_mean_squared_error"] < ranking_model.results[
-      "root_mean_squared_error"]:  # The lower the RMSE metric, the more accurate our model is at predicting ranking
-    ranking_model.results = eval_dict
-    model.save_weights(filepath=RANKING_MODEL_WEIGHTS_DIR, save_format="tf")
-    model.data_entries.to_parquet(RANKING_MODEL_DATASET_DIR)
+  if rmse < ranking_model.rmse:  # The lower the RMSE metric, the more accurate our model is at predicting ranking
+    ranking_model.state_dict = model.state_dict()
+    ranking_model.rmse = rmse
+    model_scripted = torch.jit.script(model)
+    model_scripted.save(RANKING_MODEL_DIR)
     return mongo.add_or_update(ranking_model.dict(), "RankingModel")
   return None
-
 
 def load_ranking_model():
   ranking_model = get_ranking_model()
   if ranking_model:
-    data_frame = pd.read_parquet(RANKING_MODEL_DATASET_DIR)
-    loaded_model = NewsRankingModel(data_entries=data_frame)
-    loaded_model.load_weights(RANKING_MODEL_WEIGHTS_DIR)
-    return loaded_model
+    model = torch.jit.load(RANKING_MODEL_DIR)
+    model.eval()
+    return model
   return None
 
+
+def recommend_top_stories(model, user_id, data_frame, k=5, batch_size=100):
+    model.eval()
+    all_stories = data_frame['story_id'].unique().tolist()
+    seen_stories = set(data_frame[data_frame['user_id'] == user_id]['story_id'].tolist())
+    unseen_stories = [m for m in all_stories if m not in seen_stories]
+    predictions = []
+
+    with torch.no_grad():
+        for i in range(0, len(unseen_stories), batch_size):
+            batch_unseen_stories = unseen_stories[i:i+batch_size]
+            user_tensor = torch.tensor([user_id] * len(batch_unseen_stories)).to(device)
+            movie_tensor = torch.tensor(batch_unseen_stories).to(device)
+            predicted_ratings = model(user_tensor, movie_tensor).view(-1).tolist()
+            predictions.extend(zip(batch_unseen_stories, predicted_ratings))
+
+    predictions.sort(key=lambda x: x[1], reverse=True)
+    top_k_movies = [movie_id for movie_id, _ in predictions[:k]]
+    return top_k_movies
 
 def get_indexes():
   indexes = {}
@@ -521,14 +320,14 @@ def get_indexes():
 
     story_ids = dataset.map(lambda x: x["story_id"]).shuffle(
         10_000, seed=42, reshuffle_each_iteration=False).batch(100)
-    
+
     story_id_embeddings = story_ids.map(
             model.candidate_model.embedding_model._embeddings["story_id"])
-    
+
     num_leaves = 100
     if len(recent_stories) < num_leaves:
       num_leaves = len(recent_stories)
-    
+
     scann = tfrs.layers.factorized_top_k.ScaNN(model.query_model.embedding_model.user_embedding, num_reordering_candidates=1000, num_leaves=num_leaves)
     scann.index_from_dataset(
         tf.data.Dataset.zip((story_ids, story_id_embeddings)))

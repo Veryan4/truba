@@ -25,7 +25,6 @@ func main() {
 	mux := asynq.NewServeMux()
 	mux.HandleFunc(tasks.TypeStoreStories, tasks.HandleStoreStoriesTask)
 	mux.HandleFunc(tasks.TypeAddScrapedUrls, tasks.HandleAddScrapedUrlsTask)
-	mux.HandleFunc(tasks.TypeDeleteUserFeedback, tasks.HandleDeleteUserFeedbackTask)
 	mux.HandleFunc(tasks.TypeStoreUserFeedback, tasks.HandleStoreUserFeedbackTask)
 
 	if err := srv.Run(mux); err != nil {

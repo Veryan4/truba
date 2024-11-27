@@ -8,7 +8,6 @@ import (
 	"core/internal/models"
 	"core/internal/story"
 	"core/internal/tasks"
-	"core/internal/user"
 
 	"github.com/gorilla/mux"
 	"github.com/hibiken/asynq"
@@ -96,10 +95,10 @@ func PrivateRoutes(r *mux.Router, queueClient *asynq.Client) *mux.Router {
 		RespondWithJSON(w, http.StatusOK, author)
 	}).Methods("GET")
 
-	r.HandleFunc("/training/{user_id}", func(w http.ResponseWriter, r *http.Request) {
+	r.HandleFunc("/training", func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		userId := vars["user_id"]
-		data, err := feedback.GetTFTrainingData(userId)
+		data, err := feedback.GetTrainingDataSet()
 		if err != nil {
 			RespondWithError(w, 500, err.Error())
 			return
@@ -111,41 +110,15 @@ func PrivateRoutes(r *mux.Router, queueClient *asynq.Client) *mux.Router {
 		RespondWithJSON(w, http.StatusOK, data)
 	}).Methods("GET")
 
-	r.HandleFunc("/training/{user_id}", func(w http.ResponseWriter, r *http.Request) {
-		vars := mux.Vars(r)
-		userId := vars["user_id"]
-		task, err := tasks.NewDeleteUserFeedbackTask(userId)
-		if err != nil {
-			RespondWithError(w, 500, "Could not create NewDeleteUserFeedbackTask")
-			return
-		}
-		info, err := queueClient.Enqueue(task)
-		if err != nil {
-			RespondWithError(w, 500, "Could not enqueue NewDeleteUserFeedbackTask")
-			return
-		}
-		log.Printf("enqueued task: id=%s queue=%s", info.ID, info.Queue)
-		RespondWithJSON(w, http.StatusOK, map[string]string{"feedbackJob": "Job Queued"})
-	}).Methods("DELETE")
-
 	r.HandleFunc("/update-index/{language}", func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		language := vars["language"]
-		data, err := story.UpdateTFIndex(language)
+		data, err := feedback.UpdateTFIndex(language)
 		if err != nil {
 			RespondWithError(w, 500, err.Error())
 			return
 		}
 		RespondWithJSON(w, http.StatusOK, data)
-	}).Methods("GET")
-
-	r.HandleFunc("/user/ids", func(w http.ResponseWriter, r *http.Request) {
-		ids := user.GetUserIds()
-		if len(ids) == 0 {
-			RespondWithError(w, 404, "No User Ids Found")
-			return
-		}
-		RespondWithJSON(w, http.StatusOK, ids)
 	}).Methods("GET")
 
 	r.HandleFunc("/news/{language}", func(w http.ResponseWriter, r *http.Request) {

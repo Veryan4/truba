@@ -10,6 +10,8 @@ datetime
 pymongo
 numpy
 pandas
+torch
+sklearn
 pathlib
 contextvars
 fastparquet

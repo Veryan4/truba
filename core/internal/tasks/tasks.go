@@ -15,10 +15,9 @@ import (
 )
 
 const (
-	TypeStoreStories       = "store:stories"
-	TypeAddScrapedUrls     = "store:scrapedurls"
-	TypeStoreUserFeedback  = "store:userfeedback"
-	TypeDeleteUserFeedback = "delete:userfeedback"
+	TypeStoreStories      = "store:stories"
+	TypeAddScrapedUrls    = "store:scrapedurls"
+	TypeStoreUserFeedback = "store:userfeedback"
 )
 
 var RedisAddr = os.Getenv("REDIS_HOSTNAME") + ":" + os.Getenv("REDIS_PORT")
@@ -65,24 +64,6 @@ func HandleAddScrapedUrlsTask(ctx context.Context, t *asynq.Task) error {
 
 type deleteUserFeedbackPayload struct {
 	UserId string
-}
-
-func NewDeleteUserFeedbackTask(userId string) (*asynq.Task, error) {
-	payload, err := json.Marshal(deleteUserFeedbackPayload{UserId: userId})
-	if err != nil {
-		return nil, err
-	}
-	return asynq.NewTask(TypeDeleteUserFeedback, payload), nil
-}
-
-func HandleDeleteUserFeedbackTask(ctx context.Context, t *asynq.Task) error {
-	var payload deleteUserFeedbackPayload
-	if err := json.Unmarshal(t.Payload(), &payload); err != nil {
-		return fmt.Errorf("json.Unmarshal failed: %v: %w", err, asynq.SkipRetry)
-	}
-	log.Printf("Deleting feedbacks for user %s", payload.UserId)
-	feedback.RemoveFeedbackOfUser(payload.UserId)
-	return nil
 }
 
 func NewStoreUserFeedbackTask(userFeedback feedback.UserFeedback) (*asynq.Task, error) {

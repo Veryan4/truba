@@ -160,10 +160,6 @@ func FindOrCreateUser(userEmail string, userName string) (User, error) {
 	return currentUser, err
 }
 
-func GetUserIds() []string {
-	return dbs.GetDistinctValues(userCollection, bson.M{}, "user_id")
-}
-
 func GetUserEmails(language string) []string {
 	mongoFilter := bson.M{"language": language, "is_email_subscribed": true}
 	return dbs.GetDistinctValues(userCollection, mongoFilter, "email")

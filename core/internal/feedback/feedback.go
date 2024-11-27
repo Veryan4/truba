@@ -4,13 +4,13 @@ import (
 	"time"
 
 	"core/internal/dbs"
-	"core/internal/models"
 	"core/internal/story"
 	"core/internal/user"
 	"core/internal/utils"
 
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 const userFeedbackCollection = "UserFeedback"
@@ -45,15 +45,21 @@ type UserFeedback struct {
 	FeedbackType     FeedbackType `bson:"feedback_type,omitempty" json:"feedback_type,omitempty"`
 }
 
-func RemoveFeedbackOfUser(userId string) int64 {
-	mongoFilter := bson.M{"user_id": userId}
+func RemoveOldFeedback() int64 {
+	mongoFilter := bson.M{
+		"feedback_datetime": bson.M{
+			"$lte": primitive.NewDateTimeFromTime(time.Now().AddDate(0, 0, -story.STORY_DAYS_TO_EXPIRY)),
+		},
+	}
 	return dbs.Remove(userFeedbackCollection, mongoFilter)
 }
 
-func GetFeedbackList(userId string) ([]UserFeedback, error) {
-	mongoFilter := bson.M{}
-	if userId != "defaultmodel" {
-		mongoFilter["user_id"] = userId
+func GetFeedbackList() ([]UserFeedback, error) {
+	mongoFilter := bson.M{
+		"feedback_datetime": bson.M{
+			"$gte": primitive.NewDateTimeFromTime(time.Now().AddDate(0, 0, -story.STORY_DAYS_TO_EXPIRY)),
+			"$lt":  primitive.NewDateTimeFromTime(time.Now()),
+		},
 	}
 	var feedbacks []UserFeedback
 	err := dbs.GetSorted(userFeedbackCollection,
@@ -84,82 +90,6 @@ func ConvertFeedbackTypeToRelevancyRate(feedbackType FeedbackType) float32 {
 	default:
 		return 0
 	}
-}
-
-func GetTFTrainingData(userId string) ([]models.RankingData, error) {
-	dataEntryList := make([]models.RankingData, 0)
-	feedbackList, err := GetFeedbackList(userId)
-	if err != nil {
-		return dataEntryList, err
-	}
-	relevancyDict := map[string]float32{}
-	timeDict := map[string]time.Time{}
-	for _, feedback := range feedbackList {
-		relevancyRate := ConvertFeedbackTypeToRelevancyRate(feedback.FeedbackType)
-		_, ok := relevancyDict[feedback.StoryId]
-		if ok {
-			relevancyDict[feedback.StoryId] += relevancyRate
-		} else {
-			relevancyDict[feedback.StoryId] = relevancyRate
-		}
-		_, ok2 := timeDict[feedback.StoryId]
-		if ok2 {
-			if feedback.FeedbackDatetime.After(timeDict[feedback.StoryId]) {
-				timeDict[feedback.StoryId] = feedback.FeedbackDatetime
-			}
-		} else {
-			timeDict[feedback.StoryId] = feedback.FeedbackDatetime
-		}
-	}
-	for storyId, relevancyRate := range relevancyDict {
-		currentStory, err := story.GetStoryById(storyId)
-		if err != nil ||
-			currentStory.Author == nil ||
-			currentStory.Keywords == nil ||
-			len(*currentStory.Keywords) == 0 ||
-			currentStory.Entities == nil ||
-			len(*currentStory.Entities) == 0 {
-			continue
-		}
-		authorId := currentStory.Author.AuthorId.String()
-		currentKeywords := *currentStory.Keywords
-		mostFrequentKeyword := currentKeywords[0]
-		for _, keyword := range currentKeywords {
-			if *mostFrequentKeyword.Frequency < *keyword.Frequency {
-				mostFrequentKeyword = keyword
-			}
-		}
-		currentEntities := *currentStory.Entities
-		mostFrequentEntity := currentEntities[0]
-		for _, entity := range currentEntities {
-			if *mostFrequentEntity.Frequency < *entity.Frequency {
-				mostFrequentEntity = entity
-			}
-		}
-		timeStamp := float64(timeDict[storyId].Unix())
-		rankingData := models.RankingData{
-			StoryId:             storyId,
-			UserId:              &userId,
-			RelevancyRate:       &relevancyRate,
-			TimeStamp:           &timeStamp,
-			StoryTitle:          currentStory.Title,
-			SourceAlexaRank:     currentStory.Source.RankInAlexa,
-			ReadCount:           currentStory.ReadCount,
-			SharedCount:         currentStory.SharedCount,
-			AngryCount:          currentStory.AngryCount,
-			CryCount:            currentStory.CryCount,
-			NeutralCount:        currentStory.NeutralCount,
-			SmileCount:          currentStory.SmileCount,
-			HappyCount:          currentStory.HappyCount,
-			SourceId:            &currentStory.Source.SourceId,
-			AuthorId:            &authorId,
-			MostFrequentKeyword: mostFrequentKeyword.Keyword.Text,
-			MostFrequentEntity:  mostFrequentEntity.Entity.Links,
-		}
-
-		dataEntryList = append(dataEntryList, rankingData)
-	}
-	return dataEntryList, nil
 }
 
 func FeedbackReceived(userFeedback UserFeedback) error {

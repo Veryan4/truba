@@ -417,7 +417,7 @@ func GetRecommendedStories(userId string, language string) ([]*models.ShortStory
 	return BuildShortStoriesFromDB(stories), nil
 }
 
-func UpdateTFIndex(language string) ([]models.RankingData, error) {
+func GetPreviousDaysOfNews(language string) ([]models.Story, error) {
 	mongoFilter := bson.M{
 		"language": language,
 		"published_at": bson.M{
@@ -428,45 +428,7 @@ func UpdateTFIndex(language string) ([]models.RankingData, error) {
 	var storiesInDb []models.StoryInDb
 	err := dbs.GetMany(storyCollection, mongoFilter, &storiesInDb)
 	if err != nil {
-		return []models.RankingData{}, err
+		return []models.Story{}, err
 	}
-	stories := BuildStoriesFromDB(storiesInDb)
-	rankingData := make([]models.RankingData, 0)
-	for _, story := range stories {
-		if *story.Keywords == nil || len(*story.Keywords) == 0 || *story.Entities == nil || len(*story.Entities) == 0 {
-			continue
-		}
-		keywords := *story.Keywords
-		mostFrequentKeyword := keywords[0]
-		for _, keyword := range *story.Keywords {
-			if *mostFrequentKeyword.Frequency > *keyword.Frequency {
-				mostFrequentKeyword = keyword
-			}
-		}
-		entities := *story.Entities
-		mostFrequentEntity := entities[0]
-		for _, entity := range *story.Entities {
-			if *mostFrequentEntity.Frequency > *entity.Frequency {
-				mostFrequentEntity = entity
-			}
-		}
-		authorIdString := story.Author.AuthorId.String()
-		rankingData = append(rankingData, models.RankingData{
-			StoryId:             story.StoryId.String(),
-			StoryTitle:          story.Title,
-			SourceAlexaRank:     story.Source.RankInAlexa,
-			ReadCount:           story.ReadCount,
-			SharedCount:         story.SharedCount,
-			AngryCount:          story.AngryCount,
-			CryCount:            story.CryCount,
-			NeutralCount:        story.NeutralCount,
-			SmileCount:          story.SmileCount,
-			HappyCount:          story.HappyCount,
-			SourceId:            &story.Source.SourceId,
-			AuthorId:            &authorIdString,
-			MostFrequentKeyword: mostFrequentKeyword.Keyword.Text,
-			MostFrequentEntity:  mostFrequentEntity.Entity.Links,
-		})
-	}
-	return rankingData, nil
+	return BuildStoriesFromDB(storiesInDb), nil
 }
