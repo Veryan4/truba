@@ -10,19 +10,18 @@ You'll need to have the following installed before starting
 - [minikube](https://minikube.sigs.k8s.io/docs/start/)
 
 
-### Minikube
+### Microk8s
 
-Minikube will configure your kubectl to access the cluster.
+[microk8s](https://microk8s.io/) will install a small k8s cluster on your local machine accessible via the microk8s command. To use kubectl directly, your can follow this [guide](https://microk8s.io/docs/working-with-kubectl)
 
-Minikube will need to be started whenever the computer/server is restarted. To that end the `./minikube.service` file is provided for linux distros. It will need to be added to the `/etc/systemd/system` direcotry, and you will then need to run `systemctl enable minikube.service` for minikube to start on boot.
-
-Create a tf_models directory in your home directory as this is where the ML recommendation models will be saved.
 
 ### Cloudflare
 
 To self host, using the free tier of Cloudflare will help manage the DNS settings.
 
 You need to start by adding your domain name to cloudflare then following this documentation to create your cloudflared tunnel: https://developers.cloudflare.com/cloudflare-one/tutorials/many-cfd-one-tunnel
+
+After creating your tunnel you will need to add the tunnel credentials to k8s using the following command `kubectl create secret generic tunnel-credentials --from-file=credentials.json=/Users/yourusername/.cloudflared/<tunnel ID>.json`
 
 You can stop at the deployment phase of the cloudflare documentation as it will be handled by helm later on.
 
@@ -126,18 +125,23 @@ After running the install, you will then need to use the upograde command:
 helm package . && helm upgrade <your-app-name> ./<your-app-name>-0.1.0.tgz
 ```
 
+## Building images
+
+You need to build the images for all the different services and push them to your docker repository. This can by done from the root of this project using the `docker-compose build <service>` & `docker-compose push <service>` commands. By default it will build and push the development environment images. You can change the environment value to production in the /env file to push the production images.
+
+
 ## Monitoring
 
 To add the log and trace collection you can apply the grafana tools with the following commands.
 ```
 kubectl create namespace grafana
-helm upgrade grafana grafana/grafana -n grafana
-helm upgrade -n grafana alloy grafana/alloy --values alloy-values.yaml
-helm upgrade --values loki-values.yaml loki grafana/loki -n grafana
-helm upgrade tempo grafana/tempo -n grafana
+helm install grafana grafana/grafana -n grafana
+helm install -n grafana alloy grafana/alloy --values alloy-values.yaml
+helm install --values loki-values.yaml loki grafana/loki -n grafana
+helm install tempo grafana/tempo -n grafana
 ```
 
-This will install all the required applications in the grafana namespace. To access the dashbaord use the following
+This will install all the required applications in the grafana namespace. To access the dashboard use the following
 
 ```
 kubectl get secret --namespace grafana grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
