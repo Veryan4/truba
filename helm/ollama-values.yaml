@@ -1,0 +1,9 @@
+ollama:
+  gpu:
+    enabled: true
+    type: 'nvidia'
+    number: 1
+
+  models:
+    pull:
+      - gemma3

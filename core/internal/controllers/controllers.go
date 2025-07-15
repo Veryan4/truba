@@ -12,6 +12,8 @@ import (
 
 	"core/internal/user"
 	"core/internal/utils"
+
+	"github.com/mark3labs/mcp-go/mcp"
 )
 
 var WwwDomain = os.Getenv("APP_WWW_URL")
@@ -123,4 +125,31 @@ func DecodeJSON(w http.ResponseWriter, r *http.Request, value interface{}) bool 
 		return false
 	}
 	return true
+}
+
+func mcpResourceWithJSON(uri string, payload interface{}) (mcp.ResourceContents, error) {
+	jsonBytes, _ := json.Marshal(payload)
+	jsonString := string(jsonBytes[:])
+
+	return mcp.TextResourceContents{
+		URI:      uri,
+		MIMEType: "application/json",
+		Text:     jsonString,
+	}, nil
+}
+
+func McpResourceResponseWithJSON(uri string, payload interface{}) ([]mcp.ResourceContents, error) {
+	resourceResponse, _ := mcpResourceWithJSON(uri, payload)
+
+	return []mcp.ResourceContents{
+		resourceResponse,
+	}, nil
+}
+
+func McpToolResponseWithJSON(text string, uri string, payload interface{}) (*mcp.CallToolResult, error) {
+	resource, err := mcpResourceWithJSON(uri, payload)
+	if err != nil {
+		return mcp.NewToolResultError(err.Error()), nil
+	}
+	return mcp.NewToolResultResource(text, resource), nil
 }

@@ -156,3 +156,23 @@ http://tempo:3100
 ## Debugging
 
 https://kubernetes.io/docs/tasks/debug-application-cluster/
+
+
+## Setting up the MCP server
+
+To leverage a gpu you must run `microk8s enable nvidia`. If you do not have a gpu, you can disable using the gpu in the ollama-values.yaml file.
+
+
+Although the microk8s command above should work for most people didn't work on my set-up, so I had to run the following commands manually.
+
+```
+helm install network-operator nvidia/network-operator --version=v25.3.0 --create-namespace --namespace=nvidia-network-operator
+
+helm install gpu-operator nvidia/gpu-operator --version=v24.9.2 --create-namespace --namespace=gpu-operator-resources --values=gpu-operator-values.yaml -f ./gpu-operator-config.json
+```
+
+After you've set-up the GPU connection, or disable=d using the gpu, you can run the following command to setup ollama using gemma3.
+
+```
+helm install ollama otwld/ollama --namespace ollama --create-namespace --values=ollama-values.yaml
+```

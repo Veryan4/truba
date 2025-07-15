@@ -162,6 +162,32 @@ services:
       airtableId:
         name: AIRTABLE_ID
 
+  coreMcp:
+    name: mcp
+    imageName: core
+    isCustomImage: true
+    port: 8000
+    command:
+      - /app/mcp
+    env:
+      dbHostName:
+        name: CORE_DB_HOSTNAME
+      dbPort:
+        name: CORE_DB_PORT
+      mongoUsername:
+        name: MONGO_USERNAME
+        isSecret: true
+      mongoPassword:
+        name: MONGO_PASSWORD
+        isSecret: true
+      redisHostname:
+        name: REDIS_HOSTNAME
+      redisPort:
+        name: REDIS_PORT
+      redisQueue:
+        name: REDIS_QUEUE
+
+
   coreRedis:
     name: redis
     imageName: redis:7.2-alpine

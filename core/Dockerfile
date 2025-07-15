@@ -16,6 +16,7 @@ RUN go build -C ./cmd/core/ -o ../../build
 RUN go build -C ./cmd/coreui/ -o ../../build
 RUN go build -C ./cmd/push/ -o ../../build
 RUN go build -C ./cmd/worker/ -o ../../build
+RUN go build -C ./cmd/mcp/ -o ../../build
 
 FROM alpine:latest
 

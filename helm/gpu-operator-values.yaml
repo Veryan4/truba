@@ -1,0 +1,3 @@
+dcgmExporter:
+  config:
+    name: custom-dcgm-exporter-metrics
