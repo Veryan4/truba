@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"context"
+	"log"
 	"net/http"
 
 	"core/internal/story"
@@ -9,9 +11,28 @@ import (
 	"github.com/golang-jwt/jwt"
 	"github.com/gorilla/mux"
 	"github.com/hibiken/asynq"
+	"github.com/mark3labs/mcphost/sdk"
 )
 
 func PublicRoutes(r *mux.Router, queueClient *asynq.Client) *mux.Router {
+	ctx := context.Background()
+
+	// Create MCPHost instance with default configuration
+	mcpHost, err := sdk.New(ctx, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	r.HandleFunc("/news/prompt", Chain(func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		prompt := vars["prompt"]
+		llmResponse, err := mcpHost.Prompt(ctx, prompt)
+		if err != nil {
+			RespondWithError(w, 500, err.Error())
+			return
+		}
+		RespondWithJSON(w, http.StatusOK, llmResponse)
+	}, Method("GET"))).Methods("GET", "OPTIONS")
 
 	r.HandleFunc("/news/{language}", Chain(func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)

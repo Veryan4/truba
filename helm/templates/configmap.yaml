@@ -29,5 +29,6 @@ data:
   {{end}}
   NGINX_HOST: "{{ $.Values.domainName }}"
   NGINX_PORT: "80"
+  OLLAMA_HOST: "http://ollama.default.svc.cluster.local"
 ---
 {{ end }}

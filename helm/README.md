@@ -14,7 +14,7 @@ You'll need to have the following installed before starting
 
 [microk8s](https://microk8s.io/) will install a small k8s cluster on your local machine accessible via the microk8s command. To use kubectl directly, your can follow this [guide](https://microk8s.io/docs/working-with-kubectl)
 
-Make sure to enable hostpath-storage with `microk8s enable host-path storage`, so there will be persistence with the database.
+Make sure to enable hostpath-storage with `microk8s enable hostpath-storage`, so there will be persistence with the database.
 
 Update the config of kubectl, with `microk8s config > ~/.kube/config`.
 
@@ -160,3 +160,14 @@ http://tempo:3100
 ## Debugging
 
 https://kubernetes.io/docs/tasks/debug-application-cluster/
+
+
+## Setting up the MCP server
+
+To leverage a gpu you must run `microk8s enable nvidia`. If you do not have a gpu, you can disable using the gpu in the ollama-values.yaml file.
+
+After you've set-up the GPU connection, you can run the following command to setup ollama using gemma3.
+
+```
+helm install ollama otwld/ollama --namespace ollama --create-namespace --values=ollama-values.yaml
+```

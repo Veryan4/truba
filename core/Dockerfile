@@ -1,4 +1,4 @@
-FROM golang:1.23-alpine AS build
+FROM golang:1.26-alpine AS build
 
 WORKDIR /app
 
@@ -16,6 +16,7 @@ RUN go build -C ./cmd/core/ -o ../../build
 RUN go build -C ./cmd/coreui/ -o ../../build
 RUN go build -C ./cmd/push/ -o ../../build
 RUN go build -C ./cmd/worker/ -o ../../build
+RUN go build -C ./cmd/mcp/ -o ../../build
 
 FROM alpine:latest
 
@@ -24,5 +25,7 @@ WORKDIR /app
 RUN mkdir tmp
 COPY --from=build /app/data .
 COPY --from=build /app/build .
+
+ENV OLLAMA_HOST="http://ollama.default.svc.cluster.local"
 
 CMD ["/app/core"]

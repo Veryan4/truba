@@ -68,12 +68,6 @@ spec:
             - "{{ . }}"
           {{ end }}
           {{ end }}
-          {{ if $service.isMondoDb }}
-          args:
-            - mongod
-            - --port
-            - "{{ $service.port }}"
-          {{ end }}
           {{ if $service.port }}
           ports:
             - containerPort: {{ $service.port }}
