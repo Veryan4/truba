@@ -4,13 +4,12 @@ import { Article } from "../models/article.model";
 
 export class NewsController {
   private host: ReactiveControllerHost;
-  value = newsService.newsStories();
+  private unsubscribe?: () => boolean;
+  value = newsService.state.getValue();
 
-  _changeNews = (_e: CustomEvent) => {
-    if (this.value !== newsService.newsStories()) {
-      this.value = newsService.newsStories();
-      this.host.requestUpdate();
-    }
+  _changeNews = (stories: Article[]) => {
+    this.value = stories;
+    this.host.requestUpdate();
   };
 
   constructor(host: ReactiveControllerHost) {
@@ -19,16 +18,10 @@ export class NewsController {
   }
 
   hostConnected() {
-    window.addEventListener(
-      newsService.NEWS_EVENT,
-      this._changeNews as EventListener
-    );
+    this.unsubscribe = newsService.state.subscribe(this._changeNews);
   }
 
   hostDisconnected() {
-    window.removeEventListener(
-      newsService.NEWS_EVENT,
-      this._changeNews as EventListener
-    );
+    this.unsubscribe?.();
   }
 }

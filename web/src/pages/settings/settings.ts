@@ -7,13 +7,13 @@ import { Recommendation, FavoriteItem, IdValuePair } from "../../models";
 import { iconButtonStyles, chipStyles } from "../../styles";
 import { styles } from "./settings.styles";
 
-import "../../material-web"
+import "../../material-web";
 
 @customElement("app-settings")
 class Settings extends LitElement {
   static styles = [styles, chipStyles, iconButtonStyles];
 
-  private i18n = new TranslationController(this, {scope:"home"});
+  private i18n = new TranslationController(this, { scope: "home" });
 
   @state()
   availableKeywords: FavoriteItem[];
@@ -32,7 +32,7 @@ class Settings extends LitElement {
 
   constructor() {
     super();
-    const user = userService.getUser();
+    const user = userService.state.getValue();
     if (user) {
       personalizationService
         .getPersonalization(user)
@@ -97,8 +97,8 @@ class Settings extends LitElement {
           name="keywords"
         ></md-filled-text-field>
         <md-filled-button @click=${this.addKeyword}
-            >${this.i18n.t("home.submit")}</md-filled-button
-          >
+          >${this.i18n.t("home.submit")}</md-filled-button
+        >
       </div>`;
   }
 
@@ -196,31 +196,31 @@ class Settings extends LitElement {
   initAvailableItems(personalization: Recommendation) {
     this.availableKeywords = this.setAvailableItems(
       personalization.favorite_items.favorite_keywords ?? [],
-      personalization.recommended_items.favorite_keywords ?? []
+      personalization.recommended_items.favorite_keywords ?? [],
     );
 
     this.availableEntities = this.setAvailableItems(
       personalization.favorite_items.favorite_entities ?? [],
-      personalization.recommended_items.favorite_entities ?? []
+      personalization.recommended_items.favorite_entities ?? [],
     );
 
     this.availableSources = this.setAvailableItems(
       personalization.favorite_items.favorite_sources ?? [],
-      personalization.recommended_items.favorite_sources ?? []
+      personalization.recommended_items.favorite_sources ?? [],
     );
 
     this.availableAuthors = this.setAvailableItems(
       personalization.favorite_items.favorite_authors ?? [],
-      personalization.recommended_items.favorite_authors ?? []
+      personalization.recommended_items.favorite_authors ?? [],
     );
   }
 
   setAvailableItems(
     favorite_items: FavoriteItem[],
-    recommended_items: FavoriteItem[]
+    recommended_items: FavoriteItem[],
   ): FavoriteItem[] {
     const recommended = recommended_items.filter(
-      (rec) => !favorite_items.some((fav) => fav.identifier === rec.identifier)
+      (rec) => !favorite_items.some((fav) => fav.identifier === rec.identifier),
     );
     return favorite_items.concat(recommended);
   }
@@ -228,7 +228,7 @@ class Settings extends LitElement {
   toggle(item: FavoriteItem, type: string): void {
     personalizationService.toggleFavorite(item, type).then(() => {
       const chipEl = this.renderRoot.querySelector(
-        `#${type + "-" + item.identifier.replaceAll(" ", "_")}`
+        `#${type + "-" + item.identifier.replaceAll(" ", "_")}`,
       )!;
       if (item.is_favorite) {
         chipEl.classList.add("selected");
@@ -243,27 +243,27 @@ class Settings extends LitElement {
       switch (type) {
         case "keyword":
           this.availableKeywords = this.availableKeywords.filter(
-            (x) => x.identifier !== item.identifier
+            (x) => x.identifier !== item.identifier,
           );
           break;
         case "entity":
           this.availableEntities = this.availableEntities.filter(
-            (x) => x.identifier !== item.identifier
+            (x) => x.identifier !== item.identifier,
           );
           break;
         case "source":
           this.availableSources = this.availableSources.filter(
-            (x) => x.identifier !== item.identifier
+            (x) => x.identifier !== item.identifier,
           );
           break;
         case "author":
           this.availableAuthors = this.availableAuthors.filter(
-            (x) => x.identifier !== item.identifier
+            (x) => x.identifier !== item.identifier,
           );
           break;
       }
       const chipEl = this.renderRoot.querySelector(
-        `#${type + "-" + item.identifier.replaceAll(" ", "_")}`
+        `#${type + "-" + item.identifier.replaceAll(" ", "_")}`,
       )!;
       chipEl.remove();
     });
@@ -272,12 +272,12 @@ class Settings extends LitElement {
   addKeyword(): void {
     console.log(this.keywordInput);
     const value = this.keywordInput.value;
-    if (value && !this.availableKeywords.some(item => item.value == value)) {
+    if (value && !this.availableKeywords.some((item) => item.value == value)) {
       const pair: IdValuePair = {
         id: value.trim(),
         value: value.trim(),
       };
-      const item = new FavoriteItem(pair, userService.getUser()!);
+      const item = new FavoriteItem(pair, userService.state.getValue()!);
       item.is_favorite = true;
       item.is_added = true;
       item.relevancy_rate = 1.0;
@@ -285,7 +285,7 @@ class Settings extends LitElement {
         this.availableKeywords.push(item);
         this.requestUpdate();
         this.keywordInput.value = "";
-      })
+      });
     }
   }
 }

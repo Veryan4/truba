@@ -6,39 +6,36 @@ import { userService } from "./user.service";
 let socket: WebSocket;
 
 export const webSocketService = {
-    closeSocket
-}
+  closeSocket,
+};
 
 async function openSocket() {
-    const token = httpService.getAuthToken();
-    if (!token) return;
-    socket = await new WebSocket(appConfig.backendSocket + "?token=" + token);
-    socket.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        if (Array.isArray(data)) {
-        const user = userService.getUser();
-        if (user && user.language === "en") {
-            newsService.changeNewsStories(data, user);
-        } else {
-            newsService.getNews(user);
-        }
-        }
-    };
+  const token = httpService.getAuthToken();
+  if (!token) return;
+  socket = await new WebSocket(appConfig.backendSocket + "?token=" + token);
+  socket.onmessage = (event) => {
+    const data = JSON.parse(event.data);
+    if (Array.isArray(data)) {
+      const user = userService.state.getValue();
+      if (user && user.language === "en") {
+        newsService.changeNewsStories(data, user);
+      } else {
+        newsService.getNews(user);
+      }
+    }
+  };
 }
 
 function closeSocket() {
-    socket?.close();
+  socket?.close();
 }
 
-window.addEventListener(
-    userService.USER_EVENT,
-    () => {
-        const user = userService.getUser();
-        if (user && !socket) {
-            openSocket();
-        }
-        if (!user && socket) {
-            closeSocket();
-        }
-    }
-);
+userService.state.subscribe(() => {
+  const user = userService.state.getValue();
+  if (user && !socket) {
+    openSocket();
+  }
+  if (!user && socket) {
+    closeSocket();
+  }
+});

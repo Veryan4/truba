@@ -2,26 +2,26 @@ import { userService } from "./user.service";
 import type { FavoriteItem, FeedbackType, Recommendation } from "../models";
 import type { User } from "../models/user.model";
 import { appConfig } from "../app.config";
-import { httpService } from "@veryan/lit-spa";
+import { httpService, State } from "@veryan/lit-spa";
 
-let personalization: Recommendation | null;
+const state = new State<Recommendation | null>();
 
 export const personalizationService = {
-  personalization: () => personalization,
   getPersonalization,
   postUpdatePersonalization,
   postFeedback,
   toggleFavorite,
   removeFavorite,
-  addFavorite
+  addFavorite,
+  state,
 };
 
 function getPersonalization(user: User): Promise<Recommendation> {
   const lang = user.language ? user.language : "en";
   return httpService
     .get<Recommendation>(appConfig.backendApi + "user/info/" + lang)
-    .then((pers) => {
-      personalization = pers;
+    .then((personalization) => {
+      state.update(personalization);
       return personalization;
     });
 }
@@ -41,7 +41,7 @@ function postFeedback(
   storyId: string,
   feedBackType: FeedbackType,
 ): void {
-  const currentUser = userService.getUser();
+  const currentUser = userService.state.getValue();
   if (!currentUser) return;
   const postData = {
     user_id: currentUser.user_id,
@@ -60,7 +60,7 @@ function toggleFavorite(item: FavoriteItem, type: string): Promise<any> {
   if (!item.is_favorite) {
     item.relevancy_rate = 0.0;
   }
-  const u = userService.getUser();
+  const u = userService.state.getValue();
   if (u) item.user_id = u.user_id;
   return postUpdatePersonalization(type, item).catch((err) => {
     item.is_favorite = !item.is_favorite;
