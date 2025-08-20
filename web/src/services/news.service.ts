@@ -5,28 +5,35 @@ import type { Recommendation } from "../models/personalization.model";
 import { FavoriteItem, IdValuePair } from "../models/favorite-item.model";
 
 import { appConfig } from "../app.config";
-import { httpService, translateService } from "@veryan/lit-spa";
+import { httpService, State, translateService } from "@veryan/lit-spa";
 
-let newsStories: Article[];
 const seenStoryIds = new Set<string>();
-const NEWS_EVENT = "news-update";
+const state = new State<Article[]>();
 
 export const newsService = {
-  newsStories: () => newsStories,
   getNews,
   getSingleArticle,
   getRandomNewsImage,
   changeNewsStories,
-  NEWS_EVENT,
+  state,
 };
 
 function changeNewsStories(
   news: Article[],
   user: User | null,
   recommendations: Recommendation | null = null,
-  isSingleArticle = false
 ): void {
-  news = news.map((article) => {
+  news = mapNewsStories(news, user, recommendations);
+  news.forEach((x) => seenStoryIds.add(x.story_id));
+  state.update(news);
+}
+
+function mapNewsStories(
+  news: Article[],
+  user: User | null,
+  recommendations: Recommendation | null = null,
+): Article[] {
+  return news.map((article) => {
     article = new Article(article);
     if (article && !article.image) {
       article.image = getRandomNewsImage();
@@ -61,12 +68,6 @@ function changeNewsStories(
     article.favorite_author = getFavoriteItem(article.author, user, favAuthors);
     return article;
   });
-  if (isSingleArticle) {
-    news = newsStories.concat(news);
-  }
-  newsStories = news;
-  newsStories.forEach((x) => seenStoryIds.add(x.story_id));
-  window.dispatchEvent(new CustomEvent(NEWS_EVENT));
 }
 
 async function getNews(user: User | null): Promise<void> {
@@ -93,7 +94,7 @@ async function getNews(user: User | null): Promise<void> {
 
 function getRecommendedArticles(user: User): Promise<Article[]> {
   return httpService.get<Article[]>(
-    appConfig.backendApi + "recommended-news/" + user.language
+    appConfig.backendApi + "recommended-news/" + user.language,
   );
 }
 
@@ -105,30 +106,36 @@ function getPublicArticles(): Promise<Article[]> {
 async function getSingleArticle(
   user: User | null,
   ratedId: string,
-  sourceId: string
+  sourceId: string,
 ): Promise<Article[]> {
   const postData = [...seenStoryIds];
   let lang = "en";
   if (user) lang = user.language;
   await httpService
-    .post<Article>(appConfig.backendApi + `single-article/${sourceId}/${lang}`, postData)
+    .post<Article>(
+      appConfig.backendApi + `single-article/${sourceId}/${lang}`,
+      postData,
+    )
     .then(delay(700))
     .then((article: Article) => {
-      newsStories = newsStories.filter((x) => x.story_id !== ratedId);
-      return changeNewsStories(
+      const [story] = mapNewsStories(
         [article],
         user,
-        personalizationService.personalization(),
-        true
+        personalizationService.state.getValue(),
       );
+      let news = state.getValue();
+      news = news.filter((x) => x.story_id !== ratedId);
+      news.push(story);
+      seenStoryIds.add(story.story_id);
+      state.update(news);
     });
-  return newsStories;
+  return state.getValue();
 }
 
 function getFavoriteItem(
   idValuePair: IdValuePair,
   user: User,
-  favoriteItems: FavoriteItem[] | null = null
+  favoriteItems: FavoriteItem[] | null = null,
 ): FavoriteItem {
   if (!favoriteItems) {
     return new FavoriteItem(idValuePair, user);

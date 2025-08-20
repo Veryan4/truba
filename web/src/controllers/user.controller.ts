@@ -1,15 +1,15 @@
 import { ReactiveControllerHost } from "lit";
 import { userService } from "../services/user.service";
+import { User } from "../models";
 
 export class UserController {
   private host: ReactiveControllerHost;
-  value = userService.getUser();
+  private unsubscribe?: () => boolean;
+  value = userService.state.getValue();
 
-  _changeUser = (e: CustomEvent) => {
-    if (this.value !== userService.getUser()) {
-      this.value = userService.getUser();
-      this.host.requestUpdate();
-    }
+  _changeUser = (user: User | null) => {
+    this.value = user;
+    this.host.requestUpdate();
   };
 
   constructor(host: ReactiveControllerHost) {
@@ -18,16 +18,10 @@ export class UserController {
   }
 
   hostConnected() {
-    window.addEventListener(
-      userService.USER_EVENT,
-      this._changeUser as EventListener
-    );
+    this.unsubscribe = userService.state.subscribe(this._changeUser);
   }
 
   hostDisconnected() {
-    window.removeEventListener(
-      userService.USER_EVENT,
-      this._changeUser as EventListener
-    );
+    this.unsubscribe?.();
   }
 }

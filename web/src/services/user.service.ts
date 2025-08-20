@@ -1,15 +1,15 @@
 import { User } from "../models/user.model";
 import { appConfig } from "../app.config";
-import { httpService, translateService } from "@veryan/lit-spa";
-import { GoogleOAuthProvider, googleLogout } from 'google-oauth-gsi';
+import { httpService, State, translateService } from "@veryan/lit-spa";
+import { GoogleOAuthProvider, googleLogout } from "google-oauth-gsi";
 
-const USER_EVENT = "user-update";
-const googleProvider = new GoogleOAuthProvider({clientId: appConfig.googleAuthClientId});
+const googleProvider = new GoogleOAuthProvider({
+  clientId: appConfig.googleAuthClientId,
+});
 
-let user: User | null = null;
+const state = new State<User | null>();
 
 export const userService = {
-  getUser: () => user,
   login,
   register,
   forgotPassword,
@@ -21,17 +21,16 @@ export const userService = {
   unsubscribeEmail,
   confirmEmail,
   googleProvider,
-  USER_EVENT
+  state,
 };
 
 function setUser(newUser: User | null): User | null {
   if (!newUser) {
-    user = null;
-    window.dispatchEvent(new CustomEvent(USER_EVENT));
+    state.update(null);
     return null;
   }
-  user = new User(newUser);
-  window.dispatchEvent(new CustomEvent(USER_EVENT));
+  const user = new User(newUser);
+  state.update(user);
   return user;
 }
 
@@ -51,15 +50,19 @@ function login(email: string, password: string): Promise<User | null> {
 function register(
   username: string,
   email: string,
-  password: string
+  password: string,
 ): Promise<User | null> {
   return httpService
-    .post(appConfig.backendApi + "users", {
-      username,
-      email,
-      password,
-      terms_consent: new Date().toISOString(),
-    }, true)
+    .post(
+      appConfig.backendApi + "users",
+      {
+        username,
+        email,
+        password,
+        terms_consent: new Date().toISOString(),
+      },
+      true,
+    )
     .then((data: any) => {
       httpService.setAuthToken(data.token);
       return setUser(data.user);
@@ -74,13 +77,17 @@ function forgotPassword(email: string): Promise<any> {
 
 function resetPassword(
   token: string,
-  newPassword: string
+  newPassword: string,
 ): Promise<User | null> {
   return httpService
-    .post(appConfig.backendApi + "reset_password", {
-      token,
-      new_password: newPassword,
-    }, true)
+    .post(
+      appConfig.backendApi + "reset_password",
+      {
+        token,
+        new_password: newPassword,
+      },
+      true,
+    )
     .then((data: any) => {
       httpService.setAuthToken(data.token);
       return setUser(data.user);
@@ -88,17 +95,19 @@ function resetPassword(
 }
 
 function updateUser(user: any): Promise<User | null> {
-  const lang = user.language
-    ? user.language
-    : translateService.getLanguage();
+  const lang = user.language ? user.language : translateService.getLanguage();
   return httpService
-    .patch(appConfig.backendApi + "users", {
-      user_id: user.user_id,
-      username: user.username,
-      language: lang,
-      is_personalized: user.is_personalized,
-      subscription: user.subscription,
-    }, true)
+    .patch(
+      appConfig.backendApi + "users",
+      {
+        user_id: user.user_id,
+        username: user.username,
+        language: lang,
+        is_personalized: user.is_personalized,
+        subscription: user.subscription,
+      },
+      true,
+    )
     .then((data: any) => {
       return setUser(data.user);
     });
@@ -168,7 +177,7 @@ function subscribeUser(user: User) {
       reg.pushManager
         .subscribe({
           userVisibleOnly: true,
-          applicationServerKey: appConfig.publicVapid
+          applicationServerKey: appConfig.publicVapid,
         })
         .then((sub) => {
           user.subscription = sub;

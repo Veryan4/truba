@@ -1,7 +1,7 @@
 import { userService } from "../services";
 
 export function authGuard() {
-  const user = userService.getUser();
+  const user = userService.state.getValue();
   if (user) {
     return Promise.resolve(true);
   }

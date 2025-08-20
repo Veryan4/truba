@@ -145,7 +145,7 @@ class TopBar extends LitElement {
 
   async language(lang: string): Promise<void> {
     await translateService.useLanguage(lang);
-    const user = userService.getUser();
+    const user = userService.state.getValue();
     if (user) {
       user.language = lang;
       userService.updateUser(user).then((u) => newsService.getNews(u));
@@ -155,7 +155,7 @@ class TopBar extends LitElement {
   }
 
   onTabSwitch(): void {
-    const user = userService.getUser() as User;
+    const user = userService.state.getValue() as User;
     user.is_personalized = !user.is_personalized;
     userService.updateUser(user).then((updatedUser) => {
       newsService.getNews(updatedUser);

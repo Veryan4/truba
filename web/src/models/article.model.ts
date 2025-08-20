@@ -17,6 +17,7 @@ export class Article {
   favorite_entities?: FavoriteItem[];
   is_flipped = false;
 
+  // created correct interface / replace any
   constructor(article: any) {
     this.story_id = article.story_id;
     // upgrade to https to make to avoid Mixed Content
