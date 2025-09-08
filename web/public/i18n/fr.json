@@ -4,5 +4,9 @@
   },
   "terms": {
     "title": "Terms of service"
+  },
+  "toast": {
+    "news.error": "Erreur cherchant les nouvelles",
+    "news.error.single": "Erreur remplacant la nouvelle"
   }
 }

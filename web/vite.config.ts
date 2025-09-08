@@ -16,7 +16,7 @@ export default defineConfig({
         }),
         resolve(),
         // Currently destroys md-switch styles so commented out. Will need to check when fixed.
-        minifyHTML(),
+        // minifyHTML(),
         terser({
           ecma: 2020,
           module: true,

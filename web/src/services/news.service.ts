@@ -3,12 +3,17 @@ import { Article } from "../models/article.model";
 import type { User } from "../models/user.model";
 import type { Recommendation } from "../models/personalization.model";
 import { FavoriteItem, IdValuePair } from "../models/favorite-item.model";
-
 import { appConfig } from "../app.config";
-import { httpService, State, translateService } from "@veryan/lit-spa";
+import {
+  httpService,
+  State,
+  toastService,
+  translateService,
+} from "@veryan/lit-spa";
 
 const seenStoryIds = new Set<string>();
 const state = new State<Article[]>();
+const errorState = new State<Error>();
 
 export const newsService = {
   getNews,
@@ -16,6 +21,7 @@ export const newsService = {
   getRandomNewsImage,
   changeNewsStories,
   state,
+  errorState,
 };
 
 function changeNewsStories(
@@ -75,21 +81,33 @@ async function getNews(user: User | null): Promise<void> {
     return Promise.all([
       getRecommendedArticles(user),
       personalizationService.getPersonalization(user),
-    ]).then(([articles, recommendations]) => {
-      return changeNewsStories(articles, user, recommendations);
-    });
+    ])
+      .then(([articles, recommendations]) => {
+        return changeNewsStories(articles, user, recommendations);
+      })
+      .catch(handleError);
   } else if (user && !user.is_personalized) {
     return Promise.all([
       getPublicArticles(),
       personalizationService.getPersonalization(user),
-    ]).then(([articles, recommendations]) => {
-      return changeNewsStories(articles, user, recommendations);
-    });
+    ])
+      .then(([articles, recommendations]) => {
+        return changeNewsStories(articles, user, recommendations);
+      })
+      .catch(handleError);
   } else {
-    return getPublicArticles().then((articles) => {
-      return changeNewsStories(articles, null);
-    });
+    return getPublicArticles()
+      .then((articles) => {
+        return changeNewsStories(articles, null);
+      })
+      .catch(handleError);
   }
+}
+
+function handleError(e: Error) {
+  console.log(e);
+  toastService.newError("toast.news.error");
+  errorState.update(e);
 }
 
 function getRecommendedArticles(user: User): Promise<Article[]> {
@@ -128,6 +146,10 @@ async function getSingleArticle(
       news.push(story);
       seenStoryIds.add(story.story_id);
       state.update(news);
+    })
+    .catch((e) => {
+      console.log(e);
+      toastService.newError("toast.news.error.single");
     });
   return state.getValue();
 }

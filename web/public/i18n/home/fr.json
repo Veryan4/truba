@@ -12,6 +12,7 @@
     "happy": "Content",
     "article": "Article",
     "favorites": "Personnalisation",
-    "noNews": "Aucune nouvelle aujourd'hui!"
+    "noNews": "Aucune nouvelle aujourd'hui!",
+    "newsError": "Une erreur de système est survenue, veuillez réessayer plus tard. Si l'erreur persiste, contactez Veryan"
   }
 }

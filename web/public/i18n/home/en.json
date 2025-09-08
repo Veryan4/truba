@@ -12,6 +12,7 @@
     "happy": "Happy",
     "article": "News article",
     "favorites": "Recommendation items",
-    "noNews": "No news today!"
+    "noNews": "No news today!",
+    "newsError": "There was an error fetching the news, please try again later. Contact Veryan if issue persists."
   }
 }

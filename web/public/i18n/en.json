@@ -4,5 +4,9 @@
   },
   "terms": {
     "title": "Terms of service"
+  },
+  "toast": {
+    "news.error": "Failed to fetch news",
+    "news.error.single": "Failed to fetch replacement story"
   }
 }

@@ -6,9 +6,9 @@ export const styles = css`
     justify-content: center;
     width: 100%;
   }
-  .loader-wrap{
+  .loader-wrap {
     display: flex;
-    justify-content:center;
+    justify-content: center;
     align-items: center;
     width: 100%;
     height: 88dvh;
@@ -35,6 +35,8 @@ export const styles = css`
     flex-direction: column;
     justify-content: center;
     font-size: 32px;
+    width: 50dvw;
+    text-align: center;
   }
   @media only screen and (max-width: 840px) {
     .flex-row {
