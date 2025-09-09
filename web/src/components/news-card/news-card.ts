@@ -6,27 +6,23 @@ import { TranslationController } from "@veryan/lit-spa";
 import { Article } from "../../models";
 import {
   scrollBarStyles,
-  iconButtonStyles,
   cardStyles,
+  moreVertIcon,
+  shareIcon,
 } from "../../styles";
 import { styles } from "./news-card.styles";
 
 import "../feedback-emojis/feedback-emojis";
 import "../favorite-chips/favorite-chips";
 import "@veryan/lit-spa";
-import "../../material-web"
+import "../../material-web";
 
 @customElement("news-card")
 class NewsCard extends LitElement {
-  static styles = [
-    styles,
-    cardStyles,
-    iconButtonStyles,
-    scrollBarStyles,
-  ];
+  static styles = [styles, cardStyles, scrollBarStyles];
 
   private user = new UserController(this);
-  private i18n = new TranslationController(this, {scope:"home"});
+  private i18n = new TranslationController(this, { scope: "home" });
 
   @state()
   private _isFlipped = false;
@@ -97,10 +93,9 @@ class NewsCard extends LitElement {
   private createBottomRow() {
     return html` <div class="mdc-card__actions">
       <div class="mdc-card__action-buttons">
-        <md-filled-button
-          dense
-          @click="${this.openInNewTab}"
-        >Read</md-filled-button>
+        <md-filled-button dense @click="${this.openInNewTab}"
+          >${this.i18n.t("home:read")}</md-filled-button
+        >
       </div>
       <div class="mdc-card__action-icons">
         ${this.createShareButton()} ${this.createUserButtons()}
@@ -110,33 +105,30 @@ class NewsCard extends LitElement {
 
   private createShareButton() {
     if (!(navigator as any).canShare) return "";
-    return html`<button
-      class="mdc-icon-button material-icons mdc-card__action mdc-card__action--icon--unbounded"
-      title="Share"
-      data-mdc-ripple-is-unbounded="true"
-      @click="${this.socialShare}"
-    >
-      share
-    </button>`;
+    return html` <div title="Share" class="icon" @click="${this.socialShare}">
+      ${shareIcon()}
+    </div>`;
   }
 
   private createUserButtons() {
     if (!this.user.value) return "";
-    return html`<button
-        class="mdc-icon-button material-icons mdc-card__action mdc-card__action--icon--unbounded"
-        title=${this.i18n.t("home:favorites")}
-        data-mdc-ripple-is-unbounded="true"
-        @click="${(e: Event) => (this._isFlipped = !this._isFlipped)}"
-      >
-        more_vert
-      </button>`;
+    return html` <div
+      title=${this.i18n.t("home:favorites")}
+      class="icon"
+      @click="${(e: Event) => (this._isFlipped = !this._isFlipped)}"
+    >
+      ${moreVertIcon()}
+    </div>`;
   }
 
   private createFeedbackEmojis() {
     if (!this.user.value) return "";
     return html`
       <div class="demo-card__secondary">
-        <feedback-emojis story_id=${this.article.story_id} source_id=${this.article.source.id}></feedback-emojis>
+        <feedback-emojis
+          story_id=${this.article.story_id}
+          source_id=${this.article.source.id}
+        ></feedback-emojis>
       </div>
     `;
   }

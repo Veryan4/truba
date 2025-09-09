@@ -11,7 +11,13 @@ import {
   themeService,
   ThemeController,
 } from "@veryan/lit-spa";
-import { iconButtonStyles } from "../../styles";
+import {
+  closeIcon,
+  infoIcon,
+  invertColorsIcon,
+  menuIcon,
+  settingsIcon,
+} from "../../styles";
 import { styles, mdcTopAppBarStyles } from "./top-bar.styles";
 
 import "@veryan/lit-spa";
@@ -19,7 +25,7 @@ import "../../material-web";
 
 @customElement("top-bar")
 class TopBar extends LitElement {
-  static styles = [mdcTopAppBarStyles, iconButtonStyles, styles];
+  static styles = [mdcTopAppBarStyles, styles];
 
   private i18n = new TranslationController(this, { scope: "header" });
   private user = new UserController(this);
@@ -43,14 +49,14 @@ class TopBar extends LitElement {
           >
             ${this.renderButtons()}
             <div style="position: relative;">
-              <button
-                @click=${(e: Event) => (this.menu.open = true)}
+              <div
+                class="icon hamburger toolbar mdc-top-app-bar__action-item mdc-menu-surface--anchor"
                 id="anchor"
                 aria-label="Options"
-                class="material-icons mdc-top-app-bar__action-item mdc-icon-button hamburger toolbar mdc-menu-surface--anchor"
+                @click=${(e: Event) => (this.menu.open = true)}
               >
-                view_headline
-              </button>
+                ${menuIcon()}
+              </div>
               ${this.renderMenu()}
             </div>
           </section>
@@ -93,13 +99,13 @@ class TopBar extends LitElement {
       >
         <md-menu-item @click=${() => routerService.navigate("/about")}>
           <div class="menu-item" slot="headline">
-            <i class="material-icons mdc-icon-button__icon">info</i>
+            <i class="icon mdc-icon-button__icon">${infoIcon()}</i>
             ${this.i18n.t("header.about")}
           </div>
         </md-menu-item>
         <md-menu-item @click=${this.changeTheme}>
           <div class="menu-item" slot="headline">
-            <i class="material-icons mdc-icon-button__icon">invert_colors</i>
+            <i class="icon mdc-icon-button__icon">${invertColorsIcon()}</i>
             ${this.i18n.t("header.dark_mode")}
           </div>
         </md-menu-item>
@@ -108,13 +114,13 @@ class TopBar extends LitElement {
                 @click=${() => routerService.navigate("/settings")}
               >
                 <div class="menu-item" slot="headline">
-                  <i class="material-icons mdc-icon-button__icon">settings</i>
+                  <i class="icon mdc-icon-button__icon">${settingsIcon()}</i>
                   ${this.i18n.t("header.settings")}
                 </div>
               </md-menu-item>
               <md-menu-item @click=${this.logout}>
                 <div class="menu-item" slot="headline">
-                  <i class="material-icons mdc-icon-button__icon">clear</i
+                  <i class="icon mdc-icon-button__icon">${closeIcon()}</i
                   >${this.i18n.t("header.logout")}
                 </div>
               </md-menu-item>`
@@ -122,13 +128,13 @@ class TopBar extends LitElement {
         <hr />
         <md-menu-item @click=${(e: Event) => this.language("en")}>
           <div class="menu-item" slot="headline">
-            <i class="material-icons mdc-icon-button__icon flag uk-flag"></i>
+            <i class="icon mdc-icon-button__icon flag uk-flag"></i>
             English
           </div>
         </md-menu-item>
         <md-menu-item @click=${(e: Event) => this.language("fr")}>
           <div class="menu-item" slot="headline">
-            <i class="material-icons mdc-icon-button__icon flag fr-flag"></i>
+            <i class="icon mdc-icon-button__icon flag fr-flag"></i>
             Francais
           </div>
         </md-menu-item>

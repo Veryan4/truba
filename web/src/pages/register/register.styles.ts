@@ -28,7 +28,7 @@ export const styles = css`
     position: relative;
     flex: auto;
     min-width: 0;
-    width: 180px;
+    width: 17rem;
     margin-right: 20px;
   }
   .card-title {
@@ -52,26 +52,25 @@ export const styles = css`
   #google {
     margin: 1rem 0;
   }
-
   a {
     cursor: pointer;
-    color: blue;
+    color: var(--theme-color);
     text-decoration: underline;
     padding-left: 0.2rem;
   }
-
+  a:visited{
+    color: #4e2386;
+  }
   a.navigation {
     text-decoration: unset;
     color: unset;
     text-decoration: unset;
     padding-left: unset;
   }
-
   label {
     display: flex;
     align-items: center;
   }
-
   @media only screen and (max-width: 752px) {
     .card {
       margin: 60px auto;

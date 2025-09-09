@@ -23,7 +23,7 @@ export const styles = css`
     position: relative;
     flex: auto;
     min-width: 0;
-    width: 180px;
+    width: 17rem;
     margin-right: 20px;
   }
   .card-title {

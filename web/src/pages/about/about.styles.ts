@@ -1,6 +1,12 @@
 import { css } from "lit";
 
 export const styles = css`
+  a {
+    color: var(--theme-color);
+  }
+  a:visited{
+    color: #4e2386;
+  }
   .about-container {
     display: flex;
     justify-content: center;
@@ -31,10 +37,8 @@ export const styles = css`
     font-size: 21px;
     font-weight: 600;
   }
-  .about-item {
-  }
   .about-text.link {
-    color: #1a0dab;
+    color: var(--theme-color);
   }
   strong {
     display: inline;

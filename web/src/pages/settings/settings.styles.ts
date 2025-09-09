@@ -5,24 +5,12 @@ export const styles = css`
     --mdc-theme-primary: #296954;
   }
 
-  .material-icons {
-    font-family: "Material Icons";
-    font-weight: normal;
-    font-style: normal;
-    font-size: 24px;
-    line-height: 1;
-    letter-spacing: normal;
-    text-transform: none;
+  .icon {
+    width: 1rem;
+    height: 2rem;
     display: inline-block;
-    white-space: nowrap;
-    word-wrap: normal;
-    direction: ltr;
-    -webkit-font-feature-settings: "liga";
-    -webkit-font-smoothing: antialiased;
-  }
-
-  .mdc-evolution-chip.mdc-evolution-chip--selected .material-icons {
-    color: var(--secondary-background-color);
+    color: var(--primary-color);
+    cursor: pointer;
   }
 
   .settings-container {

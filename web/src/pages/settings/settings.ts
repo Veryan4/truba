@@ -4,14 +4,14 @@ import { classMap } from "lit/directives/class-map.js";
 import { TranslationController } from "@veryan/lit-spa";
 import { userService, personalizationService } from "../../services";
 import { Recommendation, FavoriteItem, IdValuePair } from "../../models";
-import { iconButtonStyles, chipStyles } from "../../styles";
+import { chipStyles, closeIcon } from "../../styles";
 import { styles } from "./settings.styles";
 
 import "../../material-web";
 
 @customElement("app-settings")
 class Settings extends LitElement {
-  static styles = [styles, chipStyles, iconButtonStyles];
+  static styles = [styles, chipStyles];
 
   private i18n = new TranslationController(this, { scope: "home" });
 
@@ -83,10 +83,10 @@ class Settings extends LitElement {
                 ${keyword.value}
               </div>
               <i
-                class="material-icons mdc-icon-button__icon"
+                class="icon mdc-icon-button__icon"
                 @click="${(e: Event) =>
                   this.removeFavorite(keyword, "keyword")}"
-                >close</i
+                >${closeIcon()}</i
               >
             </div>`;
           })}
@@ -123,9 +123,9 @@ class Settings extends LitElement {
                 ${entity.value}
               </div>
               <i
-                class="material-icons mdc-icon-button__icon"
+                class="icon mdc-icon-button__icon"
                 @click="${(e: Event) => this.removeFavorite(entity, "entity")}"
-                >close</i
+                >${closeIcon()}</i
               >
             </div>`;
           })}
@@ -153,9 +153,9 @@ class Settings extends LitElement {
                 ${source.value}
               </div>
               <i
-                class="material-icons mdc-icon-button__icon"
+                class="icon mdc-icon-button__icon"
                 @click="${(e: Event) => this.removeFavorite(source, "source")}"
-                >close</i
+                >${closeIcon()}</i
               >
             </div>`;
           })}
@@ -183,9 +183,9 @@ class Settings extends LitElement {
                 ${author.value}
               </div>
               <i
-                class="material-icons mdc-icon-button__icon"
+                class="icon mdc-icon-button__icon"
                 @click="${(e: Event) => this.removeFavorite(author, "author")}"
-                >close</i
+                >${closeIcon()}</i
               >
             </div>`;
           })}

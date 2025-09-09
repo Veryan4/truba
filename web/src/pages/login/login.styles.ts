@@ -1,6 +1,12 @@
 import { css } from "lit";
 
 export const styles = css`
+  a {
+    color: var(--theme-color);
+  }
+  a:visited{
+    color: #4e2386;
+  }
   .card {
     font-family: var(--font-family);
     width: 275px;
@@ -25,7 +31,7 @@ export const styles = css`
     position: relative;
     flex: auto;
     min-width: 0;
-    width: 180px;
+    width: 17rem;
     margin-right: 20px;
   }
   .card-title {

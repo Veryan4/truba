@@ -1,20 +1,12 @@
 import { css } from "lit";
 
 export const styles = css`
-  .material-icons {
-    font-family: "Material Icons";
-    font-weight: normal;
-    font-style: normal;
-    font-size: 24px;
-    line-height: 1;
-    letter-spacing: normal;
-    text-transform: none;
+  .icon {
+    width: 2rem;
+    height: 2rem;
     display: inline-block;
-    white-space: nowrap;
-    word-wrap: normal;
-    direction: ltr;
-    -webkit-font-feature-settings: "liga";
-    -webkit-font-smoothing: antialiased;
+    color: var(--primary-color);
+    cursor: pointer;
   }
 
   .mdc-card {
@@ -110,7 +102,7 @@ export const styles = css`
   .menu {
     background-color: var(--secondary-background-color);
   }
-  i.material-icons {
+  i.icon {
     cursor: pointer;
     z-index: 999;
   }
