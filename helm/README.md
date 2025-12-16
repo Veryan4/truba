@@ -14,6 +14,10 @@ You'll need to have the following installed before starting
 
 [microk8s](https://microk8s.io/) will install a small k8s cluster on your local machine accessible via the microk8s command. To use kubectl directly, your can follow this [guide](https://microk8s.io/docs/working-with-kubectl)
 
+Make sure to enable hostpath-storage with `microk8s enable host-path storage`, so there will be persistence with the database.
+
+Update the config of kubectl, with `microk8s config > ~/.kube/config`.
+
 
 ### Cloudflare
 
@@ -21,7 +25,7 @@ To self host, using the free tier of Cloudflare will help manage the DNS setting
 
 You need to start by adding your domain name to cloudflare then following this documentation to create your cloudflared tunnel: https://developers.cloudflare.com/cloudflare-one/tutorials/many-cfd-one-tunnel
 
-After creating your tunnel you will need to add the tunnel credentials to k8s using the following command `kubectl create secret generic tunnel-credentials --from-file=credentials.json=/Users/yourusername/.cloudflared/<tunnel ID>.json`
+After creating your tunnel you will need to add the tunnel credentials to k8s using the following command `kubectl create secret generic tunnel-credentials --from-file=credentials.json=/home/<your-username>/.cloudflared/<tunnel ID>.json`
 
 You can stop at the deployment phase of the cloudflare documentation as it will be handled by helm later on.
 

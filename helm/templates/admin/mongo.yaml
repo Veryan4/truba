@@ -46,32 +46,10 @@ spec:
 status: {}
 ---
 apiVersion: v1
-kind: PersistentVolume
-metadata:
-  labels:
-    app: mongo
-  name: mongodata
-spec:
-  storageClassName: "manual"
-  claimRef:
-    namespace: default
-    name: mongodata
-  accessModes:
-    - ReadWriteOnce
-  persistentVolumeReclaimPolicy: Retain
-  capacity:
-      storage: 20Gi
-  hostPath:
-    path: /data/mongodata/
-status: {}
----
-apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: mongodata
 spec:
-  storageClassName: "manual"
-  volumeName: mongodata
   accessModes:
     - ReadWriteOnce
   resources:
